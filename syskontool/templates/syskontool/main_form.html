@@ -1,0 +1,57 @@
+{% extends "syskontool/base.html" %}
+
+{% block title %}Title:{{title}}{% endblock %}
+{% block content %}
+
+
+
+<div class="brick_form">
+
+<form action="action_url" method="post">
+
+
+
+{% csrf_token %}
+
+
+{% for option in option_list %}
+
+
+
+    <div class="row">
+      <div class="col-75">
+        <label for="{{option.id}}_range">{{option.content}}</label>
+      </div>
+      <div class="col-25">
+        <input type="range" min="0" max="10" value="0" id="{{option.id}}_range" oninput="this.form.{{option.id}}_input.value=this.value" style="width:70px;  margin-left: auto; padding-left: 10px;">
+        <input type="number" id="{{option.id}}_input" min="0" max="10" value="0" oninput="this.form.{{option.id}}_range.value=this.value" style="width:50px;"/>
+      </div>
+    </div>
+
+
+{%endfor%}
+
+<form>
+    <input type="range" name="amountRange" min="0" max="20" value="0" oninput="this.form.amountInput.value=this.value" />
+    <input type="number" name="amountInput" min="0" max="10" value="0" oninput="this.form.amountRange.value=this.value" />
+</form>
+
+
+
+    <div class="row">
+<!-- !!hcl -->
+      <input type="submit" value="Submit">
+    </div>
+
+
+
+
+</form>
+
+<hr class="hr_style_gradient opacity30">
+</div>
+
+
+<!--Type: {{pagetype}}-->
+{% endblock %}
+

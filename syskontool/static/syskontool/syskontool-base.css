@@ -1,0 +1,790 @@
+
+
+/* definition of variables */
+:root {
+    --color-gray0: #888;
+    --color-gray1: #CCC;
+    --color-gray2: #AAA;
+    --color-gray3: #F1F1F1;
+    --color-gray-btn-bg: #BCBCBC;
+    --color-gray-thesis: #F1F5FE;   /*  obsolete?  */
+    --color-gray-dark-text: #333;
+
+    /*general box-background*/
+    --color-box-bg: #FFFFFF;
+
+    --color-pro1: hsl(88, 0%, 100%);
+    --color-contra1: hsl(0, 0%, 100%);
+
+    --color-pro-button1: hsl(88, 20%, 96%);
+    --color-contra-button1: hsl(0, 20%, 96%);
+    --color-rest-button1: hsl(220, 20%, 96%);
+
+    --color-thesis-border1: hsla(227, 60%, 75%, 1);
+    --color-thesis-border1a0: hsla(222, 40%, 60%, 0);
+
+    --color-pro-border1: hsla(88, 40%, 60%, 1);
+    --color-pro-border1a0: hsla(88, 40%, 60%, 0);
+
+    --color-contra-border1: hsla(0, 35%, 70%, 1);
+    --color-contra-border1a0: hsla(0, 35%, 70%, 0);
+
+    --color-question-border1: hsla(41, 67%, 70%, 1);
+    --color-question-border1a0: hsla(41, 87%, 70%, 0);
+
+    --color-imsu-border1: hsla(170, 30%, 60%, 1);
+    --color-imsu-border1a0: hsla(170, 87%, 70%, 0);
+
+    --color-comment-border1: hsla(200, 20%, 70%, 1);
+    --color-comment-border1a0: hsla(300, 87%, 70%, 0);
+
+
+    --color-rest-border1: hsla(220, 28%, 76%, 1);
+    --color-rest-border1a0: hsla(220, 28%, 76%, 0);
+
+/*   absolute + relative value   */
+    --indent_width: calc(0.4em + 0.6vw);
+}
+
+@font-face {
+    font-family: 'OpenSans-Regular-webfont';
+    src: url('font/OpenSans-Regular-webfont.eot');
+    src: local('OpenSans-Regular-webfont'), url('font/OpenSans-Regular-webfont.woff') format('woff'), url('font/OpenSans-Regular-webfont.ttf') format('truetype'),  url('font/OpenSans-Regular-webfont.svg') format('svg');
+}
+
+@font-face {
+    font-family: 'lato-bold-webfont';
+    src: url('font/lato-bold-webfont.woff') format('woff'), url('font/lato-bold-webfont.woff2') format('woff2'), url('font/Lato-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'share-mono-webfont';
+    src: url('font/ShareTechMono-Regular.woff') format('woff'), url('font/ShareTechMono-Regular.woff2') format('woff2'), url('font/ShareTechMono-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+html {
+    font-family: OpenSans-Regular-webfont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+
+
+
+body {
+
+    color: var(--color-gray-dark-text);
+    background-color: #E5E5E7;
+}
+
+body a{
+    color: inherit;
+    text-decoration: none;
+}
+
+body a:hover{
+    color: inherit;
+    text-decoration: underline;
+}
+
+h1 {
+    font-family: lato-bold-webfont;
+    text-shadow: 4px 4px 4px #bbb;
+    font-size:16pt;
+}
+
+h2 {
+    font-family: lato-bold-webfont;
+    text-shadow: 2px 2px 2px #ccc;
+    font-size:14pt;
+}
+
+code {
+  font-family: share-mono-webfont;
+}
+
+.section_divider {
+    color: var(--color-gray2);
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.main_1 {
+/*     font: Helvetica Neue,Helvetica,Arial,sans-serif; */
+/*     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; */
+    color: var(--color-gray-dark-text);
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-top: 5px;
+    margin-top: -10px;
+    margin-right: auto;
+    margin-left: auto;
+    width: 90vw;
+    max-width: 35em;
+    background-color: #FAFAFA;
+}
+
+.box_base {
+
+
+    padding: 15px 15px;
+    margin-bottom: 0px;
+    border: 2px solid transparent;
+    border-radius: 4px;
+
+    /* will be overwritten */
+    background-color: var(--color-gray1);
+    border-color: var(--color-gray2);
+
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+}
+
+
+.box_base hr {
+
+    color:#AAA;
+
+}
+
+.box_base a {
+
+    text-decoration: underline;
+
+}
+
+
+.box_header {
+
+    background-color: var(--color-gray1);
+    border-color: var(--color-gray2);
+    margin-bottom:15px;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+
+    /*the high value for z-index is intended, because each brick has its own z-index
+    and the header should stay above them all. (Assume maximum of 5000 Bricks per page)
+    !! maybe-todo: this should be more elegant.
+
+    see also the comments near css-class `anchor`
+    */
+    z-index: 5100;
+}
+
+.box_footer {
+
+    background-color: var(--color-gray1);
+    border-color: var(--color-gray2);
+    margin-top:150px;
+    margin-bottom:0px;
+}
+
+.box_header_menu {
+
+    float:right;
+    position:relative;
+    bottom: 5px;
+    font-size:70%;
+}
+
+.box_footer_text {
+    font-size:70%;
+    line-height: 1.0;
+}
+
+/*links that look like text except on hover*/
+.modest_links a:link,
+.modest_links a:visited,
+.modest_links a:active,
+.fake_modest_links
+{
+    color: var(--color-gray-dark-text);
+    text-decoration: underline;
+    /* use transparent underline to slightly emphasize links*/
+    text-decoration-color: #00000055;
+}
+
+.fake_modest_links:hover,
+.modest_links a:hover {
+    text-decoration: underline;
+}
+
+.box_top_content{
+
+    background-color: var(--color-box-bg);
+    border-color: var(--color-gray0);
+
+    /*more modest shadow than the real bricks*/
+    box-shadow: 0px 4px 8px 4px rgba(100, 150, 230, 0.45);
+}
+
+
+.box_title-tag {
+
+    padding: 3px 10px 3px 10px;
+    border: 1px solid;
+    border-left: 2px solid;
+    border-radius: 2px;
+
+    font-size:70%;
+    min-width: 5em;
+    display: inline;
+
+
+     z-index: 1;
+}
+
+.brick_title{
+    font-family: lato-bold-webfont;
+    text-shadow: 2px 2px 4px #ccc;
+    font-size:14pt;
+
+}
+
+
+.box_tagged{
+    margin-top: -8px;
+    padding-bottom: 5px;
+
+}
+
+.box_pro,
+.box_pro_content {
+    background-color: var(--color-box-bg);
+    border-color: var(--color-pro-border1);
+}
+
+
+.box_contra,
+.box_contra_content {
+    background-color: var(--color-box-bg);
+    border-color: var(--color-contra-border1);
+}
+
+.box_contra_content {
+    background-color: var(--color-box-bg);
+    border-color: var(--color-contra-border1);
+}
+
+.contra_higher_order {
+
+    /*applied e.g. to a contra arg of a contra arg*/
+
+    /*This shadow is a combination of the the base_box shadow with an addintional solid line*/
+    box-shadow: 0 0 0 2px var(--color-pro-border1),
+                0 4px 8px 0 rgba(0, 0, 0, 0.2),
+                0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    border-style: dotted;
+
+}
+
+
+
+.box_thesis {
+    background-color: var(--color-box-bg);
+    border-color: var(--color-thesis-border1);
+
+}
+
+
+.box_question {
+    background-color: var(--color-box-bg);
+    border-color: var(--color-question-border1);
+
+}
+
+.box_comment {
+    background-color: var(--color-box-bg);
+    border-color: var(--color-comment-border1);
+
+}
+
+
+.box_improvement {
+    background-color: var(--color-box-bg);
+    border-color: var(--color-imsu-border1);
+
+}
+
+
+/* indentation of a box */
+.ml1 {
+    margin-left: calc(1 * var(--indent_width));
+}
+
+.ml2 {
+    margin-left: calc(2 * var(--indent_width));
+}
+
+.ml3 {
+    margin-left: calc(3 * var(--indent_width));
+}
+
+.ml4 {
+    margin-left: calc(4 * var(--indent_width));
+}
+
+.ml5 {
+    margin-left: calc(5 * var(--indent_width));
+}
+
+.ml6 {
+    margin-left: calc(6 * var(--indent_width));
+}
+
+
+/* spacing between elements */
+.mb05 {
+    margin-bottom: 0.5em;
+}
+.mb1 {
+    margin-bottom: 1em;
+}
+
+
+/* slider; source https://www.w3schools.com/howto/howto_js_rangeslider.asp */
+
+
+.slidecontainer {
+    width: 150px;
+    display: inline-block;
+    margin-left: 5px;
+    margin-right: 0px;
+
+    position: relative;
+    top:4.5px
+}
+
+/* The slider itself (including disabled version for overview pages)*/
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Full-width */
+    height: 15px; /* Specified height */
+/*     background: #d3d3d3; /* Grey background */ */
+    outline: none; /* Remove outline */
+    opacity: 0.4; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+    z-index:2;
+    display:inline;
+    margin:0;
+}
+
+/* Mouse-over effects */
+.slider_active:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 5px; /* Set a specific slider handle width */
+    height: 5px; /* Slider handle height */
+    background: #AFAFAF;
+    cursor: pointer; /* Cursor on hover */
+     z-index:2;
+}
+
+.slider::-moz-range-thumb {
+    width: 10px; /* Set a specific slider handle width */
+    height: 10px; /* Slider handle height */
+    background: #AFAFAF;
+    cursor: pointer; /* Cursor on hover */
+     z-index:2;
+}
+
+
+/* Bottom right text */
+.slider-text-block {
+    width:150px;
+    padding: 1px 0px;
+
+    position: absolute;
+    bottom: 5px;
+    left: 0px;
+
+    pointer-events: none;
+}
+
+
+/* End of slider */
+
+
+.text-block-button,
+.text-block-btn-box,
+.text-block {
+/*.text-block should be merged with slider-text-block*/
+
+    text-align:center;
+
+    font-size:70%;
+    background-color: var(--color-gray-btn-bg);
+    color: var(--color-gray-dark-text);
+    border-radius: 4px;
+    border: 0px solid;
+    padding: 2px 10px;
+    height:1.5em;
+    display:inline-block;
+
+}
+
+.text-block-button {
+
+    display:inline-block;
+    cursor: pointer;
+    margin-bottom:0px;
+    vertical-align:bottom;
+    height:1.8em;  /*hack to fix some strange height bug*/
+}
+
+
+.slidecontainer:hover .slider-text-block
+{
+    opacity:0.5;
+}
+
+.button_list{
+    list-style:none;
+    padding: 0;
+    margin: 3px;
+}
+
+.button_list li {
+  display:inline;
+}
+
+
+.text-block-button-pro,
+.text-block-button-contra,
+.text-block-button-rest {
+    border: 1px solid;
+    border-radius: 4px;
+    opacity:1;
+}
+
+.text-block-button-pro {
+    background-color: var(--color-pro-button1);
+    border-color: var(--color-pro-border1);
+}
+
+.text-block-button-contra {
+    background-color: var(--color-contra-button1);
+    border-color: var(--color-contra-border1);
+}
+
+.text-block-button-rest {
+    background-color: var(--color-rest-button1);
+    border-color: var(--color-rest-border1);
+}
+
+
+.references,
+.date-box,
+.tags-text {
+    font-size:70%;
+}
+
+
+
+.date-box{
+    border: 1px solid;
+    background-color:inherit;
+    margin-right:0px;
+    min-width:6.5em;
+
+
+}
+
+
+
+
+.test_a {
+    display: inline-block;
+    border: 1px solid;
+    background-color:coral;
+
+    margin-left:auto;
+    margin-right:0;
+}
+
+.test_b {
+
+}
+
+
+
+.test {
+
+    float:right;
+    padding: 15px 15px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+
+
+}
+
+.tab_container{width: 100%; display:table;}
+.cell_left{display:table-cell; vertical-align:bottom}
+.cell_right_outer{vertical-align:center; display:table-cell;}
+.cell_right_inner{float:right;}
+
+/* ----- horizontal rules with gradients ---- */
+
+.hr_style_gradient {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75) 40%, rgba(0, 0, 0, 0.75) 60%, rgba(0, 0, 0, 0));
+}
+
+.box_pro_content .hr_style_gradient {
+    background-image: linear-gradient(to right, var(--color-pro-border1a0) , var(--color-pro-border1) 20%, var(--color-pro-border1) 80%,
+    var(--color-pro-border1a0));
+}
+
+.box_contra_content .hr_style_gradient {
+    background-image: linear-gradient(to right, var(--color-contra-border1a0), var(--color-contra-border1) 20%, var(--color-contra-border1) 80%,
+    var(--color-contra-border1a0));
+}
+
+/*TODO: This should be named box_question_content etc*/
+.box_question .hr_style_gradient {
+    background-image: linear-gradient(to right, var(--color-question-border1a0), var(--color-question-border1) 20%, var(--color-question-border1) 80%,
+    var(--color-question-border1a0));
+}
+
+.box_improvement .hr_style_gradient {
+    background-image: linear-gradient(to right, var(--color-imsu-border1a0), var(--color-imsu-border1) 20%, var(--color-imsu-border1) 80%,
+    var(--color-imsu-border1a0));
+}
+
+.box_thesis .hr_style_gradient {
+    background-image: linear-gradient(to right, var(--color-thesis-border1a0), var(--color-thesis-border1) 20%, var(--color-thesis-border1) 80%,
+    var(--color-thesis-border1a0));
+}
+.box_comment .hr_style_gradient {
+    background-image: linear-gradient(to right, var(--color-comment-border1a0), var(--color-comment-border1) 20%, var(--color-comment-border1) 80%,
+    var(--color-comment-border1a0));
+}
+
+
+
+/*some very simple css styles which are to be combined with others*/
+.opacity30 {
+    opacity:0.3;
+}
+
+.inline {
+    display:inline;
+}
+
+.block {
+    display:block;
+}
+
+.bold {
+    font-weight:bold;
+}
+
+.vspace {
+    margin-top:2em;
+}
+
+.bgc_pro1{
+background-color: var(--color-pro-button1);
+}
+
+.bgc_contra1{
+background-color: var(--color-contra-button1);
+}
+
+.bgc_rest1{
+background-color: var(--color-rest-button1);
+}
+
+.bgc_gray3{
+background-color: var(--color-gray3);
+}
+
+ /* Dropdown Button */
+.dropbtn {
+    background-color: transparent;
+    padding: 0px;
+    border: none;
+    font-size: 100%;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    text-align:left;
+    position: absolute;
+    left:0px;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 10px;
+}
+.min_width200px {
+    min-width: 200px;
+
+}
+
+/* dropdown menu from https://www.w3schools.com/howto/howto_css_dropdown.asp*/
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: var(--color-gray-dark-text);
+    padding: 5px;
+    text-decoration: none;
+}
+
+/* Change sytyle of dropdown links on hover */
+
+/* maybe-todo: consistant styling (url_links vs anchor_links)*/
+.url_link:hover {background-color: var(--color-gray1);}
+.anchor_link:hover {
+    text-decoration: underline;
+    background-color:transparent;
+}
+
+.dd_menu_link:hover {background-color: var(--color-gray1);}
+
+/* Show the dropdown menu on mouse over */
+
+/* This might be a problem with mobile devices */
+/* see: + https://stackoverflow.com/questions/39325682/css-hover-behaviour-on-touchscreen-devices
+        + https://www.prowebdesign.ro/how-to-deal-with-hover-on-touch-screen-devices/ */
+.dropdown:hover .dropdown-content {display: block;}
+
+/* upward link in dropdown menu */
+.upward a {
+    padding:0px;
+
+}
+
+/* class for the formular which generates a simple linked button*/
+.button_form{
+vertical-align:bottom;
+display: inline;
+}
+
+
+
+
+/*
+classes to enable to box-highlightning if a brick is addressed as anchor
+inspired from https://www.caktusgroup.com/blog/2017/10/23/css-tip-fixed-headers-and-section-anchors/
+
+
+Challenge: due to the sticky header we need to vertically shift the anchor
+but we also want to highlight the brick which is activated with an anchor link
+
+-> we shift the whole box (except the anchor) down again
+-> then we must fiddle with the stacking order to ensure the dropdown menus are not hidden
+behind the next brick
+
+technical background: stacking contexts
+https://philipwalton.com/articles/what-no-one-told-you-about-z-index/
+
+useful debugging tool:
+https://github.com/gwwar/z-context
+
+*/
+
+.anchor {
+  position: relative;
+}
+.anchor_shift_up {
+  position: relative;
+  left: 0px;
+  top: -100px;
+  /*width:100%;*/
+}
+
+.anchor_shift_down {
+  position: relative;
+  left: 0px;
+  top: 100px;
+}
+
+.anchor_shift_content {
+  position: relative;
+}
+
+
+.target-label {
+  color:blue;
+}
+
+
+/* finally the highlight code */
+.anchor_shift_up:target .box_target{
+    box-shadow: 0 0  8px orange;
+
+}
+
+/* -----*/
+
+
+.brick_form label{
+    display:block;
+}
+.brick_form input, textarea{
+    width:100%;
+    box-sizing: border-box;
+}
+
+.helptext{
+    font-size:70%;
+    text-align:right;
+    display:block;
+}
+
+
+/* source:  https://www.w3schools.com/howto/howto_css_responsive_form.asp */
+
+
+
+/* Floating column for labels: 25% width */
+.col-25 {
+  float: left;
+  width: 25%;
+  margin-top: 6px;
+}
+
+/* Floating column for inputs: 75% width */
+.col-75 {
+  float: left;
+  width: 75%;
+  margin-top: 6px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - when the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .col-25, .col-75, input[type=submit] {
+    width: 100%;
+    margin-top: 0;
+  }
+}

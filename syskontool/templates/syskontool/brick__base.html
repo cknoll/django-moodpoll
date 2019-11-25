@@ -1,0 +1,113 @@
+{% load i18n %}
+{% load extra_filters %}
+
+<!-- utc_required_variable:({{page_options.bb_alevel}}) [page_options.bb_alevel] -->
+<!-- utc_required_variable:({{page_options}}) [page_options] -->
+
+
+<div class="{{brick.indentation_class}}">
+  <div class="anchor">
+  <div class="anchor_shift_up" id="{{ brick.pk }}">&nbsp;
+  <div class="anchor_shift_down">
+  <div class="anchor_shift_content" style="z-index:{{idx}};">
+    <!--unicode south east arrow (gets shown when this anchor is :target)-->
+
+<div class="box_title-tag box_target modest_links {% block title_tag_css %}{% endblock %}">
+
+    {# important: title_tag contains no user provided data so this seems to be OK #}
+    {% include "sober/widget_brick_chain.html" with brick=brick page_options=page_options only %}
+</div>
+
+
+
+<div class="{% block box_css %}box_base{% endblock %}">
+
+{% block inbox_title %}
+    <span class="brick_title"><a href="{% url 'show_brick' brick.pk %}">{{brick.title|render_markdown|safe}}</a></span>
+    <hr class="hr_style_gradient">
+{% endblock %}
+
+{% block content %}
+{# !!! probably a security issue: pass user-provided content through the `safe`-filter  #}
+    {{brick.content|render_markdown|safe}}
+{% endblock %}
+
+{% block references %}
+    <hr class="hr_style_gradient">
+    <div class="references">
+    <b>{% trans 'References' %}</b><br>
+        {{brick.references}}
+    </div>
+{% endblock %}
+{% block tags %}
+    <hr class="hr_style_gradient opacity30">
+    <div class="tags-text">
+    <b>{% trans 'Tags' %}:</b>&nbsp;
+        {{brick.tags}}
+    </div>
+{% endblock %}
+
+{# some debug information #}
+{% comment %}
+    rlevel: {{brick.relative_level}}
+    <br>
+    alevel: {{brick.absolute_level}}
+    <br>
+    bb_alevel: {{page_options.bb_alevel}}
+    <br>
+    iclass: {{brick.indentation_class}} {{brick.indentation_offset}}
+    <br>
+    pk: {{brick.pk}}  parent.pk = {{brick.parent.pk}}
+    <br>
+    page_options.page_type: {{page_options.page_type}}
+{% endcomment %}
+
+    <hr class="hr_style_gradient">
+
+
+    <div class="tab_container">
+        <div class="cell_left">
+{% block footmenu_left %}
+
+        <!-- !! hcl-->
+        {# !! introduce brick.vote_criterion instead #}
+        {% include "sober/widget_ddmenu_vote_slider.html" with page_options=page_options brick=brick csrf_token=csrf_token only %}
+
+        {% include "sober/widget_ddmenu_brick_action.html" with brick=brick page_options=page_options only %}
+
+            <!--End of menu button-->
+        <form action="{% url 'new_brick' brick.pk 'ca' %}" class="button_form">
+            <input type="submit" value="⚡" title="{% trans 'Create Contra-Argument' %}"
+                   class="text-block-button"/>
+        </form>
+
+{% endblock %}
+        </div>
+<!-- End of left cell       -->
+
+        <div class="cell_righ_outert">
+            <div class="cell_right_inner">
+{% block footmenu_right %}
+
+                <div class="text-block-btn-box date-box"
+                title="created: {{brick.creation_datetime|date:'Y-m-d H:i:s'}},&#013;last updated: {{brick.update_datetime|date:'Y-m-d H:i:s'}}">↑ {{brick.update_datetime|date:"Y-m-d"}}</div>
+{% endblock %}
+
+            </div>
+        </div>
+<!-- End of right cell       -->
+    </div>
+<!-- End of table       -->
+
+  </div> <!-- box_base -->
+
+  </div> <!-- anchor_shift_content -->
+  </div> <!-- down -->
+  </div> <!-- up -->
+  </div>  <!--anchor-->
+
+
+</div>
+
+{% block final_separator %}
+{% endblock %}

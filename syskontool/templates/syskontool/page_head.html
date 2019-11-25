@@ -1,0 +1,20 @@
+{% load i18n %}
+
+
+
+<div class="box_base box_header">
+    <!-- !! hcl-->
+    <a href="/" title="{% trans 'Go to sober landing page' %}"><h1 id="pagetop">sober - "worthwhile discussions" </h1></a>
+
+    <div class="box_header_menu modest_links">
+        <!-- !! hcl -->
+        <a href="/about" title="{% trans 'Go to page with general information' %}">{% trans 'About' %}</a>
+        |
+        {% if base.page_options.special_head_link == "new_thesis_link" %}
+            <a href="new_thesis" title="{% trans 'Create New Thesis' %}">{% trans 'New Thesis' %}</a> |
+        {% endif %}
+        <a href="feedback_page" title="{% trans 'Feedback Form' %}">{% trans 'Feedback' %}</a>
+        |
+        <a href="#top" title="{% trans 'Go to top of page' %}">{% trans 'Up' %}</a>
+    </div>
+</div>
