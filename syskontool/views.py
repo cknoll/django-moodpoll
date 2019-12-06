@@ -1,6 +1,6 @@
 # from django.http import HttpResponse
 from django.shortcuts import render
-
+from . import models
 
 def index(request):
     # return HttpResponse("Hello world!")
@@ -13,13 +13,29 @@ class Container(object):
     pass
 
 
-option_list = [ "Even Mondays",
-                "Uneven Mondays",
-                "Uneven Tuesdays",
-                "Uneven Wednesdays",
-                ]
+option_list = ["Option 1",
+               "Option 2",
+               "Option 3",
+               "Option 4",
+               "Option 'A'",
+               'Option "B"',
+               "Option Ä",
+               ]
 
 appname = "syskontool"
+
+
+def populate_db():
+    u = models.User(name="u1")
+    u.save()
+
+    p = models.Poll(optionlist=repr(option_list))
+    p.save()
+
+    values = [0]*len(option_list)
+
+    me = models.MoodExpression(user=u, poll=p, mood_values=repr(values))
+    me.save()
 
 
 def process_ol(ol):
