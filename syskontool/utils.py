@@ -43,7 +43,7 @@ def init_settings():
     """
 
     assert "manage.py" in os.listdir("./")
-    my_settings = importlib.import_module(f"{appname}_site.settings")
+    my_settings = importlib.import_module("{}_site.settings".format(appname))
     settings.configure(my_settings)
     return settings
 

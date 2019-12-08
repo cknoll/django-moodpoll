@@ -13,7 +13,9 @@ class User(models.Model):
 
 class Poll(models.Model):
     creation_datetime = models.DateTimeField(default=timezone.now)
-    optionlist = models.TextField(max_length=5000)  # options are saved as list of strings
+    title = models.CharField(max_length=200, null=True)
+    description = models.CharField(max_length=500, null=True)
+    optionlist = models.TextField(max_length=5000)  # options are saved as str-represended list of strings
 
 
 class MoodExpression(models.Model):

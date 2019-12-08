@@ -1,11 +1,14 @@
 {% extends "syskontool/base.html" %}
 
-{% block title %}Title:{{title}}{% endblock %}
+{% block title %}{{c.poll.title}}{% endblock %}
 {% block content %}
 
-
-
 <div class="brick_form">
+
+<h2>Poll:{{c.poll.title}}</h2>
+<div class="poll_description">
+{{c.poll.description}}
+</div>
 
 <form action="action_url" method="post">
 
@@ -13,10 +16,7 @@
 
 {% csrf_token %}
 
-
-{% for option in option_list %}
-
-
+{% for option in c.option_list %}
 
     <div class="row">
       <div class="col-75">
@@ -28,26 +28,16 @@
       </div>
     </div>
 
-
 {%endfor%}
 
-    <input type="range" name="amountRange" min="0" max="20" value="0" oninput="this.form.amountInput.value=this.value" />
-    <input type="number" name="amountInput" min="0" max="10" value="0" oninput="this.form.amountRange.value=this.value" />
-</form>
-
-
-
-    <div class="row">
+        <div class="row">
 <!-- !!hcl -->
       <input type="submit" value="Submit">
     </div>
 
-
-
-
+<hr class="hr_style_gradient opacity30">
 </form>
 
-<hr class="hr_style_gradient opacity30">
 </div>
 
 
