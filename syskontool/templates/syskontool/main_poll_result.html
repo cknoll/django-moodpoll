@@ -1,0 +1,43 @@
+{% extends "syskontool/base.html" %}
+
+{% block title %}Result:{{c.poll.title}}{% endblock %}
+{% block content %}
+
+<div class="brick_form">
+
+
+{% if c.msg %}
+{{c.msg}}
+<hr class="hr_style_gradient opacity30">
+{% endif %}
+
+<h2>Result for:{{c.poll.title}}</h2>
+<div class="poll_description">
+{{c.poll.description}}
+</div>
+<hr class="hr_style_gradient opacity30">
+
+{% for option in c.option_list %}
+
+    <div class="row">
+      <div class="col-75">
+        {{option.content}}
+      </div>
+      <div class="col-25">
+        R:{{option.resistances}}|N:{{option.neutrals}}%|a:{{option.approval}}
+      </div>
+    </div>
+
+{%endfor%}
+
+<hr class="hr_style_gradient opacity30">
+
+The following usernames participated up to now:
+{{c.usernames}}
+
+</div>
+
+
+<!--Type: {{pagetype}}-->
+{% endblock %}
+

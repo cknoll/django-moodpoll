@@ -5,12 +5,18 @@
 
 <div class="brick_form">
 
+
+{% if c.msg %}
+{{c.msg}}
+<hr class="hr_style_gradient opacity30">
+{% endif %}
+
 <h2>Poll:{{c.poll.title}}</h2>
 <div class="poll_description">
 {{c.poll.description}}
 </div>
 
-<form action="action_url" method="post">
+<form action="{% url c.action_url_name c.pk%}" method="post">
 
 
 
@@ -23,12 +29,24 @@
         <label for="{{option.id}}_range">{{option.content}}</label>
       </div>
       <div class="col-25">
-        <input type="range" min="0" max="10" value="0" id="{{option.id}}_range" oninput="this.form.{{option.id}}_input.value=this.value" style="width:70px;  margin-left: auto; padding-left: 10px;">
-        <input type="number" id="{{option.id}}_input" min="0" max="10" value="0" oninput="this.form.{{option.id}}_range.value=this.value" style="width:50px;"/>
+        <input type="range" min="{{c.min}}" max="{{c.max}}" value="{{c.startval}}" id="{{option.id}}_range" name="{{option.id}}_range" oninput="this.form.{{option.id}}_input.value=this.value" style="width:70px;  margin-left: auto; padding-left: 10px;">
+        <input type="number" id="{{option.id}}_input" name="{{option.id}}_input" min="{{c.min}}" max="{{c.max}}" value="{{c.startval}}" oninput="this.form.{{option.id}}_range.value=this.value" style="width:50px;"/>
       </div>
     </div>
 
 {%endfor%}
+
+<input type="hidden" name="proof" value="of concept2">
+
+{# User name #}
+<div class="row">
+      <div class="col-75">
+        <label for="username">Name:</label>
+      </div>
+      <div class="col-25">
+        <input type="text" value="{{c.username}}" id="username" name="username" style="width:100%;  margin-left: auto; padding-left: 10px;">
+      </div>
+</div>
 
         <div class="row">
 <!-- !!hcl -->

@@ -1,6 +1,7 @@
 # from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views import View
+import re
 from . import models
 from . import forms
 
@@ -82,12 +83,11 @@ class ViewCreatePoll(View):
             new_poll = form.save()
 
         c = Container()
-        c.msg = "Successfully created new poll"
+        c.msg = "Successfully created new poll:"
 
-        return ViewPoll().get(request, new_poll.pk)
+        return ViewPoll().get(request, new_poll.pk, c=c)
 
 
-# noinspection PyMethodMayBeStatic
 class ViewPoll(View):
 
     @staticmethod
@@ -103,6 +103,14 @@ class ViewPoll(View):
         if c is None:
             c = Container()
 
+        c.action_url_name = "show_poll"
+        c.pk = pk
+        c.min = -3
+        c.max = 2
+
+        # !! read the current user from session data and look if they already voted
+        c.startval = 0
+
         c.poll = get_object_or_404(models.Poll, pk=pk)
         c.option_list = parse_option_list(c.poll.optionlist.split("\n"))
         context = dict(c=c, )
@@ -110,5 +118,66 @@ class ViewPoll(View):
         return render(request, "{}/main_show_poll.html".format(appname), context)
 
     @staticmethod
-    def post(self, request):
+    def post(request, pk):
+        """
+        Process data from a voting act and show the results until now
+
+        :param request:
+        :param pk:
+        :return:
+        """
+
+        data = request.POST.copy()
+        # process numeric form data:
+
+        cregex = re.compile(r"option_\d+_input")
+        option_pairs = [(k, int(v[0])) for k, v in data.items() if cregex.match(k)]
+        option_pairs.sort()
+
+        # after ensuring correct order we can drop the keys and represent the list a one string
+        mood_values = repr([v for k, v in option_pairs])
+
+        c = Container()
+        c.username = data.get("username")
+        c.msg = data
+        c.pk = pk
+
+        c.action_url_name = "show_poll"
+        c.min = -3
+        c.max = 2
+
+        me = models.MoodExpression(username=c.username, poll=pk, mood_values=mood_values)
+        me.save()
+
+        # !! read the current user from session data and look if they already voted
+        c.startval = 0
+
+        # get all votes on the current poll
+        me_list = models.MoodExpression.objects.filter(poll=pk)
+
+        c.poll = get_object_or_404(models.Poll, pk=pk)
+        c.option_list = parse_option_list(c.poll.optionlist.split("\n"))
+        context = dict(c=c, )
+
+        return ViewPollResult().get(request, pk, c=c)
+
+
+class ViewPollResult(View):
+
+    @staticmethod
+    def get(request, pk, c=None):
+
+        if c is None:
+            c = Container()
+
+        me_list = models.MoodExpression.objects.filter(poll=pk)
+        c.poll = get_object_or_404(models.Poll, pk=pk)
+        context = dict(c=c, )
+
+        from ipydex import IPS
+        IPS()
+        return render(request, "{}/main_poll_result.html".format(appname), context)
+
+    @staticmethod
+    def post(request):
         pass
