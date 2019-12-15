@@ -142,7 +142,8 @@ class ViewPoll(View):
         # process numeric form data:
 
         cregex = re.compile(r"option_\d+_input")
-        option_pairs = [(k, int(v[0])) for k, v in data.items() if cregex.match(k)]
+
+        option_pairs = [(k, int(v)) for k, v in data.items() if cregex.match(k)]
         option_pairs.sort()
 
         # after ensuring correct order we can drop the keys and represent the list a one string
@@ -234,8 +235,11 @@ class ViewPollResult(View):
             c.pos_res.append(triple)
             opt_cont.approvals = triple
 
-            mean_n = map_normed_mean_to_09(n, -3)
-            triple = (len(n), str(mean_n)[3:], sum(n))
+            # we neglegt the sign for the mean (we already now that this value is counts negative)
+            mean_n = abs(map_normed_mean_to_09(n, -3))
+            # omit the "0." part of the str
+            triple = (len(n), str(mean_n)[2:], sum(n))
+            print(opt_cont.content, "mean_n:", mean_n)
             c.neg_res.append(triple)
             opt_cont.resistances = triple
 
