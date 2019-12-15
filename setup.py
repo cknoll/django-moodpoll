@@ -39,7 +39,7 @@ setup(
     long_description_content_type="text/markdown",
     include_package_data=True,
     keywords='django, discussions',
-    name='django-syskontool',
+    name='django-moodpoll',
     packages=find_packages(),
     setup_requires=setup_requirements,
     tests_require=test_requirements,
