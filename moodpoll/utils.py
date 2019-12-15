@@ -51,7 +51,7 @@ def init_settings():
 def get_present_db_content():
     """
 
-    Expected to be run from the django project (e.g. sober-site)
+    Expected to be run from the django project (the site dir where manage.py lives)
     """
 
     tmpfname = tempfile.mktemp()
@@ -153,12 +153,12 @@ def save_stripped_fixtures(fname=None, jsonlint=True, backup=False):
 
 def load_fixtures_to_db(fname=None, ask=True):
     """
-    This is a helper from the django-app "sober" for setting up the django-project (e.g. "sober_site")
+    This is a helper from the django-app for setting up the django-project (i.e. site dir)
     It executes `python3 manage.py loaddata ...` with the appropriate file (and its path)
 
-    It is supposed to be run in sober_site-dir with the command:
+    It is supposed to be run in site-dir with the command:
 
-        `python3 -c "import sober.utils as u; u.load_fixtures_to_db()"`
+        `python3 -c "import moodpoll.utils as u; u.load_fixtures_to_db()"`
 
     :param fname:   bare filename (default loads usual sample data)
     :param ask:     Boolean flag whether to ask befor executing the command
@@ -169,7 +169,11 @@ def load_fixtures_to_db(fname=None, ask=True):
         fname = default_deployment_fixture
 
     fixture_path = get_path("fixtures")
-    target_path = os.path.join(fixture_path, fname)
+
+    if fname.startswith("./"):
+        target_path = fname
+    else:
+        target_path = os.path.join(fixture_path, fname)
 
     if not os.path.isfile(target_path):
         raise FileNotFoundError("{} not found!".format(fname))
