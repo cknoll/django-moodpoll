@@ -1,4 +1,5 @@
 {% extends "moodpoll/base.html" %}
+{% load static %}
 
 {% block title %}Result:{{c.poll.title}}{% endblock %}
 {% block content %}
@@ -19,6 +20,7 @@ Result for:
 <hr class="hr_style_gradient opacity30">
 
 
+
 {% for option in c.option_list %}
 
     <div class="row">
@@ -26,9 +28,9 @@ Result for:
         {{option.content}}
       </div>
       <div class="col-25">
-        R:{{option.resistances.0}}.{{option.resistances.1}}|
-        N:{{option.neutrals.0}}.{{option.neutrals.1}}|
-        A:{{option.approvals.0}}.{{option.approvals.1}}
+        <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;"> {{option.resistances.0}}.{{option.resistances.1}}|
+        <img src="{% static 'moodpoll/img/symb_neu.svg' %}" style="height:0.8em;"> {{option.neutrals.0}}.{{option.neutrals.1}}|
+        <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;"> {{option.approvals.0}}.{{option.approvals.1}}
       </div>
     </div>
 

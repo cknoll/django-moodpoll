@@ -763,14 +763,14 @@ https://github.com/gwwar/z-context
 /* Floating column for labels: 25% width */
 .col-25 {
   float: left;
-  width: 25%;
+  width: 31%;
   margin-top: 6px;
 }
 
 /* Floating column for inputs: 75% width */
 .col-75 {
   float: left;
-  width: 75%;
+  width: 69%;
   margin-top: 6px;
 }
 
