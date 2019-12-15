@@ -11,11 +11,13 @@
 <hr class="hr_style_gradient opacity30">
 {% endif %}
 
-<h2>Result for:{{c.poll.title}}</h2>
+Result for:
+<h2>{{c.poll.title}}</h2>
 <div class="poll_description">
 {{c.poll.description}}
 </div>
 <hr class="hr_style_gradient opacity30">
+
 
 {% for option in c.option_list %}
 
@@ -24,7 +26,9 @@
         {{option.content}}
       </div>
       <div class="col-25">
-        R:{{option.resistances}}|N:{{option.neutrals}}%|a:{{option.approval}}
+        R:{{option.resistances.0}}.{{option.resistances.1}}|
+        N:{{option.neutrals.0}}.{{option.neutrals.1}}|
+        A:{{option.approvals.0}}.{{option.approvals.1}}
       </div>
     </div>
 
@@ -32,8 +36,20 @@
 
 <hr class="hr_style_gradient opacity30">
 
-The following usernames participated up to now:
-{{c.usernames}}
+The following users participated up to now:
+
+{% for uva in c.user_voting_acts %}
+
+    <div class="row">
+      <div class="col-75">
+        {{uva.0}}
+      </div>
+      <div class="col-25">
+        {{uva.1}}
+      </div>
+    </div>
+
+{%endfor%}
 
 </div>
 

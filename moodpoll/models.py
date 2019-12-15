@@ -16,6 +16,7 @@ class Poll(models.Model):
     title = models.CharField(max_length=200, null=True)
     description = models.CharField(max_length=500, null=True)
     optionlist = models.TextField(max_length=5000)  # options are saved as str-represented list of strings
+    # nbr_of_opts = models.IntegerField()
 
 
 class MoodExpression(models.Model):
@@ -23,4 +24,5 @@ class MoodExpression(models.Model):
     username = models.CharField(max_length=200, null=True)
     poll = models.ForeignKey(Poll, null=True, on_delete=models.SET_NULL)
     mood_values = models.TextField(max_length=1000)  # moods are saved as list of floats or ints
+    # datetime = models.DateTimeField(default=timezone.now)
 
