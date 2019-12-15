@@ -6,9 +6,9 @@
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link type="text/css" rel="stylesheet" href="{% static 'syskontool/syskontool-base.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'moodpoll/base.css' %}">
     <link rel="icon" type="image/png"       href="{% static 'syskontool/img/favicon1.png' %}">
-    <title>{% block title %}syskontool{% endblock %}</title>
+    <title>{% block title %}moodpoll{% endblock %}</title>
 </head>
 <body>
 
@@ -16,13 +16,13 @@
 
 <div class="main_1">
 
-{% include "syskontool/page_head.html" with base=base only%}
+{% include "moodpoll/page_head.html" with base=base only%}
 
 {% block content %}
 Content of the extended template
 {% endblock %}
 
-{% include "syskontool/page_foot.html" %}
+{% include "moodpoll/page_foot.html" %}
 
 </div>
 

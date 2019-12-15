@@ -21,7 +21,7 @@ class DatabaseEmptyError(ValueError):
     pass
 
 
-appname = "syskontool"
+appname = "moodpoll"
 default_deployment_fixture = "deployment_data_stripped.json"
 default_backup_fixture = "XXX_backup_all.json"
 
@@ -78,11 +78,11 @@ def save_stripped_fixtures(fname=None, jsonlint=True, backup=False):
 
     Expected to be run with in the site-dir
 
-        python3 -c "import syskontool.utils as u; u.save_stripped_fixtures()"
+        python3 -c "import moodpoll.utils as u; u.save_stripped_fixtures()"
 
         or
 
-        python3 -c "import syskontool.utils as u; u.save_stripped_fixtures(backup=True)"
+        python3 -c "import moodpoll.utils as u; u.save_stripped_fixtures(backup=True)"
 
     :return: None
     """

@@ -4,7 +4,7 @@ from . import models as m
 
 from ipydex import IPS
 
-# py3 manage.py test syskontool
+# py3 manage.py test moodpoll
 
 
 class TestApp1(TestCase):

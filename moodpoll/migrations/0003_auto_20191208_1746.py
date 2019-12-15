@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('syskontool', '0002_auto_20191207_1757'),
+        ('moodpoll', '0002_auto_20191207_1757'),
     ]
 
     operations = [

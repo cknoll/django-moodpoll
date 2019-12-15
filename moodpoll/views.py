@@ -25,7 +25,7 @@ option_list = ["Option 1",
                "Option Ä",
                ]
 
-appname = "syskontool"
+appname = "moodpoll"
 
 
 def populate_db():
