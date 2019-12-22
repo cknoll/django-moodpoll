@@ -28,6 +28,8 @@ class DatabaseEmptyError(ValueError):
 # Therefore we have to use duplicated data.
 # There is a unit tests which ensures integrity.
 duplicated_urls_data = {"contact-page": "/contact",
+                        "about-page": "/about",
+                        "new-poll": "/new",
                         }
 duplicated_urls = defaultdict(lambda: "__invalid_url__", duplicated_urls_data)
 

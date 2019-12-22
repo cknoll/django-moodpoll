@@ -157,19 +157,24 @@ Siehe [Kontakt]({}).
 # ----------------------------------------------------------------------------
 welcome = True
 
-tmp1 = get_project_READMEmd("<!-- marker_1 -->", "<!-- marker_2 -->")
+extra1 = "`moodpoll` is an app for easy and good decision making.\n\n"
 
-txt1 = tmp1
+rdme1 = get_project_READMEmd("<!-- marker_1 -->", "<!-- marker_2 -->")
+rdme2 = get_project_READMEmd("<!-- marker_2 -->", "<!-- marker_3 -->")
+
+
+txt1 = "".join((extra1, rdme1, rdme2))
 
 new_sp(type="about",
        title="About moodpoll",
        content=_(txt1))
 
+extra2 = "You can [try it out now]({}) or [read more]({}).".format(dupurls["new-poll"], dupurls["about-page"])
 
-# the following sp-object is never rendered directly but evaluated by a view
-new_sp(type="landing_page",
-       title="sober discussion landing page",
-       content=_(txt1))
+txt_landing = "".join((extra1, rdme1, extra2))
+new_sp(type="landing",
+       title="moodpoll - easy and good decision making",
+       content=_(txt_landing))
 
 # ----------------------------------------------------------------------------
 

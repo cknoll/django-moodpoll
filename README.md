@@ -1,8 +1,12 @@
 # moodpoll
-django-app for easy and good decision making
+App for **easy and good decision making**.
 
 <!-- Note: this file contains some comment-markers which enable the reusage of the text-content at sober-arguments.net/about  -->
 <!-- marker_1 -->
+
+*Easy* because creating a poll and tanking part is fast and self-explaining. *Good* because it becomes clear, which options raise the most support and which raise the most resistance inside the group. This insight enables wiser decisions and more focused discussions. 
+
+<!-- marker_2 -->
 
 
 ## Challenge
@@ -31,7 +35,7 @@ Counting only positive votes, Monday would win but exclude one Person. However, 
 
 While in this situation (few voters, few options) "ordinary communication" would perfectly work, such communication can become quited tedious. As time and willingness to communicate constructively are precious resources they should not be wasted.
   
-<!-- marker_2 -->
+<!-- marker_3 -->
 
 
 ## Current status
