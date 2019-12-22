@@ -1,11 +1,19 @@
 {% extends "moodpoll/base.html" %}
+{% load extra_filters %}
 
-{% block title %}Title:{{title}}{% endblock %}
+{% block title %}{{sp.title}}: {{ block.super }}{% endblock %}
 {% block content %}
 
-Test-content:
+{% if sp.content%}
 
-{{}}
+<div class="box_base box_top_content modest_links">
+{# !! might be ok because the data comes directly from us (no user data)  #}
+{{sp.content|render_markdown|safe}}
+</div>
 
+{% endif %}
+
+
+<!--Type: {{pagetype}}-->
 {% endblock %}
 

@@ -1,0 +1,83 @@
+{% extends "sober/base.html" %}
+{% load i18n %}
+
+{% block title %}{{sp.title}}: {{ block.super }}{% endblock %}
+{% block content %}
+
+{% if sp.content%}
+{% include "sober/brick_pseudo_top_content.html" with content=sp.content %}
+
+{% endif %}
+
+{% if sp.utc_comment %}
+<!-- {{sp.utc_comment}}  -->
+{% endif %}
+
+<!-- This will be removed -->
+{% if sp.parent_brick %}
+    {% include sp.parent_brick.template with brick=sp.parent_brick page_options=sp.page_options only %}
+{% endif %}
+
+
+
+{% if sp.preview_flag %}
+<br><br>
+{% trans "Preview" %}:
+{% endif%}
+
+{% if sp.newly_fabricated_brick %}
+    {% include sp.newly_fabricated_brick.template with brick=sp.newly_fabricated_brick page_options=sp.page_options only %}
+{% endif %}
+
+{% if sp.preview_flag %}
+<br><br>
+<div class="modest_links">
+<a href="{% url 'show_brick' sp.newly_fabricated_brick.get_hyper_parent.pk %}#{{sp.newly_fabricated_brick.pk}}">{%trans "Show in context"%}</a>
+<a href="{% url 'edit_brick' sp.newly_fabricated_brick.pk %}">{%trans "(Re-)edit"%}</a>
+</div>
+{% endif%}
+
+{% if sp.form %}
+
+<!-- !! hcl -->
+<div class="vspace">
+<hr>
+{% if sp.form.action_url_name == "new_brick" %}
+    {# here new brick means new_reaction_brick #}
+    Your reaction: create new {{sp.long_brick_type}}:
+{% elif sp.form.action_url_name == "new_thesis" %}
+    Create new thesis:
+{% else %}
+    {# edit-mode #}
+    Edit brick ({{sp.long_brick_type}}):
+{% endif %}
+</div>
+<hr>
+<div class="brick_form">
+{# for information how to manually render a form, see #}
+{# https://www.webforefront.com/django/formtemplatelayout.html #}
+
+{% if brick_id >= 0 and type_code %}
+{# ---------------  This branch is for new reaction-bricks   --------------- #}
+<form action="{% url sp.form.action_url_name brick_id type_code %}" method="post">
+
+{% elif brick_id >= 0 %}
+{# ---------------  This branch is to edit bricks   --------------- #}
+<form action="{% url sp.form.action_url_name brick_id %}" method="post">
+{% else %}
+{# ---------------  This branch is for new root-bricks (thesis)  --------------- #}
+<form action="{% url sp.form.action_url_name %}" method="post">
+{% endif %}
+
+
+{% csrf_token %}
+{{sp.form.as_p}}
+<!-- !!hcl -->
+<input type="submit" value="Save">
+</form>
+</div>
+{% endif %}
+
+<!--Type: {{pagetype}}-->
+{% endblock %}
+

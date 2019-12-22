@@ -5,14 +5,14 @@
 
     <div class="box_footer_text modest_links">
     This web site is powered by the free software
-    <a href="https://github.com/cknoll/django-sober">sober</a> in version xyz.
+    <a href="https://github.com/cknoll/django-moodpoll">moodpoll</a>.
     </div>
 
     <div class="box_header_menu">
         <!-- !!hcl_de -->
-    <a href="abc">{% trans "Legal Notice" %}</a> |
-    <a href="abc">{% trans "Privacy" %}</a> |
-    <a href="abc">{% trans "Contact" %}</a>
+    <a href="{% url 'imprint-page' %}">{% trans "Legal Notice" %}</a> |
+    <a href="{% url 'privacy-page' %}">{% trans "Privacy" %}</a> |
+    <a href="{% url 'contact-page' %}">{% trans "Contact" %}</a>
     </div>
 </div>
 <br>

@@ -10,6 +10,8 @@ import json
 import tempfile
 import time
 import importlib
+from collections import defaultdict
+
 from django.conf import settings
 
 from ipydex import IPS, ST, ip_syshook, dirsearch, sys, activate_ips_on_exception
@@ -19,6 +21,15 @@ activate_ips_on_exception()
 
 class DatabaseEmptyError(ValueError):
     pass
+
+
+# This dict must contain only data which is consitent with urlpatterns from `urls.py`
+# To prevent a circular import we cannot use `from django.urls import reverse`.
+# Therefore we have to use duplicated data.
+# There is a unit tests which ensures integrity.
+duplicated_urls_data = {"contact-page": "/contact",
+                        }
+duplicated_urls = defaultdict(lambda: "__invalid_url__", duplicated_urls_data)
 
 
 appname = "moodpoll"
@@ -46,6 +57,37 @@ def init_settings():
     my_settings = importlib.import_module("{}_site.settings".format(appname))
     settings.configure(my_settings)
     return settings
+
+
+# noinspection PyPep8Naming
+def get_project_READMEmd(marker_a=None, marker_b=None):
+    """
+    Return the content of README.md from the root directory of this project
+
+    (optionally return only the text between the two marker-strings)
+    :return:
+    """
+
+    basepath = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(basepath)
+    fpath = os.path.join(project_root, "README.md")
+    with open(fpath, "r") as txt_file:
+        txt = txt_file.read()
+
+    if marker_a is None:
+        assert marker_b is None
+        return txt
+    else:
+        assert marker_b is not None
+
+    try:
+        idx1 = txt.index(marker_a) + len(marker_a)
+        idx2 = txt.index(marker_b)
+    except ValueError:
+        IPS()
+        return txt
+
+    return txt[idx1:idx2]
 
 
 def get_present_db_content():
@@ -202,3 +244,4 @@ def safe_run_command(cmd, ask=True):
             print("\nDone.\n")
     else:
         print("Abort.")
+

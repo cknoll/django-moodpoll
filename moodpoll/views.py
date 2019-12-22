@@ -7,6 +7,7 @@ from django.views import View
 
 from . import models
 from . import forms
+from .simple_pages_interface import get_sp
 
 # debugging helper
 from ipydex import IPS, activate_ips_on_exception
@@ -256,6 +257,22 @@ class ViewPollResult(View):
     def post(request):
         pass
 
+
+def view_simple_page(request, pagetype=None):
+    """
+    Render (almost) static page
+    :param request:
+    :param pagetype:
+    :return:
+    """
+
+    # TODO: merge the base-object and the sp-object
+    base = Container()
+    lang = None
+
+    sp = get_sp(pagetype=pagetype, lang=lang)
+    context = {"pagetype": pagetype, "sp": sp, "base": base}
+    return render(request, 'moodpoll/main_simple_page.html', context)
 
 # ### Helper functions ####
 
