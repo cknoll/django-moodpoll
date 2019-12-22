@@ -2,7 +2,7 @@
 import re
 import json
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.views import View
 
 from . import models
@@ -88,16 +88,14 @@ class ViewCreatePoll(View):
 
         form = forms.PollForm(request.POST)
         if not form.is_valid():
-            # error handling
+            # !! error handling
             1/0
             return None
         else:
             new_poll = form.save()
 
-        c = Container()
-        c.msg = "Successfully created new poll:"
-
-        return ViewPoll().get(request, new_poll.pk, c=c)
+        request.session["poll_created"] = new_poll.pk
+        return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk}))
 
 
 class ViewPoll(View):
@@ -107,13 +105,18 @@ class ViewPoll(View):
         """
         :param request:
         :param pk:
-        :param key:     if provided, the (current) result is shown
+        :param key:     if provided, the (current) result is shown (not yet implemented)
         :param c:       container (recieve data from elsewhere)
         :return:
         """
 
-        if c is None:
-            c = Container()
+        c = Container()
+
+        if request.session.pop("poll_created", None) == pk:
+            c.msg = "Successfully created new poll:"
+
+            # add unit test comment
+            c.utc_new_poll = "new_poll_{}".format(pk)
 
         c.action_url_name = "show_poll"
         c.pk = pk

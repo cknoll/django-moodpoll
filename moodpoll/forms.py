@@ -11,3 +11,6 @@ class PollForm(ModelForm):
             "description": 'Some additional information (optional).',
             "optionlist": 'List of options. Each line (ended by a line break) is a separate option',
         }
+
+
+PollForm.base_fields["description"].required = False

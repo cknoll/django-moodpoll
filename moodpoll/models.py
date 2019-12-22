@@ -13,7 +13,7 @@ class User(models.Model):
 
 class Poll(models.Model):
     creation_datetime = models.DateTimeField(default=timezone.now)
-    title = models.CharField(max_length=200, null=True)
+    title = models.CharField(max_length=200, null=True, blank=True)
     description = models.CharField(max_length=500, null=True)
     optionlist = models.TextField(max_length=5000)  # options are saved as str-represented list of strings
     # nbr_of_opts = models.IntegerField()
