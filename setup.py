@@ -5,10 +5,7 @@
 
 from setuptools import setup, find_packages
 
-# from sober.release import __version__
-
-__version__ = "0.0.1"
-
+from moodpoll.release import __version__
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
@@ -17,7 +14,7 @@ with open('README.md') as readme_file:
 with open("requirements.txt") as requirements_file:
     requirements = requirements_file.read()
 
-setup_requirements = [ ]
+setup_requirements = [django]
 
 test_requirements = [ ]
 
@@ -27,7 +24,7 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'License :: OSI Approved :: GNU Affero General Public License v3 (GPLv3)',
         'Natural Language :: English',
         'Framework :: Django',
         'Programming Language :: Python :: 3',
@@ -38,7 +35,7 @@ setup(
     long_description=readme + '\n\n',
     long_description_content_type="text/markdown",
     include_package_data=True,
-    keywords='django, discussions',
+    keywords='django, decision making',
     name='django-moodpoll',
     packages=find_packages(),
     setup_requires=setup_requirements,
