@@ -169,7 +169,7 @@ new_sp(type="about",
        title="About moodpoll",
        content=_(txt1))
 
-extra2 = "You can [try it out now]({}) or [read more]({}).".format(dupurls["new-poll"], dupurls["about-page"])
+extra2 = "You can [try it out now]({}) or [read more]({}).".format(dupurls["new_poll"], dupurls["about-page"])
 
 txt_landing = "".join((extra1, rdme1, extra2))
 new_sp(type="landing",

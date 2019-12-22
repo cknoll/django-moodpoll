@@ -29,7 +29,7 @@ class DatabaseEmptyError(ValueError):
 # There is a unit tests which ensures integrity.
 duplicated_urls_data = {"contact-page": "/contact",
                         "about-page": "/about",
-                        "new-poll": "/new",
+                        "new_poll": "/new",
                         }
 duplicated_urls = defaultdict(lambda: "__invalid_url__", duplicated_urls_data)
 
