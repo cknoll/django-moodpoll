@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 
 from . import utils
 from . import models
+from . import views
 
 from ipydex import IPS
 
@@ -27,6 +28,22 @@ class TestApp1(TestCase):
                        "Option Ä",
                        ]
         IPS()
+
+
+class TestHelperFuncs(TestCase):
+
+    def test_map_mean(self):
+        m09 = views.map_normed_mean_to_09
+        self.assertEqual(m09([2, 2], 2), 0.9)
+        self.assertEqual(m09([1, 2], 2), 0.5)
+        self.assertEqual(m09([1, 1], 2), 0.1)
+        self.assertEqual(m09([0], 2), 0.0)
+        self.assertEqual(m09([], 2), 0.0)
+
+        self.assertEqual(m09([-3, -3], -3), 0.9)
+        self.assertEqual(m09([-1, -1], -3), 0.1)
+        self.assertEqual(m09([-1, -1, -1, -1, -3], -3), 0.3)
+        self.assertEqual(m09([-1, -1, -1, -1, -2], -3), 0.2)
 
 
 class TestLoginMechanics(TestCase):
@@ -90,8 +107,51 @@ class TestViews(TestCase):
         self.assertContains(response3, "utc_show_poll")
 
     def test_show_poll(self):
-        response = self.client.get(reverse('show_poll', kwargs={"pk": 1}))
+        url = reverse('show_poll', kwargs={"pk": 1})
+
+        # noinspection PyUnresolvedReferences
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
+        form, action_url = get_form_by_action_url(response, "show_poll", pk=1)
+
+        c0 = views.evaluate_poll_results(pk=1)
+
+        vote_data1 = {
+            'option_0_range': '0',
+            'option_0_input': '0',
+            'option_1_range': '1',
+            'option_1_input': '1',
+            'option_2_range': '2',
+            'option_2_input': '2',
+            'option_3_range': '-1',
+            'option_3_input': '-1',
+            'option_4_range': '-2',
+            'option_4_input': '-2',
+            'option_5_range': '-3',
+            'option_5_input': '-3',
+            'option_6_range': '0',
+            'option_6_input': '0',
+            'username': 'testuser1'
+        }
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(action_url, post_data)
+
+        # noinspection PyUnresolvedReferences
+        self.assertEqual(len(models.MoodExpression.objects.all()), 3)
+
+        c1 = views.evaluate_poll_results(pk=1)
+
+        # results for the negative votes for option 0
+        self.assertEqual(c0.neg_res[0], (1, "5", -2))
+
+        self.assertEqual(c0.neu_res[0], (1, "0", 1))
+        self.assertEqual(c1.neu_res[0], (2, "0", 2))
+
+        self.assertEqual(c1.neg_res[1], (1, "9", -3))
+        self.assertEqual(c1.neu_res[1], (1, "0", 1))
+        self.assertEqual(c0.pos_res[1], (0, "0", 0))
+        self.assertEqual(c1.pos_res[1], (1, "1", 1))
 
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests

@@ -1,6 +1,7 @@
 # from django.http import HttpResponse
 import re
 import json
+import math
 
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.views import View
@@ -186,74 +187,7 @@ class ViewPollResult(View):
 
     @staticmethod
     def get(request, pk, c=None):
-
-        if c is None:
-            c = Container()
-
-        c.poll = get_object_or_404(models.Poll, pk=pk)
-
-        # list of Container-objects
-        c.option_list = parse_option_list(c.poll.optionlist)
-
-        # !! introduce and use nbr_of_opts of model ??
-        n_opts = len(c.option_list)
-
-        me_list = models.MoodExpression.objects.filter(poll=pk)
-
-        c.user_voting_acts = []
-        mood_values = []
-        # produce a list of lists of ints
-
-        for me in me_list:
-            mood_values.append(json.loads(me.mood_values))
-
-            # !! introduce datetime
-            c.user_voting_acts.append((me.username, "2019-12-15 13:52:41"))
-
-        # count positive, negative and neutral votes separately
-        pos = list_of_empty_lists(n_opts)
-        neg = list_of_empty_lists(n_opts)
-        neu = list_of_empty_lists(n_opts)
-
-        # iterate over all
-        for mv_list in mood_values:
-            assert len(mv_list) == n_opts
-            for idx, mood_value in enumerate(mv_list):
-                if mood_value < 0:
-                    neg[idx].append(mood_value)
-                elif mood_value > 0:
-                    pos[idx].append(mood_value)
-                else:
-                    neu[idx].append(mood_value)
-
-        # Evaluation:
-        # for negative and positive votes there are three important numbers:
-        # a) how many people vote for that option
-        # b) how strong is there opinion in average
-        # c) how strong is there opinion in total score
-        # -> for every option of the option_list, we store three triples (one for negative, neutral, positive)
-
-        c.pos_res, c.neg_res, c.neu_res = [], [], []
-
-        for p, n, nt, opt_cont in zip(pos, neg, neu, c.option_list):
-            mean_p = map_normed_mean_to_09(p, 2)
-            triple = (len(p), str(mean_p)[2:], sum(p))
-            c.pos_res.append(triple)
-            opt_cont.approvals = triple
-
-            # we neglegt the sign for the mean (we already now that this value is counts negative)
-            mean_n = abs(map_normed_mean_to_09(n, -3))
-            # omit the "0." part of the str
-            triple = (len(n), str(mean_n)[2:], sum(n))
-            print(opt_cont.content, "mean_n:", mean_n)
-            c.neg_res.append(triple)
-            opt_cont.resistances = triple
-
-            # for neutral votes no mean has to be calculated, because every value is 0
-            triple = (len(nt), "0", len(nt))
-            c.neu_res.append(triple)
-            opt_cont.neutrals = triple
-
+        c = evaluate_poll_results(pk, c)
         context = dict(c=c, )
 
         return render(request, "{}/main_poll_result.html".format(appname), context)
@@ -307,6 +241,85 @@ def view_do_backup(request):
 
 # ### Helper functions ####
 
+# this functionality is outsourced for better testability
+def evaluate_poll_results(pk, c=None):
+    """
+    Return a Container-object which contains information about the results (positive, negative, neutral)
+    for all options.
+
+    :param pk:
+    :param c:
+    :return:
+    """
+    if c is None:
+        c = Container()
+
+    c.poll = get_object_or_404(models.Poll, pk=pk)
+
+    # list of Container-objects
+    c.option_list = parse_option_list(c.poll.optionlist)
+
+    # !! introduce and use nbr_of_opts of model ??
+    n_opts = len(c.option_list)
+
+    me_list = models.MoodExpression.objects.filter(poll=pk)
+
+    c.user_voting_acts = []
+    mood_values = []
+    # produce a list of lists of ints
+
+    for me in me_list:
+        mood_values.append(json.loads(me.mood_values))
+
+        # !! introduce datetime
+        c.user_voting_acts.append((me.username, "2019-12-15 13:52:41"))
+
+    # count positive, negative and neutral votes separately
+    pos = list_of_empty_lists(n_opts)
+    neg = list_of_empty_lists(n_opts)
+    neu = list_of_empty_lists(n_opts)
+
+    # iterate over all
+    for mv_list in mood_values:
+        assert len(mv_list) == n_opts
+        for idx, mood_value in enumerate(mv_list):
+            if mood_value < 0:
+                neg[idx].append(mood_value)
+            elif mood_value > 0:
+                pos[idx].append(mood_value)
+            else:
+                neu[idx].append(mood_value)
+
+    # Evaluation:
+    # for negative and positive votes there are three important numbers:
+    # a) how many people voted for that option
+    # b) how strong is there opinion in average
+    # c) how strong is there opinion in total score (sum)
+    # -> for every option of the option_list, we store three triples (one for negative, neutral, positive)
+
+    c.pos_res, c.neg_res, c.neu_res = [], [], []
+
+    for p, n, nt, opt_cont in zip(pos, neg, neu, c.option_list):
+        mean_p = map_normed_mean_to_09(p, 2)
+        triple = (len(p), str(mean_p)[2:], sum(p))
+        c.pos_res.append(triple)
+        opt_cont.approvals = triple
+
+        # we neglegt the sign for the mean (we already now that this value is counts negative)
+        mean_n = abs(map_normed_mean_to_09(n, -3))
+        # omit the "0." part of the str
+        triple = (len(n), str(mean_n)[2:], sum(n))
+        c.neg_res.append(triple)
+        opt_cont.resistances = triple
+
+        # for neutral votes no mean has to be calculated, because every value is 0
+        triple = (len(nt), "0", len(nt))
+        c.neu_res.append(triple)
+        opt_cont.neutrals = triple
+
+    return c
+
+
 def list_of_empty_lists(n):
     return [list() for i in range(n)]
 
@@ -319,19 +332,30 @@ def mean(seq):
 
 def map_normed_mean_to_09(seq, end_of_scale, round_result=1):
     """
-    - calculate the mean of num,
+    - calculate the mean of seq,
+    - subtract the minimum possible value (assumed to be 1)
     - normalize it with the "maximum" possible value (w.r.t. abs), -> somthing in [0, 1]
-    - map this interval to [0, 0.9]
+    - map this interval to [0.1, 0.9]
 
     Rationale: we want to compactly express how strong is approval and rejection - one number is needed.
-    Highest number = 0 would be confusing
+    Highest or lowest number == 0 would be confusing.
 
     :param seq:             sequence of numbers (assume all have the same sign)
     :param end_of_scale:    max possible value (min possible for negeative)
     :param round_result:    False or int (digits)
     :return:
     """
-    res = mean(seq) / end_of_scale * 0.9
+    m = mean(seq)
+
+    if m == 0:
+        return 0.0
+
+    diff = math.copysign(1, m)
+    assert abs(end_of_scale) > 1
+    assert abs(m) >= 1
+
+    # map the result to [0.1, 0.9]
+    res = (m - diff) / (end_of_scale - diff) * 0.8 + .1
     if round_result is not False:
         return round(res, round_result)
     else:
