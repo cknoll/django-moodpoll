@@ -4,8 +4,10 @@ import json
 
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.views import View
+from django.contrib.auth.decorators import login_required
 
 from . import models
+from . import utils
 from . import forms
 from .simple_pages_interface import get_sp
 
@@ -261,21 +263,47 @@ class ViewPollResult(View):
         pass
 
 
-def view_simple_page(request, pagetype=None):
+def view_simple_page(request, pagetype=None, base_container=None):
     """
     Render (almost) static page
     :param request:
     :param pagetype:
+    :param base_container:
     :return:
     """
 
     # TODO: merge the base-object and the sp-object
-    base = Container()
+    if base_container is None:
+        base_container = Container()
     lang = None
 
     sp = get_sp(pagetype=pagetype, lang=lang)
-    context = {"pagetype": pagetype, "sp": sp, "base": base}
+
+    format_dict = getattr(base_container, "format_dict", None)
+    if format_dict:
+        sp.content = sp.content.format(**format_dict)
+
+    context = {"pagetype": pagetype, "sp": sp, "base": base_container}
     return render(request, 'moodpoll/main_simple_page.html', context)
+
+
+@login_required
+def view_do_backup(request):
+    """
+    Write a json backup of the database to disk. Useful for development.
+    :param request:
+    :return:
+    """
+    c = Container()
+    if request.user.is_superuser:
+        fname = utils.save_stripped_fixtures(backup=True)
+        c.format_dict = {"backup_path": fname}
+
+        return view_simple_page(request, "backup", base_container=c)
+    else:
+
+        return view_simple_page(request, "backup_no_login", base_container=c)
+
 
 # ### Helper functions ####
 

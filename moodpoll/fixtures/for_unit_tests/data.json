@@ -1,0 +1,70 @@
+[
+  {
+    "fields" : {
+        "creation_datetime" : "2019-12-15T12:10:30.028Z",
+        "description" : "Serves to demonstrate the app.",
+        "optionlist" : "Monday\r\nTuesday\r\nWednesday\r\nThursday\r\nFriday\r\nSaturday\r\nSunday",
+        "title" : "Demopoll: Which day of the week do you like most?"
+      },
+    "model" : "moodpoll.poll",
+    "pk" : 1
+  },
+  {
+    "fields" : {
+        "creation_datetime" : "2019-12-22T19:36:19.676Z",
+        "description" : null,
+        "optionlist" : "January\r\nApril\r\nAugust\r\nDecember",
+        "title" : "Which month do you like most?"
+      },
+    "model" : "moodpoll.poll",
+    "pk" : 2
+  },
+  {
+    "fields" : {
+        "creation_datetime" : "2019-12-22T19:41:49.337Z",
+        "description" : null,
+        "optionlist" : "January\r\nApril\r\nAugust\r\nDecember",
+        "title" : "Which month do you like most?"
+      },
+    "model" : "moodpoll.poll",
+    "pk" : 3
+  },
+  {
+    "fields" : {
+        "mood_values" : "[0, 0, 1, 1, 2, 2, 1]",
+        "poll" : 1,
+        "username" : "testuser1"
+      },
+    "model" : "moodpoll.moodexpression",
+    "pk" : 1
+  },
+  {
+    "fields" : {
+        "mood_values" : "[-2, -3, 0, 0, 1, 2, 1]",
+        "poll" : 1,
+        "username" : "testuser2"
+      },
+    "model" : "moodpoll.moodexpression",
+    "pk" : 2
+  },
+  {
+    "fields" : {
+        "date_joined" : "2019-12-03T22:46:48.669Z",
+        "email" : "",
+        "first_name" : "",
+        "groups" : [  ],
+        "is_active" : true,
+        "is_staff" : true,
+        "is_superuser" : true,
+        "last_login" : "2019-12-15T12:08:58.530Z",
+        "last_name" : "",
+        "password" : "pbkdf2_sha256$180000$STMcw4xW7iXk$kP1SQRSUVudE49IzkfN3U3gJB7LFHhYomFzU3LCQ//o=",
+        "user_permissions" : [  ],
+        "username" : "admin"
+      },
+    "model" : "auth.user",
+    "pk" : 1
+  }
+]
+
+

@@ -3,10 +3,16 @@ from django.urls import reverse
 from bs4 import BeautifulSoup
 
 from . import utils
+from . import models
 
 from ipydex import IPS
 
 # py3 manage.py test moodpoll
+
+global_fixtures = ['for_unit_tests/data.json']
+
+# admin account only for unit tests
+global_login_data_admin = dict(username="admin", password="ahfahHe8")
 
 
 class TestApp1(TestCase):
@@ -21,6 +27,26 @@ class TestApp1(TestCase):
                        "Option Ä",
                        ]
         IPS()
+
+
+class TestLoginMechanics(TestCase):
+    fixtures = global_fixtures
+
+    def test_login_as_admin(self):
+        logged_in = self.client.login(**global_login_data_admin)
+        self.assertTrue(logged_in)
+        response = self.client.get(reverse('landing-page'))
+
+        self.assertTrue(response.wsgi_request.user.is_superuser)
+
+    def test_no_backup_without_login(self):
+        response = self.client.get(reverse('do_backup'))
+
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get(response.url)
+        self.assertEqual(response.url, "admin/login")
 
 
 class TestSimplePages(TestCase):
@@ -39,6 +65,7 @@ class TestSimplePages(TestCase):
 
 
 class TestViews(TestCase):
+    fixtures = global_fixtures
 
     def test_index(self):
         response = self.client.get(reverse('landing-page'))
@@ -60,11 +87,11 @@ class TestViews(TestCase):
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
         self.assertContains(response3, "utc_new_poll")
-        if 0:
+        self.assertContains(response3, "utc_show_poll")
 
-            bricks2 = list(Brick.objects.all())
-            new_brick = bricks2[-1]
-            self.assertTrue("#{}".format(new_brick.pk) in response2.url)
+    def test_show_poll(self):
+        response = self.client.get(reverse('show_poll', kwargs={"pk": 1}))
+        self.assertContains(response, "utc_show_poll")
 
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests

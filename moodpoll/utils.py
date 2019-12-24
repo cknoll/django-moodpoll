@@ -12,7 +12,7 @@ import time
 import importlib
 from collections import defaultdict
 
-from django.conf import settings
+from django.conf import settings, Settings
 
 from ipydex import IPS, ST, ip_syshook, dirsearch, sys, activate_ips_on_exception
 
@@ -50,14 +50,15 @@ def get_path(reason):
 def init_settings():
     """
     Some utils functions (e.g. save_stripped_fixtures) are called as a plain python script. Nevertheless they need
-    access to the settings. This function enables this.
+    access to the settings. This function ensures that the settings are initialized. (But are not initilized twice.)
 
     :return: settings
     """
 
-    assert "manage.py" in os.listdir("./")
-    my_settings = importlib.import_module("{}_site.settings".format(appname))
-    settings.configure(my_settings)
+    if not isinstance(settings._wrapped, Settings):
+        assert "manage.py" in os.listdir("./")
+        my_settings = importlib.import_module("{}_site.settings".format(appname))
+        settings.configure(my_settings)
     return settings
 
 
@@ -128,7 +129,7 @@ def save_stripped_fixtures(fname=None, jsonlint=True, backup=False):
 
         python3 -c "import moodpoll.utils as u; u.save_stripped_fixtures(backup=True)"
 
-    :return: None
+    :return: fname of written file
     """
 
     model_blacklist = ["contenttypes*", "sessions*", r"admin\.logentry",
@@ -193,6 +194,8 @@ def save_stripped_fixtures(fname=None, jsonlint=True, backup=False):
         jfile.write(res2)
 
     print("file written:", output_path)
+
+    return output_path
 
 
 def load_fixtures_to_db(fname=None, ask=True):

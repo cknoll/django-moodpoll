@@ -155,6 +155,21 @@ Siehe [Kontakt]({}).
        )
 
 # ----------------------------------------------------------------------------
+backup = True
+
+new_sp(type="backup",
+       title="backup message",
+       content=_("""Backup has been written to: {backup_path}"""))
+# ----------------------------------------------------------------------------
+backup_no_login = True
+
+# this is for logged in users which are no superuser
+
+new_sp(type="backup_no_login",
+       title="backup message",
+       content=_("""You need to be logged in as admin to create a backup."""))
+
+# ----------------------------------------------------------------------------
 welcome = True
 
 extra1 = "`moodpoll` is an app for easy and good decision making.\n\n"
