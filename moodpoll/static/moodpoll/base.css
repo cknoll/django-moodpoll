@@ -758,7 +758,7 @@ https://github.com/gwwar/z-context
 
 /* source:  https://www.w3schools.com/howto/howto_css_responsive_form.asp */
 
-
+/*moodpoll-specific*/
 
 /* Floating column for labels: 25% width */
 .col-25 {
@@ -780,6 +780,12 @@ https://github.com/gwwar/z-context
   display: table;
   clear: both;
 }
+
+.folding_box_heading {
+ text-decoration: underline;
+}
+
+/*end of moodpoll specific*/
 
 /* Responsive layout - when the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 600px) {

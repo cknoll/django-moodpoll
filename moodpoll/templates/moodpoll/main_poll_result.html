@@ -38,7 +38,32 @@ Result for:
 
 <hr class="hr_style_gradient opacity30">
 
-The following users participated up to now:
+<details> <summary class="folding_box_heading"><b>Explanation</b>: What do the results mean?</summary>
+<div>
+    <p>The voting result for each option is composed by three numbers in the form <i>A.B</i>,
+        where a is the integer part and B ist the fractional part.
+        The three numbers represent negative votes, neutral votes and positive votes, respectively.
+        The integer part (<i>A</i>) is the number of votes. The fractional part <i>B</i> is the
+        average strength of the vote on a scale between 1 and 9.
+        <br>
+        <br>
+        <b>Examples:</b>
+        <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;"> 5.1 means five people voted
+        negative but (almost) all chose the weakest option (i.e. -1).
+        <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;"> 3.9 means three people voted
+        positive and all of them with the strongest option (i.e. +2).<img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;"> 3.4 means: two  +1 votes and one +2 vote, which averages somewhere in the middle between 1 and 9.
+
+        <br>
+        <br>
+        Because there is no "strength" of neutral votes the fractional part <i>B</i> for them is always zero.
+
+    </p>
+</div>
+</details>
+
+<hr class="hr_style_gradient opacity30">
+
+    <b>The following users participated up to now:</b>
 
 {% for uva in c.user_voting_acts %}
 
