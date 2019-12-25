@@ -271,8 +271,8 @@ def evaluate_poll_results(pk, c=None):
     for me in me_list:
         mood_values.append(json.loads(me.mood_values))
 
-        # !! introduce datetime
-        c.user_voting_acts.append((me.username, "2019-12-15 13:52:41"))
+        dt = me.datetime.strftime(r"%Y-%m-%d %H:%m:%S")
+        c.user_voting_acts.append((me.username, dt, me.datetime.timestamp()))
 
     # count positive, negative and neutral votes separately
     pos = list_of_empty_lists(n_opts)
@@ -316,6 +316,9 @@ def evaluate_poll_results(pk, c=None):
         triple = (len(nt), "0", len(nt))
         c.neu_res.append(triple)
         opt_cont.neutrals = triple
+
+    # sort by timestamp (3rd argument) (descending)
+    c.user_voting_acts.sort(key=lambda arg: arg[2], reverse=True)
 
     return c
 

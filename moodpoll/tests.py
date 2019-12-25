@@ -63,7 +63,7 @@ class TestLoginMechanics(TestCase):
         self.assertEqual(response.status_code, 302)
 
         response = self.client.get(response.url)
-        self.assertEqual(response.url, "admin/login")
+        self.assertEqual(response.url, "/admin/login/")
 
 
 class TestSimplePages(TestCase):

@@ -24,5 +24,5 @@ class MoodExpression(models.Model):
     username = models.CharField(max_length=200, null=True)
     poll = models.ForeignKey(Poll, null=True, on_delete=models.SET_NULL)
     mood_values = models.TextField(max_length=1000)  # moods are saved as list of floats or ints
-    # datetime = models.DateTimeField(default=timezone.now)
+    datetime = models.DateTimeField(default=timezone.now, null=True)
 

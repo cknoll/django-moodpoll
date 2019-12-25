@@ -65,7 +65,17 @@ Result for:
 
     <b>The following users participated up to now:</b>
 
-{% for uva in c.user_voting_acts %}
+
+    <div class="row">
+      <div class="col-75">
+        <i>Name</i>
+      </div>
+      <div class="col-25">
+        <i>last modified (UTC)</i>
+      </div>
+    </div>
+
+    {% for uva in c.user_voting_acts %}
 
     <div class="row">
       <div class="col-75">
