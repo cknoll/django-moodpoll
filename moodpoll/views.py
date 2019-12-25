@@ -6,6 +6,7 @@ import math
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.views import View
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 from . import models
 from . import utils
@@ -14,6 +15,10 @@ from .simple_pages_interface import get_sp
 
 # debugging helper
 from ipydex import IPS, activate_ips_on_exception
+
+
+class DataIntegrityError(ValueError):
+    pass
 
 
 def index(request):
@@ -167,7 +172,19 @@ class ViewPoll(View):
 
         the_poll = get_object_or_404(models.Poll, pk=pk)
 
-        me = models.MoodExpression(username=c.username, poll=the_poll, mood_values=mood_values)
+        # try to find a MoodExpression with the same combination of poll and username
+
+        # noinspection PyUnresolvedReferences
+        old_me_list = models.MoodExpression.objects.filter(poll=1, username=c.username)
+        if len(old_me_list) == 0:
+            me = models.MoodExpression(username=c.username, poll=the_poll, mood_values=mood_values)
+        elif len(old_me_list) == 1:
+            me = old_me_list[0]
+            me.mood_values = mood_values
+            me.datetime = timezone.now()
+        else:
+            msg = "Unexpected: mutiple votes for username {} and poll {}".format(c.username, the_poll)
+            raise DataIntegrityError(msg)
         me.save()
 
         # !! read the current user from session data and look if they already voted

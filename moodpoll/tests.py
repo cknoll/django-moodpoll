@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from bs4 import BeautifulSoup
+import time
 
 from . import utils
 from . import models
@@ -132,13 +133,18 @@ class TestViews(TestCase):
             'option_5_input': '-3',
             'option_6_range': '0',
             'option_6_input': '0',
-            'username': 'testuser1'
+            'username': 'testuser3'
         }
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
         response = self.client.post(action_url, post_data)
 
         # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 3)
+        me = models.MoodExpression.objects.all()
+        self.assertEqual(len(me), 3)
+        self.assertEqual(me[0].username, "testuser1")
+
+        ts0 = 1574332979
+        self.assertEqual(me[0].datetime.timestamp(), ts0)
 
         c1 = views.evaluate_poll_results(pk=1)
 
@@ -152,6 +158,20 @@ class TestViews(TestCase):
         self.assertEqual(c1.neu_res[1], (1, "0", 1))
         self.assertEqual(c0.pos_res[1], (0, "0", 0))
         self.assertEqual(c1.pos_res[1], (1, "1", 1))
+
+        # perform another vote for testuser1. This should not add a new MoodExpression object to database
+        # but insteas update the existing one
+        post_data.update(username="testuser1")
+        response = self.client.post(action_url, post_data)
+
+        # noinspection PyUnresolvedReferences
+        me = models.MoodExpression.objects.all()
+        self.assertEqual(len(me), 3)
+        self.assertEqual(me[0].username, "testuser1")
+
+        timediff = views.timezone.now().timestamp() - me[0].datetime.timestamp()
+        # time of last modification should be very recent
+        self.assertTrue(timediff < 1)
 
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests

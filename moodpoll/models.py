@@ -26,3 +26,6 @@ class MoodExpression(models.Model):
     mood_values = models.TextField(max_length=1000)  # moods are saved as list of floats or ints
     datetime = models.DateTimeField(default=timezone.now, null=True)
 
+    def __repr__(self):
+        return "<MoodExpr: {} {}, {}>".format(self.username, self.poll.pk, self.datetime)
+
