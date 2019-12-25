@@ -126,7 +126,7 @@ class ViewPoll(View):
             # add unit test comment
             c.utc_new_poll = "new_poll_{}".format(pk)
 
-        c.action_url_name = "show_poll"
+        c.action_url_name = "poll_result"
         c.pk = pk
         c.min = -3
         c.max = 2
@@ -139,6 +139,20 @@ class ViewPoll(View):
         context = dict(c=c, )
 
         return render(request, "{}/main_show_poll.html".format(appname), context)
+
+    @staticmethod
+    def post(request, pk):
+        pass
+
+
+class ViewPollResult(View):
+
+    @staticmethod
+    def get(request, pk, c=None):
+        c = evaluate_poll_results(pk, c)
+        context = dict(c=c, )
+
+        return render(request, "{}/main_poll_result.html".format(appname), context)
 
     @staticmethod
     def post(request, pk):
@@ -163,12 +177,6 @@ class ViewPoll(View):
 
         c = Container()
         c.username = data.get("username")
-        c.msg = data
-        c.pk = pk
-
-        c.action_url_name = "show_poll"
-        c.min = -3
-        c.max = 2
 
         the_poll = get_object_or_404(models.Poll, pk=pk)
 
@@ -179,39 +187,16 @@ class ViewPoll(View):
         if len(old_me_list) == 0:
             me = models.MoodExpression(username=c.username, poll=the_poll, mood_values=mood_values)
         elif len(old_me_list) == 1:
+            # overwrite the old db-entry
             me = old_me_list[0]
             me.mood_values = mood_values
             me.datetime = timezone.now()
         else:
-            msg = "Unexpected: mutiple votes for username {} and poll {}".format(c.username, the_poll)
+            msg = "Unexpected: multiple votes for username {} and poll {}".format(c.username, the_poll)
             raise DataIntegrityError(msg)
         me.save()
 
-        # !! read the current user from session data and look if they already voted
-        c.startval = 0
-
-        # get all votes on the current poll
-        me_list = models.MoodExpression.objects.filter(poll=pk)
-
-        c.poll = get_object_or_404(models.Poll, pk=pk)
-        c.option_list = parse_option_list(c.poll.optionlist)
-        context = dict(c=c, )
-
         return ViewPollResult().get(request, pk, c=c)
-
-
-class ViewPollResult(View):
-
-    @staticmethod
-    def get(request, pk, c=None):
-        c = evaluate_poll_results(pk, c)
-        context = dict(c=c, )
-
-        return render(request, "{}/main_poll_result.html".format(appname), context)
-
-    @staticmethod
-    def post(request):
-        pass
 
 
 def view_simple_page(request, pagetype=None, base_container=None):
@@ -288,7 +273,7 @@ def evaluate_poll_results(pk, c=None):
     for me in me_list:
         mood_values.append(json.loads(me.mood_values))
 
-        dt = me.datetime.strftime(r"%Y-%m-%d %H:%m:%S")
+        dt = me.datetime.strftime(r"%Y-%m-%d %H:%M:%S")
         c.user_voting_acts.append((me.username, dt, me.datetime.timestamp()))
 
     # count positive, negative and neutral votes separately

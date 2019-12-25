@@ -114,7 +114,7 @@ class TestViews(TestCase):
         self.assertEqual(len(models.MoodExpression.objects.all()), 2)
         response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "show_poll", pk=1)
+        form, action_url = get_form_by_action_url(response, "poll_result", pk=1)
 
         c0 = views.evaluate_poll_results(pk=1)
 
