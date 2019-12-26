@@ -170,6 +170,40 @@ new_sp(type="backup_no_login",
        content=_("""You need to be logged in as admin to create a backup."""))
 
 # ----------------------------------------------------------------------------
+general_error = True
+
+# this is for logged in users which are no superuser
+
+new_sp(type="general_error",
+       title="general error page",
+       content=_("""Some Error occurred. Sorry."""))
+
+# ----------------------------------------------------------------------------
+
+overwrite_warning = True
+
+# this is the page which asks whether to overwrite/update an existing mood_expression
+
+new_sp(type="overwrite_warning",
+       title="overwrite warning",
+       content=_("""
+A user named {username} has already voted for this poll. Time of last modification: {dt_string}.
+<br>
+<br>
+If you do not want to overwrite this voting act, please use the "go back" function of your browser and
+choose a different username.
+<br>
+<br>
+Otherwise click the press the following button:
+<form action="{action_url}" method="post">
+        <button type="submit" name="overwrite" value="overwrite">Overwrite existing voting act for this user!</button>
+{form_data}
+</form> 
+<!-- utc_overwrite_warning -->
+
+"""))
+
+# ----------------------------------------------------------------------------
 welcome = True
 
 extra1 = "`moodpoll` is an app for easy and good decision making.\n\n"

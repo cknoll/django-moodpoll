@@ -126,7 +126,7 @@ class ViewPoll(View):
             # add unit test comment
             c.utc_new_poll = "new_poll_{}".format(pk)
 
-        c.action_url_name = "poll_result"
+        c.action_url_name = "poll_eval"
         c.pk = pk
         c.min = -3
         c.max = 2
@@ -155,7 +155,17 @@ class ViewPollResult(View):
         return render(request, "{}/main_poll_result.html".format(appname), context)
 
     @staticmethod
-    def post(request, pk):
+    def post(request):
+        pass
+
+
+class ViewPollEvaluation(View):
+
+    @staticmethod
+    def get(request, pk):
+        return view_simple_page(request, pagetype="general_error")
+
+    def post(self, request, pk):
         """
         Process data from a voting act and show the results until now
 
@@ -177,6 +187,7 @@ class ViewPollResult(View):
 
         c = Container()
         c.username = data.get("username")
+        c.post_data = data
 
         the_poll = get_object_or_404(models.Poll, pk=pk)
 
@@ -189,14 +200,54 @@ class ViewPollResult(View):
         elif len(old_me_list) == 1:
             # overwrite the old db-entry
             me = old_me_list[0]
-            me.mood_values = mood_values
-            me.datetime = timezone.now()
+            if data.get("__overwrite_flag") == "True":
+                # update the values and the time
+                me.mood_values = mood_values
+                me.datetime = timezone.now()
+            else:
+                return self.handle_conflict(request, pk, me, c)
         else:
             msg = "Unexpected: multiple votes for username {} and poll {}".format(c.username, the_poll)
             raise DataIntegrityError(msg)
         me.save()
 
-        return ViewPollResult().get(request, pk, c=c)
+
+        return redirect(reverse("poll_result", kwargs={"pk": pk}))
+
+    @staticmethod
+    def handle_conflict(request, pk, old_me, c):
+        """
+        Called if a username is used the second time for one poll.
+
+        -> Display a page where the user can decide whether to overwrite existing mood_values
+        or to give a new name.
+
+        :param request:
+        :param pk:          pk of the poll
+        :param old_me:      old mood_expression
+        :param c:           container with preprocessed data from the caller
+        :return:
+        """
+
+        dt_string = datetime_string_from_dt_object(old_me.datetime)
+
+        action_url = reverse("poll_eval", kwargs={"pk": pk})
+
+        # generate some hidden values including "overwrite_flag"
+
+        hidden_fields = ['<input type="hidden" name="__overwrite_flag" value="True">']
+        for key, value in c.post_data.items():
+            if key == "csrfmiddlewaretoken":
+                # maybe omit that entry or generate a new one?
+                # continue
+                pass
+            hidden_fields.append('<input type="hidden" name="{}" value="{}">'.format(key, value))
+        form_data = "\n".join(hidden_fields)
+
+        c.format_dict = {"username": old_me.username, "action_url": action_url,
+                         "dt_string": dt_string, "form_data": form_data}
+
+        return view_simple_page(request, pagetype="overwrite_warning", base_container=c)
 
 
 def view_simple_page(request, pagetype=None, base_container=None):
@@ -243,6 +294,11 @@ def view_do_backup(request):
 
 # ### Helper functions ####
 
+
+def datetime_string_from_dt_object(dt_object):
+    return dt_object.strftime(r"%Y-%m-%d %H:%M:%S")
+
+
 # this functionality is outsourced for better testability
 def evaluate_poll_results(pk, c=None):
     """
@@ -273,7 +329,7 @@ def evaluate_poll_results(pk, c=None):
     for me in me_list:
         mood_values.append(json.loads(me.mood_values))
 
-        dt = me.datetime.strftime(r"%Y-%m-%d %H:%M:%S")
+        dt = datetime_string_from_dt_object(me.datetime)
         c.user_voting_acts.append((me.username, dt, me.datetime.timestamp()))
 
     # count positive, negative and neutral votes separately

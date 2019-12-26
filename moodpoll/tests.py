@@ -85,6 +85,26 @@ class TestSimplePages(TestCase):
 class TestViews(TestCase):
     fixtures = global_fixtures
 
+    @classmethod
+    def setUpTestData(cls):
+        cls.vote_data1 = {
+            'option_0_range': '0',
+            'option_0_input': '0',
+            'option_1_range': '1',
+            'option_1_input': '1',
+            'option_2_range': '2',
+            'option_2_input': '2',
+            'option_3_range': '-1',
+            'option_3_input': '-1',
+            'option_4_range': '-2',
+            'option_4_input': '-2',
+            'option_5_range': '-3',
+            'option_5_input': '-3',
+            'option_6_range': '0',
+            'option_6_input': '0',
+            'username': 'testuser3'
+        }
+
     def test_index(self):
         response = self.client.get(reverse('landing-page'))
         self.assertEqual(response.status_code, 200)
@@ -114,29 +134,18 @@ class TestViews(TestCase):
         self.assertEqual(len(models.MoodExpression.objects.all()), 2)
         response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_result", pk=1)
+        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        self.assertNotEqual(form, None)
 
         c0 = views.evaluate_poll_results(pk=1)
 
-        vote_data1 = {
-            'option_0_range': '0',
-            'option_0_input': '0',
-            'option_1_range': '1',
-            'option_1_input': '1',
-            'option_2_range': '2',
-            'option_2_input': '2',
-            'option_3_range': '-1',
-            'option_3_input': '-1',
-            'option_4_range': '-2',
-            'option_4_input': '-2',
-            'option_5_range': '-3',
-            'option_5_input': '-3',
-            'option_6_range': '0',
-            'option_6_input': '0',
-            'username': 'testuser3'
-        }
+        vote_data1 = self.vote_data1
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
         response = self.client.post(action_url, post_data)
+
+        # this should be a redirect to poll_results
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
 
         # noinspection PyUnresolvedReferences
         me = models.MoodExpression.objects.all()
@@ -159,19 +168,50 @@ class TestViews(TestCase):
         self.assertEqual(c0.pos_res[1], (0, "0", 0))
         self.assertEqual(c1.pos_res[1], (1, "1", 1))
 
+    def test_poll(self):
+        url = reverse('show_poll', kwargs={"pk": 1})
+
+        # noinspection PyUnresolvedReferences
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        response = self.client.get(url)
+        self.assertContains(response, "utc_show_poll")
+        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        self.assertNotEqual(form, None)
+
+        vote_data1 = self.vote_data1
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+
         # perform another vote for testuser1. This should not add a new MoodExpression object to database
-        # but insteas update the existing one
+        # but instead update the existing one
         post_data.update(username="testuser1")
+
         response = self.client.post(action_url, post_data)
+
+        # this should now not be a redirect but display the name-conflict page
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "utc_overwrite_warning")
+
+        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        self.assertNotEqual(form, None)
+
+        # this form only consists of hidden values and one button. No values to specify here
+        post_data = generate_post_data_for_form(form, spec_values=None)
+        response = self.client.post(action_url, post_data)
+
+        # now we have the redirect again
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
+
+        # self.assertEqual(response.status_code, 200)
 
         # noinspection PyUnresolvedReferences
         me = models.MoodExpression.objects.all()
-        self.assertEqual(len(me), 3)
+        self.assertEqual(len(me), 2)
         self.assertEqual(me[0].username, "testuser1")
 
         timediff = views.timezone.now().timestamp() - me[0].datetime.timestamp()
-        # time of last modification should be very recent
-        self.assertTrue(timediff < 1)
+        # time of last modification should be very recent (but allow a quick escape from interactive shell)
+        self.assertTrue(timediff < 2)
 
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests
