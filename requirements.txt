@@ -1,1 +1,3 @@
 django
+ipydex
+beautifulsoup4
