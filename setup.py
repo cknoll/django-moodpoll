@@ -14,9 +14,9 @@ with open('README.md') as readme_file:
 with open("requirements.txt") as requirements_file:
     requirements = requirements_file.read()
 
-setup_requirements = [django]
+setup_requirements = []
 
-test_requirements = [ ]
+test_requirements = []
 
 setup(
     author="Carsten Knoll",
