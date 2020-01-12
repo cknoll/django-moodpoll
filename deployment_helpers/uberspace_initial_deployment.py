@@ -136,15 +136,15 @@ c = StateConnection(remote, user=user)
 x = False
 
 if x:
-    c.run('uname -s')
+
+    # TODO setup a virtual environment
+
     c.run('pip3 install uwsgi --user')
 
-    # upload files for django
-    # this asks again for the passphrase
+    # upload all files for deployment (and also some config templates, which does not harm)
 
-    # import patchwork.transfers
-    # patchwork.transfers.rsync(c, "files/", "~")
-    cmd = "rsync  -pthrvz  --rsh='ssh  -p 22 ' files/ moodpoll@klemola.uberspace.de:~"
+    # TODO: find a more elegant way to do this
+    cmd = "rsync  -pthrvz  --rsh='ssh  -p 22 ' files/ {}@{}:~".format(user, remote)
     os.system(cmd)
 
     c.run('supervisorctl reread')
@@ -159,9 +159,9 @@ if x:
 
     # deploy django app (assume correct requirements.txt)
 
-    # WARNING!! deletes all existing user data!
+    # WARNING!! deletes all existing user data for this app
     # TODO: make a backup of the data
-    # TODO: use moodpoll from this directory
+    # TODO: use moodpoll from the local repo directory (and not from github)
     c.run('rm -rf {}'.format(app_dir_name))
     c.run('git clone --depth 1 {}'.format(app_repo_url))
 
@@ -170,6 +170,8 @@ if x:
 
     # install django and other dependencies
     c.run('pip3 install --user -r requirements.txt')
+
+    # install the app from the local directory (allows easy hotfixing)
     c.run('pip3 install --user -e .')
 
     # this was created by rsync above
@@ -187,5 +189,3 @@ if x:
           'u.load_initial_fixtures(abspath=\'{}\')"'.format(init_fixture_path))
 
     c.run('python3 manage.py collectstatic')
-
-
