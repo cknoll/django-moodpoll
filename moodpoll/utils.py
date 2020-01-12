@@ -198,7 +198,7 @@ def save_stripped_fixtures(fname=None, jsonlint=True, backup=False):
     return output_path
 
 
-def load_fixtures_to_db(fname=None, ask=True):
+def load_fixtures_to_db(fname=None, ask=True, abspathflag=False):
     """
     This is a helper from the django-app for setting up the django-project (i.e. site dir)
     It executes `python3 manage.py loaddata ...` with the appropriate file (and its path)
@@ -208,7 +208,11 @@ def load_fixtures_to_db(fname=None, ask=True):
         `python3 -c "import moodpoll.utils as u; u.load_fixtures_to_db()"`
 
     :param fname:   bare filename (default loads usual sample data)
-    :param ask:     Boolean flag whether to ask befor executing the command
+    :param ask:     Boolean flag whether to ask before executing the command
+
+    :param abspathflag:
+                    Boolean flag whether to use fname as absolute path or not
+
     :return:        None
     """
 
@@ -217,7 +221,7 @@ def load_fixtures_to_db(fname=None, ask=True):
 
     fixture_path = get_path("fixtures")
 
-    if fname.startswith("./"):
+    if abspathflag:
         target_path = fname
     else:
         target_path = os.path.join(fixture_path, fname)
@@ -227,6 +231,17 @@ def load_fixtures_to_db(fname=None, ask=True):
 
     cmd = "python3 manage.py loaddata {}".format(target_path)
     safe_run_command(cmd, ask)
+
+
+def load_initial_fixtures(abspath):
+    """
+    Call to load_load_fixtures_to_db taylored for initial deployment.
+
+    :param abspath:
+    :return:
+    """
+
+    load_fixtures_to_db(abspath, ask=False, abspathflag=True)
 
 
 def safe_run_command(cmd, ask=True):
