@@ -1,8 +1,12 @@
 from fabric import Connection
 import time
-from ipydex import IPS
+from ipydex import IPS, activate_ips_on_exception
+activate_ips_on_exception()
 import os
 import secrets
+
+from utils import render_template
+
 
 
 """
@@ -53,10 +57,14 @@ app_settings = {
 
 
 # generate the file site_specific_settings.py from the above dictionary
-app_settings_lines = ["{} = {}\n".format(k, repr(v)) for k, v in app_settings.items()]
-path = os.path.join("files", deployment_dir, inner_deployment_dir, "site_specific_settings.py")
-with open(path, "w") as pyfile:
-    pyfile.writelines(app_settings_lines)
+tmpl_path = os.path.join("files", deployment_dir, inner_deployment_dir, "template_site_specific_settings.py")
+render_template(tmpl_path, context=dict(app_settings=app_settings))
+
+# generate the uwsgi config file
+tmpl_path = os.path.join("files", "uwsgi", "apps-enabled", "template_moodpoll.ini")
+render_template(tmpl_path, context=dict(user=user, deployment_dir=deployment_dir,
+                                        inner_deployment_dir=inner_deployment_dir))
+exit()
 
 # savety check
 
@@ -122,7 +130,6 @@ class StateConnection(object):
             print("->:", cmd)
             res = None
         return res
-
 
 c = StateConnection(remote, user=user)
 
