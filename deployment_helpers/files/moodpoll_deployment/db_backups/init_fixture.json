@@ -1,0 +1,22 @@
+[
+  {
+    "fields" : {
+        "date_joined" : "2019-12-03T22:46:48.669Z",
+        "email" : "",
+        "first_name" : "",
+        "groups" : [  ],
+        "is_active" : true,
+        "is_staff" : true,
+        "is_superuser" : true,
+        "last_login" : "2019-12-03T22:48:17.283Z",
+        "last_name" : "",
+        "password" : "pbkdf2_sha256$120000$OMpxuO6Zu6LD$NIhGNgSQrcTLL+VeMjnceK7MU10IuTuuFC1uvRwRzA4=",
+        "user_permissions" : [  ],
+        "username" : "admin"
+      },
+    "model" : "auth.user",
+    "pk" : 1
+  }
+]
+
+
