@@ -207,7 +207,7 @@ def load_fixtures_to_db(fname=None, ask=True, abspathflag=False):
 
         `python3 -c "import moodpoll.utils as u; u.load_fixtures_to_db()"`
 
-    :param fname:   bare filename (default loads usual sample data)
+    :param fname:   filename or path (default None; loads usual sample data)
     :param ask:     Boolean flag whether to ask before executing the command
 
     :param abspathflag:
@@ -222,7 +222,7 @@ def load_fixtures_to_db(fname=None, ask=True, abspathflag=False):
     fixture_path = get_path("fixtures")
 
     if abspathflag:
-        target_path = fname
+        target_path = os.path.expanduser(fname)
     else:
         target_path = os.path.join(fixture_path, fname)
 
