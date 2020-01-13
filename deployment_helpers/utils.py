@@ -1,5 +1,6 @@
-from jinja2 import Environment, PackageLoader, FileSystemLoader
 import os
+from fabric import Connection
+from jinja2 import Environment, PackageLoader, FileSystemLoader
 
 jin_env = Environment(loader=FileSystemLoader('./'))
 
@@ -23,3 +24,58 @@ def render_template(tmpl_path, context):
 
     else:
         print(target_path, "\n"*2, result)
+
+
+class StateConnection(object):
+    """
+    Wrapper class for fabric connection which remembers the working directory.
+    """
+
+    def __init__(self, remote, user):
+        self._c = Connection(remote, user)
+        self.dir = None
+
+    def chdir(self, path):
+        """
+        The following works on uberspace:
+
+        c.chdir("etc")
+        c.chdir("~")
+        c.chdir("$HOME")
+
+        :param path:
+        :return:
+        """
+
+        if path is None:
+            self.dir = None
+            return
+
+        cmd = "cd {} && pwd".format(path)
+        res = self.run(cmd, hide=True, warn=True)
+
+        if res.exited != 0:
+            print("Could not change directory. Error message: {}".format(res.stderr))
+        else:
+            # store the result of pwd in the variable
+            self.dir = res.stdout.strip()
+
+    def run(self, cmd, use_dir=True, hide=False, warn=False, printonly=False):
+        """
+
+        :param cmd:
+        :param use_dir:
+        :param hide:        see docs of invoke
+        :param warn:        see docs of invoke
+        :return:
+        """
+
+        if use_dir and self.dir is not None:
+            cmd = "cd {}; {}".format(self.dir, cmd)
+
+        if not printonly:
+            res = self._c.run(cmd, hide=hide, warn=warn)
+        else:
+            print("->:", cmd)
+            res = None
+        return res
