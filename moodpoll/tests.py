@@ -127,6 +127,25 @@ class TestViews(TestCase):
         self.assertContains(response3, "utc_new_poll")
         self.assertContains(response3, "utc_show_poll")
 
+    def test_new_poll_with_md_description(self):
+        response1 = self.client.get(reverse('new_poll'))
+        self.assertEqual(response1.status_code, 200)
+
+        form, action_url = get_form_by_action_url(response1, "new_poll")
+        self.assertIsNotNone(form)
+
+        md_description = "*test123* see: <https://example.com>"
+        form_values = {"title": "unittest_poll", "description": md_description, "optionlist": "a\nb\nc"}
+        post_data = generate_post_data_for_form(form, spec_values=form_values)
+
+        # this causes a redirect (status-code 302)
+        response2 = self.client.post(action_url, post_data)
+        self.assertEqual(response2.status_code, 302)
+        response3 = self.client.get(response2.url)
+
+        self.assertContains(response3, "<em>test123</em>")
+        self.assertContains(response3, '<a href="https://example.com">')
+
     def test_show_poll(self):
         url = reverse('show_poll', kwargs={"pk": 1})
 
