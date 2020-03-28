@@ -23,13 +23,13 @@
 <div class="{% block box_css %}box_base{% endblock %}">
 
 {% block inbox_title %}
-    <span class="brick_title"><a href="{% url 'show_brick' brick.pk %}">{{brick.title|render_markdown|safe}}</a></span>
+    <span class="brick_title"><a href="{% url 'show_brick' brick.pk %}">{{brick.title|render_markdown_bleach|safe}}</a></span>
     <hr class="hr_style_gradient">
 {% endblock %}
 
 {% block content %}
-{# !!! probably a security issue: pass user-provided content through the `safe`-filter  #}
-    {{brick.content|render_markdown|safe}}
+{# user-provided content is sanitized by bleach and thus considered to be safe #}
+    {{brick.content|render_markdown_bleach|safe}}
 {% endblock %}
 
 {% block references %}

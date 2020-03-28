@@ -7,8 +7,8 @@
 {% if sp.content%}
 
 <div class="box_base box_top_content modest_links">
-{# !! might be ok because the data comes directly from us (no user data)  #}
-{{sp.content|render_markdown|safe}}
+{# note that the data is passed through bleach.clean(..) and thus should be safe  #}
+{{sp.content|render_markdown_bleach|safe}}
 </div>
 
 {% endif %}
