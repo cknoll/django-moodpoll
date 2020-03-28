@@ -6,7 +6,7 @@ App for **easy and good decision making**.
 
 *Easy* because creating a poll and taking part is fast and self-explaining.
 
-*Good* because it becomes clear, which options raise the most support and which raise the most resistance inside the group. This insight enables wiser decisions and more focused discussions. 
+*Good* because it becomes clear, which options raise the most support and which raise the most resistance inside the group. This insight enables wiser decisions and more focused discussions.
 
 <!-- marker_2 -->
 
@@ -16,7 +16,7 @@ A group of people wants to agree on some question with more than one possible op
 
 ## General Solution
 
-In many situations "systemic consenting" (originally in german: ["Systemisches Konsensieren"](https://www.partizipation.at/systemisches-konsensieren.html)) is a better principle. It tries to find the option which raises the least resistance inside the group, and not the one which has the biggest homogeneous subgroup of supporters. Unfortunately it is not yet well known and derserves some explanation. 
+In many situations "systemic consenting" (originally in german: ["Systemisches Konsensieren"](https://www.partizipation.at/systemisches-konsensieren.html)) is a better principle. It tries to find the option which raises the least resistance inside the group, and not the one which has the biggest homogeneous subgroup of supporters. Unfortunately it is not yet well known and derserves some explanation.
 
 ## Contribution of the App `moodpoll`
 
@@ -28,14 +28,14 @@ The app enables to create a poll within a few seconds. Just type in some text. E
 Say Alice, Bob and Carl want to agree when they meet. Available options are:
 
 1. Monday
-1. Tuesday 
+1. Tuesday
 
 Alice and Bob have preferences for Monday and are indifferent for Tuesday. Carl prefers Tuesday and is not available on Monday.
 
 Counting only positive votes, Monday would win but exclude one Person. However, Tuesday raises the the least resistance. It is OK for everyone.
 
-While in this situation (few voters, few options) "ordinary communication" would perfectly work, such communication can become quite tedious. As time and willingness to communicate constructively are precious resources they should not be wasted.
-  
+While in this situation (few voters, few options) "ordinary communication" would perfectly work, such communication can become quite tedious. As time and willingness to communicate constructively are precious resources, they should not be wasted.
+
 <!-- marker_3 -->
 
 
@@ -49,4 +49,4 @@ Some missing features:
 - Sorting options of the results
 - Protecting polls against unwanted read/write-access
 - Internationalization
-  
+

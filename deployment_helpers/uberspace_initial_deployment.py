@@ -1,11 +1,11 @@
 import time
 from ipydex import IPS, activate_ips_on_exception
-activate_ips_on_exception()
 import os
 import secrets
 
-from utils import render_template, StateConnection
+from .utils import render_template, StateConnection
 
+activate_ips_on_exception()
 
 
 """
