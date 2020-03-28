@@ -121,6 +121,7 @@ class ViewPoll(View):
         c = Container()
 
         if request.session.pop("poll_created", None) == pk:
+            c.full_url = request.get_raw_uri()
             c.msg = "Successfully created new poll:"
 
             # add unit test comment

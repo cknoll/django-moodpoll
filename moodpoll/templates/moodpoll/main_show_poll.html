@@ -1,4 +1,5 @@
 {% extends "moodpoll/base.html" %}
+{% load extra_filters %}
 
 {% block title %}{{c.poll.title}}{% endblock %}
 {% block content %}
@@ -13,13 +14,14 @@
 {% endif %}
 
 {% if c.msg %}
-{{c.msg}}
+{{c.msg}} <a href="{{c.full_url}}">{{c.full_url}}</a>
 <hr class="hr_style_gradient opacity30">
 {% endif %}
 
-<h2>Poll:{{c.poll.title}}</h2>
+
+<h2>{{c.poll.title}}</h2>
 <div class="poll_description">
-{{c.poll.description}}
+{{c.poll.description|render_markdown_bleach|safe}}
 </div>
 
 <form action="{% url c.action_url_name c.pk%}" method="post">

@@ -8,7 +8,7 @@ class PollForm(ModelForm):
         fields = ['title', 'description', 'optionlist']
         help_texts = {
             "title": 'Title of the poll',
-            "description": 'Some additional information (optional).',
+            "description": 'Some additional information about the poll (optional, markdown enabled).',
             "optionlist": 'List of options. Each line (ended by a line break) is a separate option',
         }
 
