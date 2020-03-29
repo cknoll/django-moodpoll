@@ -286,10 +286,7 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(models.MoodExpression.objects.all()), 2)
         self.assertContains(response, "utc_show_poll")
-        # self.assertContains(response, "utc_overwrite_warning")
-        # self.assertContains(response,
-        # '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
-        self.assertContains(response, "utc_invalid_data_warning")
+        self.assertContains(response, "utc_invalid_data_warning:flag_inconsistency")
 
     def test_polling_act_name_conflict3(self):
         """
@@ -344,6 +341,31 @@ class TestViews(TestCase):
         timediff = views.timezone.now().timestamp() - last_me.datetime.timestamp()
         # time of last modification should be very recent (but allow a quick escape from interactive shell)
         self.assertTrue(timediff < 2)
+
+    def test_polling_act_empty_name(self):
+        """
+        Provoke a name conflict and handle it via renaming (consistent case)
+        """
+        url = reverse('show_poll', kwargs={"pk": 1})
+
+        # noinspection PyUnresolvedReferences
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        response = self.client.get(url)
+        self.assertContains(response, "utc_show_poll")
+        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        self.assertNotEqual(form, None)
+
+        # now try emoty username
+        vote_data1 = {**self.vote_data1, "username": ""}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(action_url, post_data)
+
+        # this should display the poll_dialog again with a warning
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        self.assertContains(response, "utc_show_poll")
+        self.assertContains(response, "utc_invalid_data_warning:empty_name")
+
 
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests
