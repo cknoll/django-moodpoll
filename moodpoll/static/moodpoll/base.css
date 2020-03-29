@@ -47,6 +47,8 @@
 
     /* moodpool specific */
     --color-warning1: #702020;
+    /*--color-gray-dark-text-underline-alpha: rgba(20%, 20%, 20%, 30%);*/
+    --color-gray-dark-text-underline-alpha: #30303050;
 }
 
 @font-face {
@@ -772,6 +774,15 @@ color: var(--color-warning1);
 
 }
 
+
+.main_1 a {
+
+    text-decoration: underline;
+    text-decoration-color: var(--color-gray-dark-text-underline-alpha);
+
+}
+
+
 /* Floating column for labels: 25% width */
 .col-25 {
   float: left;
@@ -795,6 +806,12 @@ color: var(--color-warning1);
 
 .folding_box_heading {
  text-decoration: underline;
+ text-decoration-color: var(--color-gray-dark-text-underline-alpha);
+}
+
+.folding_box_heading:hover {
+ text-decoration: underline;
+ text-decoration-color: var(--color-gray-dark-text);
 }
 
 /*end of moodpoll specific*/
