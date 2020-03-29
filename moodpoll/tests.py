@@ -183,16 +183,25 @@ class TestViews(TestCase):
 
         c1 = views.evaluate_poll_results(pk=1)
 
+        self.assertEqual(c0.sorted_index_list, [5, 4, 6, 2, 3, 0, 1])
+
+        # test values for option0 and option1
+        i0 = c0.sorted_index_list.index(0)
+        i1 = c0.sorted_index_list.index(1)
+
         # results for the negative votes for option 0
-        self.assertEqual(c0.neg_res[0], (1, "5", -2))
+        self.assertEqual(c0.neg_res[i0], (1, "5", -2))
+        self.assertEqual(c0.neu_res[i0], (1, "0", 1))
+        self.assertEqual(c0.pos_res[i1], (0, "0", 0))
 
-        self.assertEqual(c0.neu_res[0], (1, "0", 1))
-        self.assertEqual(c1.neu_res[0], (2, "0", 2))
+        # test values for option0 and option1 (after additional poll)
 
-        self.assertEqual(c1.neg_res[1], (1, "9", -3))
-        self.assertEqual(c1.neu_res[1], (1, "0", 1))
-        self.assertEqual(c0.pos_res[1], (0, "0", 0))
-        self.assertEqual(c1.pos_res[1], (1, "1", 1))
+        i0 = c1.sorted_index_list.index(0)
+        i1 = c1.sorted_index_list.index(1)
+        self.assertEqual(c1.neu_res[i0], (2, "0", 2))
+        self.assertEqual(c1.neg_res[i1], (1, "9", -3))
+        self.assertEqual(c1.neu_res[i1], (1, "0", 1))
+        self.assertEqual(c1.pos_res[i1], (1, "1", 1))
 
     def test_polling_act_name_conflict1(self):
         """

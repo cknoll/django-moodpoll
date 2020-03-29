@@ -375,29 +375,32 @@ def evaluate_poll_results(pk, c=None):
     c.option_list = parse_option_list(c.poll.optionlist)
 
     # !! introduce and use nbr_of_opts of model ??
-    n_opts = len(c.option_list)
+    c.n_opts = len(c.option_list)
 
     # noinspection PyUnresolvedReferences
     me_list = models.MoodExpression.objects.filter(poll=pk)
 
     c.user_voting_acts = []
-    mood_values = []
+    c.mood_values = []
     # produce a list of lists of ints
 
     for me in me_list:
-        mood_values.append(json.loads(me.mood_values))
+        c.mood_values.append(json.loads(me.mood_values))
 
         dt = datetime_string_from_dt_object(me.datetime)
         c.user_voting_acts.append((me.username, dt, me.datetime.timestamp()))
 
     # count positive, negative and neutral votes separately
-    pos = list_of_empty_lists(n_opts)
-    neg = list_of_empty_lists(n_opts)
-    neu = list_of_empty_lists(n_opts)
+    pos = list_of_empty_lists(c.n_opts)
+    neg = list_of_empty_lists(c.n_opts)
+    neu = list_of_empty_lists(c.n_opts)
+
+    # now, mood_values now looks like [[0, 0, 1, 1, 2, 2, 1], [-2, -3, 0, 0, 1, 2, 1]]
+    # (two mood expressions for 7 options)
 
     # iterate over all
-    for mv_list in mood_values:
-        assert len(mv_list) == n_opts
+    for mv_list in c.mood_values:
+        assert len(mv_list) == c.n_opts
         for idx, mood_value in enumerate(mv_list):
             if mood_value < 0:
                 neg[idx].append(mood_value)
@@ -405,6 +408,16 @@ def evaluate_poll_results(pk, c=None):
                 pos[idx].append(mood_value)
             else:
                 neu[idx].append(mood_value)
+
+    # example values:
+    # In [1]: pos
+    # Out[1]: [[], [], [1], [1], [2, 1], [2, 2], [1, 1]]
+    #
+    # In [2]: neg
+    # Out[2]: [[-2], [-3], [], [], [], [], []]
+    #
+    # In [3]: neu
+    # Out[3]: [[0], [0], [0], [0], [], [], []]
 
     # Evaluation:
     # for negative and positive votes there are three important numbers:
@@ -421,7 +434,7 @@ def evaluate_poll_results(pk, c=None):
         c.pos_res.append(triple)
         opt_cont.approvals = triple
 
-        # we neglegt the sign for the mean (we already now that this value is counts negative)
+        # we neglect the sign for the mean (we already now that this value is negative)
         mean_n = abs(map_normed_mean_to_09(n, -3))
         # omit the "0." part of the str
         triple = (len(n), str(mean_n)[2:], sum(n))
@@ -433,10 +446,93 @@ def evaluate_poll_results(pk, c=None):
         c.neu_res.append(triple)
         opt_cont.neutrals = triple
 
-    # sort by timestamp (3rd argument) (descending)
+    # Examples:
+
+    # In[1]: c.pos_res
+    # Out[1]:
+    # [(0, '0', 0),
+    #  (0, '0', 0),
+    #  (1, '1', 1),
+    #  (1, '1', 1),
+    #  (2, '5', 3),
+    #  (2, '9', 4),
+    #  (2, '1', 2)]
+    #
+    # In[2]: c.neg_res
+    # Out[2]:
+    # [(1, '5', -2),
+    #  (1, '9', -3),
+    #  (0, '0', 0),
+    #  (0, '0', 0),
+    #  (0, '0', 0),
+    #  (0, '0', 0),
+    #  (0, '0', 0)]
+    #
+    # In[3]: c.neu_res
+    # Out[3]:
+    # [(1, '0', 1),
+    #  (1, '0', 1),
+    #  (1, '0', 1),
+    #  (1, '0', 1),
+    #  (0, '0', 0),
+    #  (0, '0', 0),
+    #  (0, '0', 0)]
+
+    sort_poll_results(c)
+
+    # sort user_voting_acts by timestamp (3rd argument) (descending)
     c.user_voting_acts.sort(key=lambda arg: arg[2], reverse=True)
 
     return c
+
+
+def sort_poll_results(c):
+    """
+
+    Sorting orders: signed_rejection_average (dec), rejection_people (inc), acceptance_average (dec),
+    acceptance_people (dec).
+
+
+    :param c:  data container with the (unsorted results)
+    """
+
+    def key_func(i):
+        """
+        for each index generate a numeric tuple. Such tuples can be easily compared: if first entries are equal,
+        compeare the second entries, etc.
+        For those values which should be sorted in decreasing order we use negation.
+
+        :param i:   index
+        :return:
+        """
+        # noinspection PyRedundantParentheses
+        return (-c.neg_res[i][2], c.neg_res[i][0], -c.pos_res[i][2], -c.pos_res[i][0],)
+        
+    c.sorted_index_list = list(range(c.n_opts))
+    c.key_tuples = [key_func(i) for i in range(c.n_opts)]
+
+    c.sorted_index_list.sort(key=key_func)
+
+    resort_list_in_place(c.neg_res, new_order=c.sorted_index_list)
+    resort_list_in_place(c.pos_res, new_order=c.sorted_index_list)
+    resort_list_in_place(c.neu_res, new_order=c.sorted_index_list)
+    resort_list_in_place(c.option_list, new_order=c.sorted_index_list)
+
+
+def resort_list_in_place(original_list, new_order):
+    """
+
+    :param original_list:
+    :param new_order:       sequence of ints (a permutation of range(len(original_list)))
+
+    :return: None
+    """
+
+    # note this temporarily creates a new list
+    # taken from: https://stackoverflow.com/a/6098306/333403
+
+    original_list[:] = [original_list[i] for i in new_order]
+
 
 
 def list_of_empty_lists(n):

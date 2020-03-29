@@ -33,10 +33,21 @@ Result for:
 
 <hr class="hr_style_gradient opacity30">
 
+{% if c.debug_flag %}
+<hr class="hr_style_gradient opacity30">
+debug:
+<br>key_tuples: {{c.key_tuples}}
+<br>sorted_index_list: {{c.sorted_index_list}}
+<br>mood_values: {{c.mood_values}}
+<br>neg_res: {{c.neg_res}}
+<br>pos_res: {{c.pos_res}}
+<hr class="hr_style_gradient opacity30">
+{% endif %}
+
 <details> <summary class="folding_box_heading"><b>Explanation</b>: What do the results mean?</summary>
 <div>
     <p>The voting result for each option is composed by three numbers in the form <i>A.B</i>,
-        where a is the integer part and B ist the fractional part.
+        where <i>A</i> is the integer part and <i>B</i> ist the fractional part.
         The three numbers represent negative votes, neutral votes and positive votes, respectively.
         The integer part (<i>A</i>) is the number of votes. The fractional part <i>B</i> is the
         average strength of the vote on a scale between 1 and 9.
@@ -51,6 +62,12 @@ Result for:
         <br>
         <br>
         Because there is no "strength" of neutral votes the fractional part <i>B</i> for them is always zero.
+        <br>
+        <br>
+        <b>Sorting:</b>
+        The results are sorted w.r.t. multiple criteria. If they are equal in the first criterium, then the second
+        one is compared etc. The criteria are: 1. Least absolute resistance-votes, 2. Least people with resistance,
+        3. Most absolute acceptance votes, 4. Most people with acceptance
 
     </p>
 </div>
