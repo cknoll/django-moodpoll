@@ -14,6 +14,7 @@ from . import forms
 from .simple_pages_interface import get_sp
 
 # debugging helper
+# noinspection PyUnresolvedReferences
 from ipydex import IPS, activate_ips_on_exception
 
 
@@ -77,12 +78,12 @@ def parse_option_list(ol_str, start_values=None):
 
     res = []
     for idx, option_str in enumerate(ol):
-        C = Container()
-        C.content = option_str
-        C.id = f"option_{idx}"
-        C.start_value = start_values[idx]
+        data_c = Container()
+        data_c.content = option_str
+        data_c.id = f"option_{idx}"
+        data_c.start_value = start_values[idx]
 
-        res.append(C)
+        res.append(data_c)
 
     return res
 
@@ -112,7 +113,6 @@ class ViewCreatePoll(View):
         if not form.is_valid():
             # !! error handling # unify with handle_inconsistent_data below
             raise NotImplementedError("Form Validation not yet implemented")
-            return None
         else:
             new_poll = form.save()
 
@@ -139,6 +139,7 @@ class ViewPoll(View):
 
         c.full_url = request.get_raw_uri()
         url_c = get_segmented_urls(request, pk)
+        # noinspection PyUnresolvedReferences
         c.poll_url = url_c.full_show_poll
 
         if request.session.pop("poll_created", None) == pk:
@@ -172,6 +173,7 @@ class ViewPollResult(View):
         c = evaluate_poll_results(pk, c)
 
         url_c = get_segmented_urls(request, pk)
+        # noinspection PyUnresolvedReferences
         c.poll_url = url_c.full_show_poll
         context = dict(c=c, )
 
@@ -184,6 +186,7 @@ class ViewPollResult(View):
 
 class ViewPollEvaluation(View):
 
+    # noinspection PyUnusedLocal
     @staticmethod
     def get(request, pk):
         return view_simple_page(request, pagetype="general_error")
@@ -231,12 +234,14 @@ class ViewPollEvaluation(View):
             if c.username == "":
                 c.err_msg = f"An empty name is not allowed."
                 c.err_comment = "utc_invalid_data_warning:empty_name"
+                # noinspection PyTypeChecker
                 return self.handle_invalid_data(request, pk, c)
 
             if overwrite_flag in ("True", True):
                 c.err_msg = f'The submitted data was inconsistent: Overwrite-mode=True, but user "{c.username}"' \
                             f"has not voted before. So, nothing to overwrite. Please double-check your name."
                 c.err_comment = "utc_invalid_data_warning:flag_inconsistency"
+                # noinspection PyTypeChecker
                 return self.handle_invalid_data(request, pk, c)
 
             # create new mood expression
@@ -249,6 +254,7 @@ class ViewPollEvaluation(View):
                 me.mood_values = c.mood_values_str
                 me.datetime = timezone.now()
             else:
+                # noinspection PyTypeChecker
                 return self.handle_name_conflict(request, pk, me, c)
         else:
             # this should not happen
@@ -371,6 +377,7 @@ def evaluate_poll_results(pk, c=None):
     # !! introduce and use nbr_of_opts of model ??
     n_opts = len(c.option_list)
 
+    # noinspection PyUnresolvedReferences
     me_list = models.MoodExpression.objects.filter(poll=pk)
 
     c.user_voting_acts = []
@@ -433,6 +440,7 @@ def evaluate_poll_results(pk, c=None):
 
 
 def list_of_empty_lists(n):
+    # noinspection PyUnusedLocal
     return [list() for i in range(n)]
 
 
