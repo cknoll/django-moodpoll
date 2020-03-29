@@ -27,5 +27,5 @@ class MoodExpression(models.Model):
     datetime = models.DateTimeField(default=timezone.now, null=True)
 
     def __repr__(self):
-        return "<MoodExpr: {} {}, {}>".format(self.username, self.poll.pk, self.datetime)
+        return "<MoodExpr [{}]: poll:{}, un:{}, {}>".format(self.pk, self.poll.pk, self.username, self.datetime)
 

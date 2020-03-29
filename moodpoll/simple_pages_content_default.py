@@ -180,6 +180,7 @@ new_sp(type="general_error",
 
 # ----------------------------------------------------------------------------
 
+# !! obsolete 2020-03-29 12:26:16
 overwrite_warning = True
 
 # this is the page which asks whether to overwrite/update an existing mood_expression
