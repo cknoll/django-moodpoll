@@ -138,6 +138,8 @@ class ViewPoll(View):
             c.name_conflict_mode = False
 
         c.full_url = request.get_raw_uri()
+        url_c = get_segmented_urls(request, pk)
+        c.poll_url = url_c.full_show_poll
 
         if request.session.pop("poll_created", None) == pk:
             # This poll was just created by this user. This should be mentioned
@@ -166,7 +168,11 @@ class ViewPollResult(View):
 
     @staticmethod
     def get(request, pk, c=None):
+
         c = evaluate_poll_results(pk, c)
+
+        url_c = get_segmented_urls(request, pk)
+        c.poll_url = url_c.full_show_poll
         context = dict(c=c, )
 
         return render(request, "{}/main_poll_result.html".format(appname), context)
@@ -335,6 +341,8 @@ def view_do_backup(request):
         return view_simple_page(request, "backup_no_login", base_container=c)
 
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 # ### Helper functions ####
 
 
@@ -464,3 +472,23 @@ def map_normed_mean_to_09(seq, end_of_scale, round_result=1):
         return round(res, round_result)
     else:
         return res
+
+
+def get_segmented_urls(request, pk):
+    """
+
+    :param request:
+    :param pk:
+    :return:            Container
+    """
+
+    data_c = Container()
+    data_c.raw_url = request.get_raw_uri()
+    data_c.protocol = "https://" if request.is_secure() else "http://"
+    data_c.host = request.get_host()
+    data_c.show_poll = reverse("show_poll", kwargs={"pk": pk})
+    data_c.res_poll = reverse("poll_result", kwargs={"pk": pk})
+    data_c.full_show_poll = f"{data_c.protocol}{data_c.host}{data_c.show_poll}"
+    data_c.full_res_poll = f"{data_c.protocol}{data_c.host}{data_c.res_poll}"
+
+    return data_c

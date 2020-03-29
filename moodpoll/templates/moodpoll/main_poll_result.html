@@ -14,8 +14,6 @@
 
 Result for:
 {% include "moodpoll/part_title_and_description.html" %}
-<hr class="hr_style_gradient opacity30">
-
 
 
 {% for option in c.option_list %}
@@ -85,7 +83,10 @@ Result for:
 
 {%endfor%}
 
-</div>
+<hr class="hr_style_gradient opacity30">
+Go back to poll: <a href="{{c.poll_url}}">{{c.poll_url}}</a>
+
+</div> <!-- End of brick_form -->
 
 
 <!--Type: {{pagetype}}-->
