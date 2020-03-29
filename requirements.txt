@@ -4,3 +4,4 @@ markdown
 beautifulsoup4
 bleach
 django-bleach
+django-nose

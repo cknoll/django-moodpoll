@@ -9,7 +9,14 @@ from . import views
 
 from ipydex import IPS
 
-# py3 manage.py test moodpoll
+"""
+This file is assumed to be used with the following commands
+python3 manage.py test moodpoll
+python3 manage.py test moodpoll --nocapture --ips
+
+# one single test
+python3 manage.py test moodpoll.tests:TestViews.test_poll --nocapture --ips
+"""
 
 global_fixtures = ['for_unit_tests/data.json']
 
