@@ -194,7 +194,10 @@ class TestViews(TestCase):
         self.assertEqual(c0.pos_res[1], (0, "0", 0))
         self.assertEqual(c1.pos_res[1], (1, "1", 1))
 
-    def test_poll(self):
+    def test_polling_act_name_conflict1(self):
+        """
+        Provoke a name conflict and handle it via overwrite flag
+        """
         url = reverse('show_poll', kwargs={"pk": 1})
 
         # noinspection PyUnresolvedReferences
@@ -211,25 +214,26 @@ class TestViews(TestCase):
         # but instead update the existing one
         post_data.update(username="testuser1")
 
-        IPS()
         response = self.client.post(action_url, post_data)
 
-        # this should now not be a redirect but display the name-conflict page
+        # this should now not be a redirect but display the poll_dialog again with a warning and an
+        # overwrite-confirmation checkbox
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        self.assertContains(response, "utc_show_poll")
         self.assertContains(response, "utc_overwrite_warning")
+        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
 
         form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
         self.assertNotEqual(form, None)
 
-        # this form only consists of hidden values and one button. No values to specify here
-        post_data = generate_post_data_for_form(form, spec_values=None)
+        vote_data2 = {**vote_data1, "username": "testuser1", "overwrite_flag": True}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
         response = self.client.post(action_url, post_data)
 
-        # now we have the redirect again
+        # now we have the redirect to the result page
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
-
-        # self.assertEqual(response.status_code, 200)
 
         # noinspection PyUnresolvedReferences
         me = models.MoodExpression.objects.all()
@@ -237,6 +241,107 @@ class TestViews(TestCase):
         self.assertEqual(me[0].username, "testuser1")
 
         timediff = views.timezone.now().timestamp() - me[0].datetime.timestamp()
+        # time of last modification should be very recent (but allow a quick escape from interactive shell)
+        self.assertTrue(timediff < 2)
+
+    def test_polling_act_name_conflict2(self):
+        """
+        Provoke a name conflict and handle it via renaming (insconsistent case)
+        """
+        url = reverse('show_poll', kwargs={"pk": 1})
+
+        # noinspection PyUnresolvedReferences
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        response = self.client.get(url)
+        self.assertContains(response, "utc_show_poll")
+        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        self.assertNotEqual(form, None)
+
+        vote_data1 = self.vote_data1
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+
+        # perform another vote for testuser1. This should not add a new MoodExpression object to database
+        # but instead update the existing one
+        post_data.update(username="testuser1")
+
+        response = self.client.post(action_url, post_data)
+
+        # this should now not be a redirect but display the poll_dialog again with a warning and an
+        # overwrite-confirmation checkbox
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        self.assertContains(response, "utc_show_poll")
+        self.assertContains(response, "utc_overwrite_warning")
+        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
+
+        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        self.assertNotEqual(form, None)
+
+        # test renaming and overwrite flag (this is inconsistent)
+        vote_data2 = {**vote_data1, "username": "testuser1(1)", "overwrite_flag": True}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
+        response = self.client.post(action_url, post_data)
+
+        # the poll dialog should be displayed again with an different warning
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        self.assertContains(response, "utc_show_poll")
+        # self.assertContains(response, "utc_overwrite_warning")
+        # self.assertContains(response,
+        # '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
+        self.assertContains(response, "utc_invalid_data_warning")
+
+    def test_polling_act_name_conflict3(self):
+        """
+        Provoke a name conflict and handle it via renaming (consistent case)
+        """
+        url = reverse('show_poll', kwargs={"pk": 1})
+
+        # noinspection PyUnresolvedReferences
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        response = self.client.get(url)
+        self.assertContains(response, "utc_show_poll")
+        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        self.assertNotEqual(form, None)
+
+        vote_data1 = self.vote_data1
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+
+        # perform another vote for testuser1. This should not add a new MoodExpression object to database
+        # but instead update the existing one
+        post_data.update(username="testuser1")
+
+        response = self.client.post(action_url, post_data)
+
+        # this should now not be a redirect but display the poll_dialog again with a warning and an
+        # overwrite-confirmation checkbox
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        self.assertContains(response, "utc_show_poll")
+        self.assertContains(response, "utc_overwrite_warning")
+        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
+
+        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        self.assertNotEqual(form, None)
+
+        # test renaming and overwrite flag (this is inconsistent)
+        vote_data2 = {**vote_data1, "username": "testuser1(1)", "overwrite_flag": False}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
+        response = self.client.post(action_url, post_data)
+
+        # now we have the redirect to the result page
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
+
+        # noinspection PyUnresolvedReferences
+        me = models.MoodExpression.objects.all()
+        self.assertEqual(len(me), 3)
+        self.assertEqual(me[0].username, "testuser1")
+
+        last_me = me.last()
+        self.assertEqual(last_me.username, "testuser1(1)")
+
+        timediff = views.timezone.now().timestamp() - last_me.datetime.timestamp()
         # time of last modification should be very recent (but allow a quick escape from interactive shell)
         self.assertTrue(timediff < 2)
 

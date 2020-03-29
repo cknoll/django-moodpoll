@@ -48,8 +48,21 @@
 
 {# User name #}
 
-{% if c.name_conflict_mode %}
 
+{% if c.err_mode %}
+<!-- {{c.err_comment}} -->
+<hr class="hr_style_gradient opacity30">
+<div class="row">
+      <div class="warning">
+        {{c.err_msg}}
+      </div>
+</div>
+<hr class="hr_style_gradient opacity30">
+{% endif %}
+
+
+{% if c.name_conflict_mode %}
+<!-- utc_overwrite_warning -->
 <hr class="hr_style_gradient opacity30">
 <div class="row">
       <div class="warning">
@@ -86,9 +99,7 @@
       <input type="submit" value="Resubmit">
 </div>
 
-
 {% else %}
-
 
 <div class="row">
       <div class="col-75">

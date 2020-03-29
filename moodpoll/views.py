@@ -209,24 +209,40 @@ class ViewPollEvaluation(View):
         c.username = data.get("username")
         c.post_data = data
 
+        # if the checkbox is not checked, the key is not in data
+        overwrite_flag = data.get("overwrite_flag", False)
+
         the_poll = get_object_or_404(models.Poll, pk=pk)
 
         # try to find a MoodExpression with the same combination of poll and username
 
         # noinspection PyUnresolvedReferences
         old_me_list = models.MoodExpression.objects.filter(poll=pk, username=c.username)
+
         if len(old_me_list) == 0:
+            # there is no name conflict
+            if c.username == "":
+                c.err_msg = f"An empty name is not allowed."
+                c.err_comment = "utc_invalid_data_warning:empty_name"
+                return self.handle_invalid_data(request, pk, c)
+
+            if overwrite_flag in ("True", True):
+                c.err_msg = f'The submitted data was inconsistent: Overwrite-mode=True, but user "{c.username}"' \
+                            f"has not voted before. So, nothing to overwrite. Please double-check your name."
+                c.err_comment = "utc_invalid_data_warning:flag_inconsistency"
+                return self.handle_invalid_data(request, pk, c)
+
             # create new mood expression
             me = models.MoodExpression(username=c.username, poll=the_poll, mood_values=c.mood_values_str)
         elif len(old_me_list) == 1:
             # overwrite the old db-entry or handle name-conflict
             me = old_me_list[0]
-            if data.get("overwrite_flag") == "True":
+            if overwrite_flag == "True":
                 # update the values and the time
                 me.mood_values = c.mood_values_str
                 me.datetime = timezone.now()
             else:
-                return self.handle_conflict(request, pk, me, c)
+                return self.handle_name_conflict(request, pk, me, c)
         else:
             # this should not happen
             msg = "Unexpected: multiple votes for username {} and poll {}".format(c.username, the_poll)
@@ -236,7 +252,7 @@ class ViewPollEvaluation(View):
         return redirect(reverse("poll_result", kwargs={"pk": pk}))
 
     @staticmethod
-    def handle_conflict(request, pk, old_me, c):
+    def handle_name_conflict(request, pk, old_me, c):
         """
         Called if a username is re-used for one poll.
 
@@ -256,26 +272,24 @@ class ViewPollEvaluation(View):
 
         return ViewPoll.get(request, pk, c=c)
 
+    @staticmethod
+    def handle_invalid_data(request, pk, c):
+        """
+        Called in case of data inconsitencies
+
+        -> Gather data which should be displayed on the polling view
+
+        :param request:
+        :param pk:          pk of the poll
+        :param c:           container with preprocessed data from the caller
+        :return:
         """
 
-        action_url = reverse("poll_eval", kwargs={"pk": pk})
+        c.start_values = c.mood_values
+        c.err_mode = True
+        assert len(c.err_msg) > 0
 
-        # generate some hidden values including "overwrite_flag"
-
-        hidden_fields = ['<input type="hidden" name="__overwrite_flag" value="True">']
-        for key, value in c.post_data.items():
-            if key == "csrfmiddlewaretoken":
-                # maybe omit that entry or generate a new one?
-                # continue
-                pass
-            hidden_fields.append('<input type="hidden" name="{}" value="{}">'.format(key, value))
-        form_data = "\n".join(hidden_fields)
-
-        c.format_dict = {"username": old_me.username, "action_url": action_url,
-                         "dt_string": dt_string, "form_data": form_data}
-
-        return view_simple_page(request, pagetype="overwrite_warning", base_container=c)
-        """
+        return ViewPoll.get(request, pk, c=c)
 
 
 def view_simple_page(request, pagetype=None, base_container=None):
