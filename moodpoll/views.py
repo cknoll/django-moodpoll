@@ -59,14 +59,28 @@ def populate_db():
     me.save()
 
 
-def parse_option_list(ol_str):
+def parse_option_list(ol_str, start_values=None):
+
+    """
+
+    :param ol_str:          option_list_string (options separated by newline)
+    :param start_values:    None or sequence of default voting values (e.g. from a previous vote)
+    :return:
+    """
 
     ol = ol_str.strip().split("\n")
+    if start_values is None:
+        start_values = [0]*len(ol)
+
+    # IPS()
+    assert len(start_values) == len(ol)
+
     res = []
     for idx, option_str in enumerate(ol):
         C = Container()
         C.content = option_str
         C.id = f"option_{idx}"
+        C.start_value = start_values[idx]
 
         res.append(C)
 
@@ -118,9 +132,13 @@ class ViewPoll(View):
         :return:
         """
 
-        c = Container()
+        if c is None:
+            c = Container()
+            c.start_values = None
+            c.name_conflict_mode = False
 
         if request.session.pop("poll_created", None) == pk:
+            # This poll was just created by this user. This should be mentioned
             c.full_url = request.get_raw_uri()
             c.msg = "Successfully created new poll:"
 
@@ -132,11 +150,8 @@ class ViewPoll(View):
         c.min = -3
         c.max = 2
 
-        # !! read the current user from session data and look if they already voted
-        c.startval = 0
-
         c.poll = get_object_or_404(models.Poll, pk=pk)
-        c.option_list = parse_option_list(c.poll.optionlist)
+        c.option_list = parse_option_list(c.poll.optionlist, c.start_values)
         context = dict(c=c, )
 
         return render(request, "{}/main_show_poll.html".format(appname), context)
@@ -176,17 +191,21 @@ class ViewPollEvaluation(View):
         """
 
         data = request.POST.copy()
+        c = Container()
         # process numeric form data:
 
+        # the field_names are like "option_0_input", "option_1_input", ...
+        # we finde them via regular expressions
         cregex = re.compile(r"option_\d+_input")
 
         option_pairs = [(k, int(v)) for k, v in data.items() if cregex.match(k)]
         option_pairs.sort()
 
-        # after ensuring correct order we can drop the keys and represent the list a one string
-        mood_values = repr([v for k, v in option_pairs])
+        # after ensuring correct order we can drop the keys and save only one list of integers
+        c.mood_values = [v for k, v in option_pairs]
+        # save list as string (to store it in the db)
+        c.mood_values_str = repr(c.mood_values)
 
-        c = Container()
         c.username = data.get("username")
         c.post_data = data
 
@@ -195,33 +214,33 @@ class ViewPollEvaluation(View):
         # try to find a MoodExpression with the same combination of poll and username
 
         # noinspection PyUnresolvedReferences
-        old_me_list = models.MoodExpression.objects.filter(poll=1, username=c.username)
+        old_me_list = models.MoodExpression.objects.filter(poll=pk, username=c.username)
         if len(old_me_list) == 0:
-            me = models.MoodExpression(username=c.username, poll=the_poll, mood_values=mood_values)
+            # create new mood expression
+            me = models.MoodExpression(username=c.username, poll=the_poll, mood_values=c.mood_values_str)
         elif len(old_me_list) == 1:
-            # overwrite the old db-entry
+            # overwrite the old db-entry or handle name-conflict
             me = old_me_list[0]
-            if data.get("__overwrite_flag") == "True":
+            if data.get("overwrite_flag") == "True":
                 # update the values and the time
-                me.mood_values = mood_values
+                me.mood_values = c.mood_values_str
                 me.datetime = timezone.now()
             else:
                 return self.handle_conflict(request, pk, me, c)
         else:
+            # this should not happen
             msg = "Unexpected: multiple votes for username {} and poll {}".format(c.username, the_poll)
             raise DataIntegrityError(msg)
         me.save()
-
 
         return redirect(reverse("poll_result", kwargs={"pk": pk}))
 
     @staticmethod
     def handle_conflict(request, pk, old_me, c):
         """
-        Called if a username is used the second time for one poll.
+        Called if a username is re-used for one poll.
 
-        -> Display a page where the user can decide whether to overwrite existing mood_values
-        or to give a new name.
+        -> Gather data which should be displayed on the polling view
 
         :param request:
         :param pk:          pk of the poll
@@ -230,7 +249,14 @@ class ViewPollEvaluation(View):
         :return:
         """
 
-        dt_string = datetime_string_from_dt_object(old_me.datetime)
+        c.old_dt_string = datetime_string_from_dt_object(old_me.datetime)
+        c.start_values = c.mood_values
+        c.name_conflict_mode = True
+        c.old_username = old_me.username
+
+        return ViewPoll.get(request, pk, c=c)
+
+        """
 
         action_url = reverse("poll_eval", kwargs={"pk": pk})
 
@@ -249,6 +275,7 @@ class ViewPollEvaluation(View):
                          "dt_string": dt_string, "form_data": form_data}
 
         return view_simple_page(request, pagetype="overwrite_warning", base_container=c)
+        """
 
 
 def view_simple_page(request, pagetype=None, base_container=None):

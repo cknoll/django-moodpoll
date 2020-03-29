@@ -44,6 +44,9 @@
 
 /*   absolute + relative value   */
     --indent_width: calc(0.4em + 0.6vw);
+
+    /* moodpool specific */
+    --color-warning1: #702020;
 }
 
 @font-face {
@@ -759,6 +762,15 @@ https://github.com/gwwar/z-context
 /* source:  https://www.w3schools.com/howto/howto_css_responsive_form.asp */
 
 /*moodpoll-specific*/
+
+.warning {
+
+font-size:80%;
+font-weight:bold;
+color: var(--color-warning1);
+
+
+}
 
 /* Floating column for labels: 25% width */
 .col-25 {

@@ -211,6 +211,7 @@ class TestViews(TestCase):
         # but instead update the existing one
         post_data.update(username="testuser1")
 
+        IPS()
         response = self.client.post(action_url, post_data)
 
         # this should now not be a redirect but display the name-conflict page
