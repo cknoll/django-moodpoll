@@ -13,10 +13,7 @@
 {% endif %}
 
 Result for:
-<h2>{{c.poll.title}}</h2>
-<div class="poll_description">
-{{c.poll.description}}
-</div>
+{% include "moodpoll/part_title_and_description.html" %}
 <hr class="hr_style_gradient opacity30">
 
 

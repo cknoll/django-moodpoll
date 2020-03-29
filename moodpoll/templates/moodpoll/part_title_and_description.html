@@ -1,0 +1,6 @@
+{% load extra_filters %}
+
+<h2>{{c.poll.title}} <a href="{{c.full_url}}">&#x1f517;</a></h2>
+<div class="poll_description">
+{{c.poll.description|render_markdown_bleach|safe}}
+</div>

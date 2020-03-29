@@ -110,8 +110,8 @@ class ViewCreatePoll(View):
 
         form = forms.PollForm(request.POST)
         if not form.is_valid():
-            # !! error handling
-            1/0
+            # !! error handling # unify with handle_inconsistent_data below
+            raise NotImplementedError("Form Validation not yet implemented")
             return None
         else:
             new_poll = form.save()
@@ -137,9 +137,10 @@ class ViewPoll(View):
             c.start_values = None
             c.name_conflict_mode = False
 
+        c.full_url = request.get_raw_uri()
+
         if request.session.pop("poll_created", None) == pk:
             # This poll was just created by this user. This should be mentioned
-            c.full_url = request.get_raw_uri()
             c.msg = "Successfully created new poll:"
 
             # add unit test comment
