@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-# Create your models here.
+# Todo: the models need servere refactoring!
 
 
 class User(models.Model):
