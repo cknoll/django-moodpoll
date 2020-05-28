@@ -38,21 +38,20 @@ project_src_path = "../"
 # dir for local deployment files (e.g. database files)
 local_deployment_workdir = "../../local_deployment_workdir"
 
-# this is only relevant if you maintain more than one instance
-instance_path = du.get_dir_of_this_file()
-
 outer_deployment_dir = "moodpoll_deployment"
-inner_deployment_dir = "site"
-init_fixture_path = "~/{}/db_backups/init_fixture.json".format(outer_deployment_dir)
+inner_deployment_dir = "djproject"
 
 app_name = "django-moodpoll"
 
 # -------------------------- End Config section -----------------------
 
 # it should not be necessary to change the data below, but it might be interesting what happens.
+
+# this is only relevant if you maintain more than one instance
+instance_path = os.path.join(du.get_dir_of_this_file(), "specific")
 # (After all, this code runs on your computer/server under your responsibility).
 
-local_deployment_files_dir = os.path.join(project_src_path, "deployment_utils/files")
+local_deployment_files_base_dir = du.get_dir_of_this_file()
 
 args = du.parse_args()
 
@@ -66,6 +65,10 @@ else:
     target_deployment_path = os.path.join(local_deployment_workdir, outer_deployment_dir)
     debug_mode = True
 
+# TODO
+init_fixture_path = os.path.join(target_deployment_path, "fixitures/init_fixture.json")
+
+
 # this will be passed to the template of site_specific_settings.py
 app_settings = {
     "SECRET_KEY": secrets.token_urlsafe(50),
@@ -75,7 +78,7 @@ app_settings = {
     }
 
 # generate the file site_specific_settings.py from the above dictionary
-tmpl_path = os.path.join("general", outer_deployment_dir, inner_deployment_dir, "template_site_specific_settings.py")
+tmpl_path = os.path.join("specific", inner_deployment_dir, "template_site_specific_settings.py")
 du.render_template(tmpl_path, context=dict(app_settings=app_settings))
 
 # generate the uwsgi config file
@@ -98,9 +101,14 @@ if args.initial:
     print("\n", "install uwsgi", "\n")
     c.run('pip3 install uwsgi --user', target_spec="remote")
 
-    print("\n", "upload config files for deployment", "\n")
+    print("\n", "upload config files for initial deployment", "\n")
 
-    c.rsync_upload(local_deployment_files_dir+"/", "~", target_spec="remote")
+    srcpath1 = os.path.join(local_deployment_files_base_dir, "uberspace")
+    srcpath2 = os.path.join(local_deployment_files_base_dir, "general")
+
+    filters = "--exclude='README.md'"
+    c.rsync_upload(srcpath1 + "/", "~", filters=filters, target_spec="remote")
+    c.rsync_upload(srcpath2 + "/", "~", filters=filters, target_spec="remote")
 
     if args.target == "remote":
 
@@ -166,8 +174,8 @@ c.run('python3 manage.py test moodpoll', target_spec="both")
 
 # TODO: this should be simplified to f"python3 manage.py loaddata {init_fixture_path}"
 print("\n", "install initial data", "\n")
-c.run('python3 -c "import moodpoll.utils as u; '
-      'u.load_initial_fixtures(abspath=\'{}\')"'.format(init_fixture_path), target_spec="both")
+
+c.run(f"python3 manage.py loaddata {init_fixture_path}", target_spec="both")
 
 print("\n", "copy static files to final location", "\n")
 c.run('python3 manage.py collectstatic --no-input')
