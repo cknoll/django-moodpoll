@@ -42,7 +42,7 @@ local_deployment_workdir = "../../local_deployment_workdir"
 instance_path = du.get_dir_of_this_file()
 
 outer_deployment_dir = "moodpoll_deployment"
-inner_deployment_dir = "moodpoll_site"
+inner_deployment_dir = "site"
 init_fixture_path = "~/{}/db_backups/init_fixture.json".format(outer_deployment_dir)
 
 app_name = "django-moodpoll"
@@ -54,7 +54,7 @@ app_name = "django-moodpoll"
 
 local_deployment_files_dir = os.path.join(project_src_path, "deployment_utils/files")
 
-args = du.argparser.parse_args()
+args = du.parse_args()
 
 if args.target == "remote":
     static_root_dir = f"/home/{user}/{outer_deployment_dir}/collected_static"
@@ -75,11 +75,11 @@ app_settings = {
     }
 
 # generate the file site_specific_settings.py from the above dictionary
-tmpl_path = os.path.join("files", outer_deployment_dir, inner_deployment_dir, "template_site_specific_settings.py")
+tmpl_path = os.path.join("general", outer_deployment_dir, inner_deployment_dir, "template_site_specific_settings.py")
 du.render_template(tmpl_path, context=dict(app_settings=app_settings))
 
 # generate the uwsgi config file
-tmpl_path = os.path.join("files", "uwsgi", "apps-enabled", "template_moodpoll.ini")
+tmpl_path = os.path.join("uberspace", "uwsgi", "apps-enabled", "template_moodpoll.ini")
 du.render_template(tmpl_path, context=dict(user=user, deployment_dir=outer_deployment_dir,
                                            inner_deployment_dir=inner_deployment_dir))
 
@@ -124,11 +124,12 @@ print("\n", "upload current application files for deployment", "\n")
 # omit irrelevant files (like .git)
 filters = \
     f"--exclude='.git/' " \
+    f"--exclude='.idea/' " \
     f"--exclude='{inner_deployment_dir}/__pycache__/*' " \
     f"--exclude='{app_name}/__pycache__/*' " \
     f"--exclude='__pycache__/' " \
-    f"--exclude='.idea/' " \
     f"--exclude='deployment_utils/' " \
+    f"--exclude='django_moodpoll.egg-info/' " \
     f"--exclude='db.sqlite3' " \
     f"--exclude='deployment*.py' " \
     ""
@@ -136,6 +137,8 @@ filters = \
 c.rsync_upload(project_src_path + "/", target_deployment_path, filters=filters, target_spec="both")
 
 # now rsync instance-specific data (this might overwrite generic data from the project)
+# this file should usually not be overwritten
+filters = "--exclude='README.md'"
 c.rsync_upload(instance_path + "/", target_deployment_path, filters=filters, target_spec="both")
 
 # .............................................................................................
@@ -143,7 +146,10 @@ c.rsync_upload(instance_path + "/", target_deployment_path, filters=filters, tar
 print("\n", "install django and other dependencies", "\n")
 c.run('pip3 install --user -r requirements.txt', target_spec="both")
 
-print("\n", "install the app from the local directory", "\n")
+if args.symlink:
+    raise NotImplementedError
+# this is where symlinking comes into play
+# print("\n", "install the app from the local directory", "\n")
 # (-e allows easy hotfixing)
 # c.run('pip3 install --user -e .')
 

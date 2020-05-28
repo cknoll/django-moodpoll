@@ -19,21 +19,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
-
-# these values are imported from site_specific_settings (which is auto generated from
-# the deployment script)
-
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = '4(bbovkj6lx0txurbo4uozpr+sk&y%cu-o$8w0kww&cgyp)hww'
+SECRET_KEY = '4(bbovkj6lx0txurbo4uozpr+sk&y%cu-o$8w0kww&cgyp)hww'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
+DEBUG = True
 
-# ALLOWED_HOSTS = []
-
-from .site_specific_settings import *
-
-STATIC_ROOT = os.path.expanduser(STATIC_ROOT)
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 
 # Application definition
@@ -45,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_bleach',
+    'django_nose',
     'moodpoll',
 ]
 
@@ -133,3 +127,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # path where db-backups are dumped to
 BACKUP_PATH = os.path.join(BASE_DIR, "db_backups")
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
