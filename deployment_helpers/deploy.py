@@ -1,15 +1,18 @@
 import time
-from ipydex import IPS, activate_ips_on_exception
 import os
 import secrets
 
-from .utils import render_template, StateConnection
+# this is not listed in the requirements because it is not needed on the deployment server
+# noinspection PyPackageRequirements
+import deploymentutils as du
+from ipydex import IPS, activate_ips_on_exception
 
+# simplify debugging
 activate_ips_on_exception()
 
 
 """
-This script serves to deploy the django app `moodpoll` on an uberspace account.
+This script serves to deploy and maintain the django app `moodpoll` on an uberspace account.
 It is largely based on this tutorial: <https://lab.uberspace.de/guide_django.html>.
 
 """
@@ -19,118 +22,146 @@ It is largely based on this tutorial: <https://lab.uberspace.de/guide_django.htm
 # eval $(ssh-agent); ssh-add -t 10m
 
 
-# -------------------------- Begin Essential Config section 1 -----------------------
+# -------------------------- Begin Essential Config section  ------------------------
 
 # this must be changed according to your uberspace accound details (machine name and user name)
 remote = "klemola.uberspace.de"
 user = "moodpoll"
 
-# -------------------------- Begin Optional Config section 1 -----------------------
+# -------------------------- Begin Optional Config section -------------------------
 # if you know what you are doing you can adapt these seetings to your needs
 
-deployment_dir = "moodpoll_deployment"
+# this is the root dir of the project (where setup.py lies)
+# if you maintain more than one instance (and deploy.py lives outside the project dir, this has to change)
+project_src_path = "../"
+
+# dir for local deployment files (e.g. database files)
+local_deployment_workdir = "../../local_deployment_workdir"
+
+# this is only relevant if you maintain more than one instance
+instance_path = du.get_dir_of_this_file()
+
+outer_deployment_dir = "moodpoll_deployment"
 inner_deployment_dir = "moodpoll_site"
-init_fixture_path = "~/{}/db_backups/init_fixture.json".format(deployment_dir)
+init_fixture_path = "~/{}/db_backups/init_fixture.json".format(outer_deployment_dir)
 
 app_name = "django-moodpoll"
-
-# this is where the code will live
-app_dir_path = "~/" + app_name
-
-# use https here
-app_repo_url = "https://github.com/cknoll/django-moodpoll.git"
-
-debug_mode = False
 
 # -------------------------- End Config section -----------------------
 
 # it should not be necessary to change the data below, but it might be interesting what happens.
-# (After all, this code runs on your server account under your responsibility).
+# (After all, this code runs on your computer/server under your responsibility).
 
+local_deployment_files_dir = os.path.join(project_src_path, "deployment_utils/files")
+
+args = du.argparser.parse_args()
+
+if args.target == "remote":
+    static_root_dir = f"/home/{user}/{outer_deployment_dir}/collected_static"
+    # this is where the code will live
+    target_deployment_path = f"~/{outer_deployment_dir}"
+    debug_mode = False
+else:
+    static_root_dir = None
+    target_deployment_path = os.path.join(local_deployment_workdir, outer_deployment_dir)
+    debug_mode = True
+
+# this will be passed to the template of site_specific_settings.py
 app_settings = {
     "SECRET_KEY": secrets.token_urlsafe(50),
     "DEBUG": debug_mode,
     "ALLOWED_HOSTS": ["{}.uber.space".format(user)],
-    "STATIC_ROOT": "~/{}/collected_static".format(deployment_dir)
+    "STATIC_ROOT": "~/{}/collected_static".format(outer_deployment_dir)
     }
 
-
 # generate the file site_specific_settings.py from the above dictionary
-tmpl_path = os.path.join("files", deployment_dir, inner_deployment_dir, "template_site_specific_settings.py")
-render_template(tmpl_path, context=dict(app_settings=app_settings))
+tmpl_path = os.path.join("files", outer_deployment_dir, inner_deployment_dir, "template_site_specific_settings.py")
+du.render_template(tmpl_path, context=dict(app_settings=app_settings))
 
 # generate the uwsgi config file
 tmpl_path = os.path.join("files", "uwsgi", "apps-enabled", "template_moodpoll.ini")
-render_template(tmpl_path, context=dict(user=user, deployment_dir=deployment_dir,
-                                        inner_deployment_dir=inner_deployment_dir))
+du.render_template(tmpl_path, context=dict(user=user, deployment_dir=outer_deployment_dir,
+                                           inner_deployment_dir=inner_deployment_dir))
 
 
-# safety check
+# TODO: make a backup of the remote-data
+# print a warning for data destruction
+du.warn_user(app_name, args.target, args.unsafe)
 
-print("The following script is for initial deployment of {}.\n".format(app_name),
-      "All exisitng user data of the app will be deleted.\n\n")
 
-res = input("Continue (N/y)? ")
-if 1 and res.lower() != "y":
-    print("Abort.")
-    exit()
+c = du.StateConnection(remote, user=user, target=args.target)
 
-c = StateConnection(remote, user=user)
+# TODO setup a virtual environment
+# TODO activate virtual environment
 
-x = True
+if args.initial:
+    print("\n", "install uwsgi", "\n")
+    c.run('pip3 install uwsgi --user', target_spec="remote")
 
-if x:
+    print("\n", "upload config files for deployment", "\n")
 
-    # TODO setup a virtual environment
+    c.rsync_upload(local_deployment_files_dir+"/", "~", target_spec="remote")
 
-    c.run('pip3 install uwsgi --user')
+    if args.target == "remote":
 
-    # upload all files for deployment (and also some config templates, which does not harm)
+        c.run('supervisorctl reread', target_spec="remote")
+        c.run('supervisorctl update', target_spec="remote")
+        print("waiting 10s for uwsgi to start")
+        time.sleep(10)
 
-    # TODO: find a more elegant way to do this
-    cmd = "rsync  -pthrvz  --rsh='ssh  -p 22 ' files/ {}@{}:~".format(user, remote)
-    os.system(cmd)
+        res1 = c.run('supervisorctl status', target_spec="remote")
 
-    c.run('supervisorctl reread')
-    c.run('supervisorctl update')
-    print("waiting 10s for uwsgi to start")
-    time.sleep(10)
+        assert "uwsgi" in res1.stdout
+        assert "RUNNING" in res1.stdout
 
-    res1 = c.run('supervisorctl status')
+if args.target == "local":
+    print("\n", "ensure that local deployment path exists", "\n")
+    c.run(f"mkdir -p {target_deployment_path}", target_spec="both")
 
-    assert "uwsgi" in res1.stdout
-    assert "RUNNING" in res1.stdout
+c.chdir(target_deployment_path)
 
-    # deploy django app (assume correct requirements.txt)
+print("\n", "upload current application files for deployment", "\n")
+# omit irrelevant files (like .git)
+filters = \
+    f"--exclude='.git/' " \
+    f"--exclude='{inner_deployment_dir}/__pycache__/*' " \
+    f"--exclude='{app_name}/__pycache__/*' " \
+    f"--exclude='__pycache__/' " \
+    f"--exclude='.idea/' " \
+    f"--exclude='deployment_utils/' " \
+    f"--exclude='db.sqlite3' " \
+    f"--exclude='deployment*.py' " \
+    ""
 
-    # WARNING!! might delete all existing user data for this app
-    # TODO: make a backup of the data
-    # upload the local version of the repo (assume that the present script is inside the repo)
-    cmd = "rsync  -pthrvz  --exclude '/.*' .. {0}@{1}:~/{2}".format(user, remote, app_name)
-    os.system(cmd)
+c.rsync_upload(project_src_path + "/", target_deployment_path, filters=filters, target_spec="both")
 
-    # this was created by git clone
-    c.chdir(app_dir_path)
+# now rsync instance-specific data (this might overwrite generic data from the project)
+c.rsync_upload(instance_path + "/", target_deployment_path, filters=filters, target_spec="both")
 
-    # install django and other dependencies
-    c.run('pip3 install --user -r requirements.txt')
+# .............................................................................................
 
-    # install the app from the local directory (allows easy hotfixing)
-    c.run('pip3 install --user -e .')
+print("\n", "install django and other dependencies", "\n")
+c.run('pip3 install --user -r requirements.txt', target_spec="both")
 
-    # this was created by rsync above
-    c.chdir("~/"+deployment_dir)
+print("\n", "install the app from the local directory", "\n")
+# (-e allows easy hotfixing)
+# c.run('pip3 install --user -e .')
 
-    c.run('python3 manage.py makemigrations')
+print("\n", "prepare and create database", "\n")
 
-    # this creates the database
-    c.run('python3 manage.py migrate')
+# this currently fails (due to no matching directory structure)
+c.run('python3 manage.py makemigrations', target_spec="both")
 
-    c.run('python3 manage.py test moodpoll')
+# this creates the database
+c.run('python3 manage.py migrate', target_spec="both")
 
-    # install initial data
-    c.run('python3 -c "import moodpoll.utils as u; '
-          'u.load_initial_fixtures(abspath=\'{}\')"'.format(init_fixture_path))
+print("\n", "run tests", "\n")
+c.run('python3 manage.py test moodpoll', target_spec="both")
 
-    print("copy static files to the right place")
-    c.run('python3 manage.py collectstatic --no-input')
+# TODO: this should be simplified to f"python3 manage.py loaddata {init_fixture_path}"
+print("\n", "install initial data", "\n")
+c.run('python3 -c "import moodpoll.utils as u; '
+      'u.load_initial_fixtures(abspath=\'{}\')"'.format(init_fixture_path), target_spec="both")
+
+print("\n", "copy static files to final location", "\n")
+c.run('python3 manage.py collectstatic --no-input')
