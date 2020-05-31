@@ -1,10 +1,16 @@
 import time
 import os
 import secrets
+import re
 
 # this is not listed in the requirements because it is not needed on the deployment server
 # noinspection PyPackageRequirements
-import deploymentutils as du
+try:
+    import deploymentutils as du
+except ImportError as err:
+    print("You need to install the package `deploymentutils` to run this script.")
+    exit()
+
 from ipydex import IPS, activate_ips_on_exception
 
 # simplify debugging
@@ -55,15 +61,19 @@ local_deployment_files_base_dir = du.get_dir_of_this_file()
 
 args = du.parse_args()
 
+final_msg = "Deployment script done."
+
 if args.target == "remote":
     static_root_dir = f"/home/{user}/{outer_deployment_dir}/collected_static"
     # this is where the code will live
     target_deployment_path = f"~/{outer_deployment_dir}"
     debug_mode = False
+    pip_user_flag = " --user"  # this might be dropped if we use a virtualenv on the remote target
 else:
     static_root_dir = None
     target_deployment_path = os.path.join(local_deployment_workdir, outer_deployment_dir)
     debug_mode = True
+    pip_user_flag = ""  # assume activated virtualenv on local target
 
 # TODO
 init_fixture_path = os.path.join(target_deployment_path, "fixitures/init_fixture.json")
@@ -99,7 +109,7 @@ c = du.StateConnection(remote, user=user, target=args.target)
 
 if args.initial:
     print("\n", "install uwsgi", "\n")
-    c.run('pip3 install uwsgi --user', target_spec="remote")
+    c.run(f'pip3 install uwsgi{pip_user_flag}', target_spec="remote")
 
     print("\n", "upload config files for initial deployment", "\n")
 
@@ -151,8 +161,25 @@ c.rsync_upload(instance_path + "/", target_deployment_path, filters=filters, tar
 
 # .............................................................................................
 
-print("\n", "install django and other dependencies", "\n")
-c.run('pip3 install --user -r requirements.txt', target_spec="both")
+print("\n", "install dependencies", "\n")
+res = c.run(f'pip3 show django', target_spec="both")
+loc = re.findall("Location:.*", res.stdout)
+if args.target == "local" and len(loc) == 0:
+    msg = f"{du.bred('Caution:')} django seems not to be installed on local system.\n" \
+          f"This might indicate some problem with pip or the virtualenv not activated.\n"
+    print(msg)
+
+    cmd = ["python", "-c", "import sys; print('; '.join(sys.path))"]
+    syspath = c.run(cmd, target_spec="local").stdout
+
+    print("This is your current python-path:\n\n", syspath)
+
+    res = input("Continue and install django in that path (N/y)? ")
+    if res.lower() != "y":
+        print(du.bred("Aborted."))
+        exit()
+
+c.run(f'pip3 install{pip_user_flag} -r requirements.txt', target_spec="both")
 
 if args.symlink:
     raise NotImplementedError
@@ -178,4 +205,12 @@ print("\n", "install initial data", "\n")
 c.run(f"python3 manage.py loaddata {init_fixture_path}", target_spec="both")
 
 print("\n", "copy static files to final location", "\n")
-c.run('python3 manage.py collectstatic --no-input')
+c.run('python3 manage.py collectstatic --no-input', target_spec="remote")
+
+if args.target == "local":
+    print("\n", f"now you can go to {target_deployment_path} and run `python3 manage.py runserver", "\n")
+else:
+    print("\n", "restart uwsgi service", "\n")
+    c.run(f"supervisorctl restart uwsgi", target_spec="remote")
+
+print(final_msg)
