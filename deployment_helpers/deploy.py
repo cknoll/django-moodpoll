@@ -45,7 +45,7 @@ project_src_path = "../"
 local_deployment_workdir = "../../local_deployment_workdir"
 
 outer_deployment_dir = "moodpoll_deployment"
-inner_deployment_dir = "djproject"
+inner_deployment_dir = "settings"
 
 app_name = "django-moodpoll"
 
@@ -64,13 +64,13 @@ args = du.parse_args()
 final_msg = "Deployment script done."
 
 if args.target == "remote":
-    static_root_dir = f"/home/{user}/{outer_deployment_dir}/collected_static"
     # this is where the code will live
     target_deployment_path = f"~/{outer_deployment_dir}"
+    static_root_dir = f"{target_deployment_path}/collected_static"
     debug_mode = False
     pip_user_flag = " --user"  # this might be dropped if we use a virtualenv on the remote target
 else:
-    static_root_dir = None
+    static_root_dir = ""
     target_deployment_path = os.path.join(local_deployment_workdir, outer_deployment_dir)
     debug_mode = True
     pip_user_flag = ""  # assume activated virtualenv on local target
@@ -84,7 +84,7 @@ app_settings = {
     "SECRET_KEY": secrets.token_urlsafe(50),
     "DEBUG": debug_mode,
     "ALLOWED_HOSTS": ["{}.uber.space".format(user)],
-    "STATIC_ROOT": "~/{}/collected_static".format(outer_deployment_dir)
+    "STATIC_ROOT": static_root_dir
     }
 
 # generate the file site_specific_settings.py from the above dictionary

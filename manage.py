@@ -5,10 +5,11 @@ import sys
 from ipydex import IPS, activate_ips_on_exception
 
 # simplify debugging
-activate_ips_on_exception()
+# activate_ips_on_exception()
 
 if __name__ == '__main__':
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djproject.settings')
+    # "settings" is the name of the django-project
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
