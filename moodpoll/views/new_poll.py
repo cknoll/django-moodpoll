@@ -43,5 +43,5 @@ class NewPollView(View):
                     )
                 poll_option.save()
 
-        return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk}))
+        return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk, "key": new_poll.key}))
 
