@@ -132,9 +132,8 @@ if args.initial:
         assert "uwsgi" in res1.stdout
         assert "RUNNING" in res1.stdout
 
-if args.target == "local":
-    print("\n", "ensure that local deployment path exists", "\n")
-    c.run(f"mkdir -p {target_deployment_path}", target_spec="both")
+print("\n", "ensure that deployment path exists", "\n")
+c.run(f"mkdir -p {target_deployment_path}", target_spec="both")
 
 c.chdir(target_deployment_path)
 

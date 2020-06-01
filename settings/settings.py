@@ -130,3 +130,5 @@ BACKUP_PATH = os.path.join(BASE_DIR, "db_backups")
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+# noinspection PyUnresolvedReferences
+from .site_specific_settings import *
