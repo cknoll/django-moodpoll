@@ -6,26 +6,27 @@
 
 <div class="brick_form">
 
-
-{% if c.msg %}
-{{c.msg}}
-<hr class="hr_style_gradient opacity30">
-{% endif %}
+{# TODO indentation #}
 
 Result for:
-{% include "moodpoll/part_title_and_description.html" %}
+{#% include "moodpoll/part_title_and_description.html" %#}
+{# TODO title+desc #}
 
 
-{% for option in c.option_list %}
+{% for option in mood_sums %}
 
     <div class="row">
       <div class="col-75">
-        {{option.content}}
+        {{option.poll_option__text}}
       </div>
       <div class="col-25">
+          <!-- 
         <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;"> {{option.resistances.0}}.{{option.resistances.1}}|
         <img src="{% static 'moodpoll/img/symb_neu.svg' %}" style="height:0.8em;"> {{option.neutrals.0}}.{{option.neutrals.1}}|
         <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;"> {{option.approvals.0}}.{{option.approvals.1}}
+-->
+          <img src="{% static 'moodpoll/img/symb_neu.svg' %}" style="height:0.8em;">
+          {{option.mood_sum}}
       </div>
     </div>
 
@@ -33,16 +34,7 @@ Result for:
 
 <hr class="hr_style_gradient opacity30">
 
-{% if c.debug_flag %}
-<hr class="hr_style_gradient opacity30">
-debug:
-<br>key_tuples: {{c.key_tuples}}
-<br>sorted_index_list: {{c.sorted_index_list}}
-<br>mood_values: {{c.mood_values}}
-<br>neg_res: {{c.neg_res}}
-<br>pos_res: {{c.pos_res}}
-<hr class="hr_style_gradient opacity30">
-{% endif %}
+{# TODO: move to separate file #}
 
 <details> <summary class="folding_box_heading"><b>Explanation</b>: What do the results mean?</summary>
 <div>
@@ -73,6 +65,7 @@ debug:
 </div>
 </details>
 
+<!-- 
 <hr class="hr_style_gradient opacity30">
 
     <b>The following users participated up to now:</b>
@@ -99,9 +92,7 @@ debug:
     </div>
 
 {%endfor%}
-
-<hr class="hr_style_gradient opacity30">
-Go back to poll: <a href="{{c.poll_url}}">{{c.poll_url}}</a>
+-->
 
 </div> <!-- End of brick_form -->
 

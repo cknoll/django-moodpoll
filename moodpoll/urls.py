@@ -4,13 +4,14 @@ from django.views.generic.base import RedirectView
 
 from .views.new_poll import NewPollView
 from .views.show_poll import ShowPollView
+from .views.poll_result import PollResultView
 from . import views_monolith as views
 
 urlpatterns = [
   url(r'^$', views.view_simple_page, name='landing-page', kwargs={"pagetype": "landing"}),
   path('new', NewPollView.as_view(), name='new_poll'),
   path('show/<int:pk>/<int:key>', ShowPollView.as_view(), name='show_poll'),
-  path('res/<int:pk>/<int:key>', views.ViewPollResult.as_view(), name='poll_result'),
+  path('res/<int:pk>/<int:key>', PollResultView.as_view(), name='poll_result'),
   path('poll_eval/<int:pk>', views.ViewPollEvaluation.as_view(), name='poll_eval'),
   path('backup', views.view_do_backup, name='do_backup'),
 
