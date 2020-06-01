@@ -2,11 +2,13 @@ from django.conf.urls import url
 from django.urls import path
 from django.views.generic.base import RedirectView
 
-from . import views
+from .views.new_poll import NewPollView
+from . import views_monolith as views
 
 urlpatterns = [
   url(r'^$', views.view_simple_page, name='landing-page', kwargs={"pagetype": "landing"}),
-  path('new', views.ViewCreatePoll.as_view(), name='new_poll'),
+  #path('new', views.ViewCreatePoll.as_view(), name='new_poll'),
+  path('new', NewPollView.as_view(), name='new_poll'),
   path('show/<int:pk>', views.ViewPoll.as_view(), name='show_poll'),
   path('res/<int:pk>', views.ViewPollResult.as_view(), name='poll_result'),
   path('poll_eval/<int:pk>', views.ViewPollEvaluation.as_view(), name='poll_eval'),

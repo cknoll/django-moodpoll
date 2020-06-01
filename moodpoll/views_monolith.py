@@ -98,28 +98,6 @@ def view_test(request):
 
 
 # noinspection PyMethodMayBeStatic
-class ViewCreatePoll(View):
-
-    def get(self, request):
-        form = forms.PollForm()
-
-        context = dict(form=form)
-        form.action_url_name = "new_poll"
-        return render(request, "{}/main_new_poll.html".format(appname), context)
-
-    def post(self, request):
-
-        form = forms.PollForm(request.POST)
-        if not form.is_valid():
-            # !! error handling # unify with handle_inconsistent_data below
-            raise NotImplementedError("Form Validation not yet implemented")
-        else:
-            new_poll = form.save()
-
-        request.session["poll_created"] = new_poll.pk
-        return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk}))
-
-
 class ViewPoll(View):
 
     @staticmethod

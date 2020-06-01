@@ -1,0 +1,33 @@
+{% extends "moodpoll/base.html" %}
+
+{% block title %}New Poll{{title}}{% endblock %}
+{% block content %}
+
+<div class="brick_form">
+    <form action="" method="post">
+        {% csrf_token %}
+        <label for="title">
+            Title
+        </label>
+        <input type="text" id="title" name="title">
+
+        <label for="description">
+            Description
+        </label>
+        <textarea id="description" name="description"></textarea>
+
+        <label for="replies_hidden">
+            Hide Replies
+        </label>
+        <input type="checkbox" name="replies_hidden" id="replies_hidden">
+
+        <label for="options">
+            Options
+        </label>
+        <textarea id="options" name="options">Responses
+One per Line</textarea>
+        <input type="submit" value="Create New Poll">
+    </form>
+</div>
+
+{% endblock %}
