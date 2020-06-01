@@ -3,9 +3,9 @@ import os
 import secrets
 import re
 
-# this is not listed in the requirements because it is not needed on the deployment server
-# noinspection PyPackageRequirements
 try:
+    # this is not listed in the requirements because it is not needed on the deployment server
+    # noinspection PyPackageRequirements,PyUnresolvedReferences
     import deploymentutils as du
 except ImportError as err:
     print("You need to install the package `deploymentutils` to run this script.")
@@ -41,11 +41,12 @@ user = "moodpoll"
 # if you maintain more than one instance (and deploy.py lives outside the project dir, this has to change)
 project_src_path = "../"
 
-# dir for local deployment files (e.g. database files)
-local_deployment_workdir = "../../local_deployment_workdir"
+# base directory for local testing deployment
+# might also be the place for a custom deploy_local.py script
+local_deployment_workdir = "../../local_testing"
 
-outer_deployment_dir = "moodpoll_deployment"
-inner_deployment_dir = "settings"
+# directory for local deployment files (e.g. database files)
+deployment_dir = "moodpoll_deployment"
 
 app_name = "django-moodpoll"
 
@@ -61,17 +62,17 @@ local_deployment_files_base_dir = du.get_dir_of_this_file()
 
 args = du.parse_args()
 
-final_msg = "Deployment script done."
+final_msg = f"Deployment script {du.bgreen('done')}."
 
 if args.target == "remote":
-    # this is where the code will live
-    target_deployment_path = f"~/{outer_deployment_dir}"
+    # this is where the code will live after deployment
+    target_deployment_path = f"/home/{user}/{deployment_dir}"
     static_root_dir = f"{target_deployment_path}/collected_static"
     debug_mode = False
     pip_user_flag = " --user"  # this might be dropped if we use a virtualenv on the remote target
 else:
     static_root_dir = ""
-    target_deployment_path = os.path.join(local_deployment_workdir, outer_deployment_dir)
+    target_deployment_path = os.path.join(local_deployment_workdir, deployment_dir)
     debug_mode = True
     pip_user_flag = ""  # assume activated virtualenv on local target
 
@@ -88,13 +89,12 @@ app_settings = {
     }
 
 # generate the file site_specific_settings.py from the above dictionary
-tmpl_path = os.path.join("specific", inner_deployment_dir, "template_site_specific_settings.py")
+tmpl_path = os.path.join("specific", "settings", "template_site_specific_settings.py")
 du.render_template(tmpl_path, context=dict(app_settings=app_settings))
 
 # generate the uwsgi config file
 tmpl_path = os.path.join("uberspace", "uwsgi", "apps-enabled", "template_moodpoll.ini")
-du.render_template(tmpl_path, context=dict(user=user, deployment_dir=outer_deployment_dir,
-                                           inner_deployment_dir=inner_deployment_dir))
+du.render_template(tmpl_path, context=dict(user=user, deployment_dir=target_deployment_path))
 
 
 # TODO: make a backup of the remote-data
@@ -104,7 +104,7 @@ du.warn_user(app_name, args.target, args.unsafe)
 
 c = du.StateConnection(remote, user=user, target=args.target)
 
-# TODO setup a virtual environment
+# TODO setup a virtual environment (also adapt template_moodpoll.ini)
 # TODO activate virtual environment
 
 if args.initial:
@@ -143,7 +143,7 @@ print("\n", "upload current application files for deployment", "\n")
 filters = \
     f"--exclude='.git/' " \
     f"--exclude='.idea/' " \
-    f"--exclude='{inner_deployment_dir}/__pycache__/*' " \
+    f"--exclude='settings/__pycache__/*' " \
     f"--exclude='{app_name}/__pycache__/*' " \
     f"--exclude='__pycache__/' " \
     f"--exclude='deployment_utils/' " \
@@ -207,10 +207,11 @@ c.run(f"python3 manage.py loaddata {init_fixture_path}", target_spec="both")
 print("\n", "copy static files to final location", "\n")
 c.run('python3 manage.py collectstatic --no-input', target_spec="remote")
 
+print(final_msg)
+
 if args.target == "local":
     print("\n", f"now you can go to {target_deployment_path} and run `python3 manage.py runserver", "\n")
 else:
     print("\n", "restart uwsgi service", "\n")
     c.run(f"supervisorctl restart uwsgi", target_spec="remote")
 
-print(final_msg)
