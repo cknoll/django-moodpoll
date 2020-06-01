@@ -5,12 +5,10 @@ from .models import Poll
 class PollForm(ModelForm):
     class Meta:
         model = Poll
-        fields = ['title', 'description', 'optionlist']
+        fields = ['title', 'description', 'replies_hidden']
         help_texts = {
             "title": 'Title of the poll',
             "description": 'Some additional information about the poll (optional, markdown enabled).',
-            "optionlist": 'List of options. Each line (ended by a line break) is a separate option',
+            "replies_hidden": 'Enable to hide the replies. Otherwise all replies will be public.',
         }
 
-
-PollForm.base_fields["description"].required = False
