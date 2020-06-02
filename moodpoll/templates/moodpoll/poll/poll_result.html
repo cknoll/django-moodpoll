@@ -1,13 +1,13 @@
 {% extends "moodpoll/base.html" %}
 {% load static %}
 {% load extra_tags %}
+{% load extra_filters %}
 
 {% block title %}Result:{{c.poll.title}}{% endblock %}
 {% block content %}
 
 {% include "moodpoll/snippets/poll_title_description.html" %}
 
-{% if mood_sums %}
 <table class="table mb-2">
     <thead>
         <tr>
@@ -38,35 +38,63 @@
     </thead>
        
     <tbody>
-        {% for option in mood_sums %}
+        {% for option in poll_options %}
         <tr>
             <td>
                 <div class="columns">
                     <div class="column col-6 col-sm-12">
                         <div class="columns">
                             <div class="column col-8">
-                                {{option.poll_option__text}}
+                                <label class="btn" for="hist_{{option.id}}">
+                                    ⋮
+                                </label>
+                                {{option.text}}
                             </div>
                             <div class="column col-2">
-                                {{option.mood_praise}}
+                                {{option.get_mood_praise}}
                             </div>
                             <div class="column col-2">
-                                {{option.mood_blame}}
+                                {{option.get_mood_blame}}
                             </div>
                         </div>
                     </div>
                     <div class="column col-6 col-sm-12">
                         <div class="columns">
                             <div class="column col-2">
-                                {{option.mood_sum}}
+                                {{option.get_mood_sum}}
                             </div>
                             <div class="column col-10">
                                 <div class="bar">
                                     <div class="bar-item"
-                                         style="width:{% make_html_width mood_sums_meta.mood_sum__min mood_sums_meta.mood_sum__max option.mood_sum %}">
+                                         style="width:{% make_html_width mood_bar_min mood_bar_max option.get_mood_sum %}">
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    {# TODO consider enabling autocomplete #}
+                    <input type="checkbox" class="moodpoll_collapsible" id="hist_{{option.id}}" style="display:none" autocomplete="off">
+                    <div class="column col-12" style="display:none">
+                        <div class="columns">
+                        {% for mood_value, mood_cnt in option.get_vote_cnt_by_mood_value.items %}
+                            <div class="column col-2 text-right">
+                                {{mood_value|add_num_prefix}}
+                            </div>
+                            <div class="column col-10">
+                                <div class="bar">
+                                    <div class="bar-item"
+                                         style="width:{% make_html_width 0 poll_replies.count mood_cnt %};
+                                                min-width: 5px;
+                                                {# TODO load from cfg -2 #}
+                                                background:{% make_redgreen_css_gradient -10 10 mood_value %}">
+                                        {% if mood_cnt %}
+                                        {{mood_cnt}}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -75,6 +103,13 @@
         {% endfor %}
     </tbody>
 </table>
+
+<style>
+ {# TODO move to better place #}
+ .moodpoll_collapsible:checked ~ div {
+     display: block !important;
+ }
+</style>
 
 <div class="columns">
     <div class="column col-12">
@@ -96,25 +131,5 @@
 <details>
     {% include "moodpoll/snippets/poll_results_explanation.html" %}
 </details>
-
-{% else %}
-
-<div class="columns">
-    <div class="column col-12">
-        <div class="hero bg-gray">
-            <div class="hero-body">
-                <h1>
-                    No replies yet!
-                </h1>
-                <p>
-                    Come back once there are some replies to the poll!
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% endif %}
-
 
 {% endblock %}

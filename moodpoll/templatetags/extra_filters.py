@@ -18,3 +18,11 @@ def render_markdown_bleach(txt):
     return bleach.clean(markdown.markdown(txt))
 
 
+@register.filter
+def add_num_prefix(num):
+    if 0 < num:
+        return '+{}'.format(num)
+    if 0 == num:
+        return '±{}'.format(num)
+    return '{}'.format(num)
+
