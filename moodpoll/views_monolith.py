@@ -10,7 +10,6 @@ from django.utils import timezone
 
 from . import models
 from . import utils
-from . import forms
 from .simple_pages_interface import get_sp
 
 # debugging helper
