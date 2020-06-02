@@ -5,14 +5,11 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Sum, Q, F
 from django.db.models.functions import Coalesce
 from .. import models
+from ..utils import get_poll_or_4xx
 
 class PollResultView(View):
     def get(self, request, pk, key):
-        poll = get_object_or_404(models.Poll, pk=pk)
-
-        #check auth
-        if key != poll.key:
-            raise PermissionDenied()
+        poll = get_poll_or_4xx(pk, key)
 
         # note that this will return an empty set if no one has responded yet
         mood_sums = models.PollOptionReply.objects. \

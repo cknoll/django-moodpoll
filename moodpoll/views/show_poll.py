@@ -4,22 +4,12 @@ from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from .. import models
+from ..utils import get_poll_or_4xx
+
 
 class ShowPollView(View):
     def get(self, request, pk, key):
-        """
-        :param request:
-        :param pk:
-        :param key: access key. required for authorization
-        :return:
-        """
-
-        poll = get_object_or_404(models.Poll, pk=pk)
-
-        #check auth
-        if key != poll.key:
-            raise PermissionDenied()
-
+        poll = get_poll_or_4xx(pk, key)
         poll_options = models.PollOption.objects.filter(poll=poll)
 
         context = {
@@ -30,17 +20,10 @@ class ShowPollView(View):
         return render(request, "moodpoll/poll/show_poll.html", context)
 
     def post(self, request, pk, key):
-        """
-        answer a poll
-        """
-        poll = get_object_or_404(models.Poll, pk=pk)
-
-        #check auth
-        if key != poll.key:
-            raise PermissionDenied()
-
+        poll = get_poll_or_4xx(pk, key)
         poll_options = models.PollOption.objects.filter(poll=poll)
 
+        # TODO randomize key
         poll_reply = models.PollReply(
             key=1,
             user_name='Anonymous',
@@ -53,6 +36,7 @@ class ShowPollView(View):
         with transaction.atomic():
             poll_reply.save()
             
+            # note: iterate over poll options, as only submission for these options have been authenticated
             for option in poll_options:
                 htmlname = 'option_{}'.format(option.pk)
                 if htmlname not in request.POST:
