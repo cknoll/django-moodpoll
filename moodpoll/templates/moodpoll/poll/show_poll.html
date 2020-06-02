@@ -3,32 +3,44 @@
 {% block title %}{{c.poll.title}}{% endblock %}
 {% block content %}
 
-<div class="brick_form">
 
-    {% include "moodpoll/snippets/poll_title_description.html" %}
+{% include "moodpoll/snippets/poll_title_description.html" %}
 
-    <form action="" method="post">
-        {% csrf_token %}
+<form action="" method="post">
+    {% csrf_token %}
 
-        {% for option in options %}
-        <div class="row">
-            <div class="col-75">
-                {{option.text}}
-            </div>
-            <div class="col-25">
-                {# TODO load from cfg #}
-                <input name="option_{{option.pk}}" type="range" min="-10" max="+10">
+    <div class="columns">
+        <table class="table mb-2">
+            <tbody>
+                {% for option in options %}
+                <tr>
+                    <td>
+                        <div class="columns mx-1">
+                            <div class="col-6 col-md-4 col-sm-12">
+                                {{option.text}}
+                            </div>
+                            <div class="col-6 col-md-8 col-sm-12">
+                                {# TODO load from cfg #}
+                                <input name="option_{{option.pk}}" type="range" class="slider" min="-10" max="+10" value="0">
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="col-12">
+            <div class="col-6 col-md-9 col-sm-12 col-ml-auto">
+                <div class="input-group">
+                    <input type="text" name="name" id="name" class="form-input" placeholder="Name">
+                    <button class="btn btn-primary input-group-btn">
+                        Submit
+                    </button>
+                </div>
             </div>
         </div>
-        {% endfor %}
-
-        <label for="name">
-            Name
-        </label>
-        <input type="text" name="name" id="name">
-
-        <input type="submit">
-    </form>
-</div>
+    </div>
+</form>
 
 {% endblock %}
