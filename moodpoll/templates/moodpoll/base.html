@@ -1,31 +1,44 @@
-<!DOCTYPE html>
 {% load static %}
 
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
 
-<html><head lang="en">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link type="text/css" rel="stylesheet" href="{% static 'moodpoll/base.css' %}">
-    <link rel="icon" type="image/png"       href="{% static 'moodpoll/img/favicon1.png' %}">
-    <title>{% block title %}moodpoll{% endblock %}</title>
-</head>
-<body>
+        <!-- <link type="text/css" rel="stylesheet" href="{% static 'moodpoll/base.css' %}"> -->
+        <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
 
+        <link rel="icon" type="image/png"       href="{% static 'moodpoll/img/favicon1.png' %}">
 
+        <title>
+            {% block title %}
+            moodpoll
+            {% endblock %}
+        </title>
+    </head>
+    <body>
+        <header class="columns mt-2">
+            <div class="column col-mx-auto col-9 col-md-11 col-xs-12">
+                {% include "moodpoll/snippets/base/header.html" with base=base only%}
+            </div>
+        </header>
+            
+        <main class="columns">
+            <div class="column col-mx-auto col-9 col-md-11 col-xs-12">
+                {% block content %}
+                If you can see this, please file a bug report.
+                {% endblock %}
 
-<div class="main_1">
+            </div>
+        </main>
 
-{% include "moodpoll/page_head.html" with base=base only%}
-
-{% block content %}
-Content of the extended template
-{% endblock %}
-
-{% include "moodpoll/page_foot.html" %}
-
-</div>
-
-
-</body>
+        <footer class="columns">
+            <div class="column col-mx-auto col-9 col-md-11 col-xs-12">
+                {% include "moodpoll/snippets/base/footer.html" with base=base only%}
+            </div>
+        </footer>
+    </body>
 </html>
