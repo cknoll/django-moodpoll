@@ -9,7 +9,7 @@ Complete deployment should (at best) be a onliner.
 
 - Ensure you have this directory structure:
 
-
+```
     [project_root]
     ├── [project_repo]/
     │   ├── .git/...
@@ -23,6 +23,7 @@ Complete deployment should (at best) be a onliner.
     │
     ├── local_testing/                  <- will be auto-created by deploy.py
     └── ...
+```
 
 - run `python3 deploy.py local`
     - If you plan to play arround with the source files you can symlink them instead of copy: `deploy.py  -l local`.
