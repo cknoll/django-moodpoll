@@ -1,0 +1,15 @@
+{% load extra_filters %}
+
+{% if poll.title %}
+<h2>{{poll.title}}</h2>
+{% endif %}
+
+{% if poll.description %}
+<div class="poll_description">
+    {{poll.description|render_markdown_bleach|safe}}
+</div>
+{% endif %}
+
+{% if poll.description or poll.title %}
+<hr class="hr_style_gradient opacity30">
+{% endif %}
