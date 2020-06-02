@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.views import View
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
+from django.db.models.functions import Coalesce
 from .. import models
 
 class PollResultView(View):
@@ -13,7 +14,15 @@ class PollResultView(View):
         if key != poll.key:
             raise PermissionDenied()
 
-        mood_sums = models.PollOptionReply.objects.filter(poll_option__poll=poll).values('poll_option', 'poll_option__text').annotate(mood_sum=Sum('mood_value'))
+        # note that this will return an empty set if no one has responded yet
+        mood_sums = models.PollOptionReply.objects. \
+            filter(poll_option__poll=poll). \
+            values('poll_option', 'poll_option__text'). \
+            annotate(
+                mood_sum=Coalesce(Sum('mood_value'), 0),
+                mood_praise=Coalesce(Sum('mood_value', filter=Q(mood_value__gt=0)), 0),
+                mood_blame=Coalesce(Sum('mood_value', filter=Q(mood_value__lt=0)), 0)
+                )
 
         poll_options = models.PollOption.objects.filter(poll=poll)
             

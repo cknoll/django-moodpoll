@@ -20,13 +20,14 @@ Result for:
         {{option.poll_option__text}}
       </div>
       <div class="col-25">
-          <!-- 
-        <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;"> {{option.resistances.0}}.{{option.resistances.1}}|
-        <img src="{% static 'moodpoll/img/symb_neu.svg' %}" style="height:0.8em;"> {{option.neutrals.0}}.{{option.neutrals.1}}|
-        <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;"> {{option.approvals.0}}.{{option.approvals.1}}
--->
+          <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;">
+          {{option.mood_blame}}
+
           <img src="{% static 'moodpoll/img/symb_neu.svg' %}" style="height:0.8em;">
           {{option.mood_sum}}
+
+          <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;">
+          {{option.mood_praise}}
       </div>
     </div>
 
