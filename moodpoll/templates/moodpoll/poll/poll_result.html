@@ -1,37 +1,120 @@
 {% extends "moodpoll/base.html" %}
 {% load static %}
+{% load extra_tags %}
 
 {% block title %}Result:{{c.poll.title}}{% endblock %}
 {% block content %}
 
-<div class="brick_form">
-    {% include "moodpoll/snippets/poll_title_description.html" %}
+{% include "moodpoll/snippets/poll_title_description.html" %}
 
-    {% for option in mood_sums %}
-    <div class="row">
-        <div class="col-75">
-            {{option.poll_option__text}}
-        </div>
-        <div class="col-25">
-            <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;">
-            {{option.mood_blame}}
+{% if mood_sums %}
+<table class="table mb-2">
+    <thead>
+        <tr>
+            <th>
+                <div class="columns">
+                    <div class="column col-6 col-sm-12">
+                        <div class="columns">
+                            <div class="column col-8">
+                                Option
+                            </div>
+                            <div class="column col-2">
+                                <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;">
+                            </div>
+                            <div class="column col-2">
+                                <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column col-1 col-sm-2">
+                        Sum
+                    </div>
+                    <div class="column col-5 col-sm-10">
+                        Histogram
+                    </div>
+                </div>
+            </th>
+        </tr>
+    </thead>
+       
+    <tbody>
+        {% for option in mood_sums %}
+        <tr>
+            <td>
+                <div class="columns">
+                    <div class="column col-6 col-sm-12">
+                        <div class="columns">
+                            <div class="column col-8">
+                                {{option.poll_option__text}}
+                            </div>
+                            <div class="column col-2">
+                                {{option.mood_praise}}
+                            </div>
+                            <div class="column col-2">
+                                {{option.mood_blame}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column col-6 col-sm-12">
+                        <div class="columns">
+                            <div class="column col-2">
+                                {{option.mood_sum}}
+                            </div>
+                            <div class="column col-10">
+                                <div class="bar">
+                                    <div class="bar-item"
+                                         style="width:{% make_html_width mood_sums_meta.mood_sum__min mood_sums_meta.mood_sum__max option.mood_sum %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-            <img src="{% static 'moodpoll/img/symb_neu.svg' %}" style="height:0.8em;">
-            {{option.mood_sum}}
+<div class="columns">
+    <div class="column col-12">
+        Participants up to now:
+    </div>
 
-            <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;">
-            {{option.mood_praise}}
+    <div class="column col-12">
+        <ul>
+            {% for reply in poll_replies %}
+            <li>
+                {{ reply.user_name }}
+            </li>
+                
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<details>
+    {% include "moodpoll/snippets/poll_results_explanation.html" %}
+</details>
+
+{% else %}
+
+<div class="columns">
+    <div class="column col-12">
+        <div class="hero bg-gray">
+            <div class="hero-body">
+                <h1>
+                    No replies yet!
+                </h1>
+                <p>
+                    Come back once there are some replies to the poll!
+                </p>
+            </div>
         </div>
     </div>
-    {%endfor%}
-
-    <hr class="hr_style_gradient opacity30">
-
-    <details>
-        {% include "moodpoll/snippets/poll_results_explanation.html" %}
-    </details>
 </div>
+
+{% endif %}
 
 
 {% endblock %}
-
