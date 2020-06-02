@@ -5,8 +5,7 @@
 
 <div class="brick_form">
 
-    {#% include "moodpoll/part_title_and_description.html" %#}
-    TODO title+desc
+    {% include "moodpoll/snippets/poll_title_description.html" %}
 
     <form action="" method="post">
         {% csrf_token %}
