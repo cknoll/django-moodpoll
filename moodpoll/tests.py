@@ -151,10 +151,11 @@ class TestViews(TestCase):
         self.assertContains(response3, "utc_show_poll")
 
     def test_new_poll_with_md_description(self):
-        response1 = self.client.get(reverse('new_poll'))
+        new_poll_url = reverse('new_poll')
+        response1 = self.client.get(new_poll_url)
         self.assertEqual(response1.status_code, 200)
 
-        form, action_url = get_form_by_action_url(response1, "new_poll")
+        form = get_first_form(response1)
         self.assertIsNotNone(form)
 
         md_description = "*test123* see: <https://example.com>"
@@ -162,7 +163,7 @@ class TestViews(TestCase):
         post_data = generate_post_data_for_form(form, spec_values=form_values)
 
         # this causes a redirect (status-code 302)
-        response2 = self.client.post(action_url, post_data)
+        response2 = self.client.post(new_poll_url, post_data)
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
 
@@ -170,20 +171,20 @@ class TestViews(TestCase):
         self.assertContains(response3, '<a href="https://example.com">')
 
     def test_show_poll(self):
-        url = reverse('show_poll', kwargs={"pk": 1})
+        url = reverse('show_poll', kwargs={"pk": 1, "key": 1102838733})
 
         # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        self.assertEqual(len(models.PollReply.objects.all()), 1)
         response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        form = get_first_form(response)
         self.assertNotEqual(form, None)
 
-        c0 = views.evaluate_poll_results(pk=1)
+        c0 = views_monolith.evaluate_poll_results(pk=1)
 
         vote_data1 = self.vote_data1
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
-        response = self.client.post(action_url, post_data)
+        response = self.client.post(url, post_data)
 
         # this should be a redirect to poll_results
         self.assertEqual(response.status_code, 302)
@@ -197,7 +198,7 @@ class TestViews(TestCase):
         ts0 = 1574332979
         self.assertEqual(me[0].datetime.timestamp(), ts0)
 
-        c1 = views.evaluate_poll_results(pk=1)
+        c1 = views_monolith.evaluate_poll_results(pk=1)
 
         self.assertEqual(c0.sorted_index_list, [5, 4, 6, 2, 3, 0, 1])
 
