@@ -10,7 +10,6 @@ from django.utils import timezone
 
 from . import models
 from . import utils
-from . import forms
 from .simple_pages_interface import get_sp
 
 # debugging helper
@@ -96,92 +95,6 @@ def view_test(request):
 
     return render(request, "{}/main_form.html".format(appname), context)
 
-
-# noinspection PyMethodMayBeStatic
-class ViewCreatePoll(View):
-
-    def get(self, request):
-        form = forms.PollForm()
-
-        context = dict(form=form)
-        form.action_url_name = "new_poll"
-        return render(request, "{}/main_new_poll.html".format(appname), context)
-
-    def post(self, request):
-
-        form = forms.PollForm(request.POST)
-        if not form.is_valid():
-            # !! error handling # unify with handle_inconsistent_data below
-            raise NotImplementedError("Form Validation not yet implemented")
-        else:
-            new_poll = form.save()
-
-        request.session["poll_created"] = new_poll.pk
-        return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk}))
-
-
-class ViewPoll(View):
-
-    @staticmethod
-    def get(request, pk, key=None, c=None):
-        """
-        :param request:
-        :param pk:
-        :param key:     if provided, the (current) result is shown (not yet implemented)
-        :param c:       container (recieve data from elsewhere)
-        :return:
-        """
-
-        if c is None:
-            c = Container()
-            c.start_values = None
-            c.name_conflict_mode = False
-
-        c.full_url = request.get_raw_uri()
-        url_c = get_segmented_urls(request, pk)
-        # noinspection PyUnresolvedReferences
-        c.poll_url = url_c.full_show_poll
-
-        if request.session.pop("poll_created", None) == pk:
-            # This poll was just created by this user. This should be mentioned
-            c.msg = "Successfully created new poll:"
-
-            # add unit test comment
-            c.utc_new_poll = "new_poll_{}".format(pk)
-
-        c.action_url_name = "poll_eval"
-        c.pk = pk
-        c.min = -3
-        c.max = 2
-
-        c.poll = get_object_or_404(models.Poll, pk=pk)
-        c.option_list = parse_option_list(c.poll.optionlist, c.start_values)
-        context = dict(c=c, )
-
-        return render(request, "{}/main_show_poll.html".format(appname), context)
-
-    @staticmethod
-    def post(request, pk):
-        pass
-
-
-class ViewPollResult(View):
-
-    @staticmethod
-    def get(request, pk, c=None):
-
-        c = evaluate_poll_results(pk, c)
-
-        url_c = get_segmented_urls(request, pk)
-        # noinspection PyUnresolvedReferences
-        c.poll_url = url_c.full_show_poll
-        context = dict(c=c, )
-
-        return render(request, "{}/main_poll_result.html".format(appname), context)
-
-    @staticmethod
-    def post(request):
-        pass
 
 
 class ViewPollEvaluation(View):

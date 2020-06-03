@@ -1,0 +1,37 @@
+{% extends "moodpoll/base.html" %}
+{% load static %}
+
+{% block title %}Result:{{c.poll.title}}{% endblock %}
+{% block content %}
+
+<div class="brick_form">
+    {% include "moodpoll/snippets/poll_title_description.html" %}
+
+    {% for option in mood_sums %}
+    <div class="row">
+        <div class="col-75">
+            {{option.poll_option__text}}
+        </div>
+        <div class="col-25">
+            <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;">
+            {{option.mood_blame}}
+
+            <img src="{% static 'moodpoll/img/symb_neu.svg' %}" style="height:0.8em;">
+            {{option.mood_sum}}
+
+            <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;">
+            {{option.mood_praise}}
+        </div>
+    </div>
+    {%endfor%}
+
+    <hr class="hr_style_gradient opacity30">
+
+    <details>
+        {% include "moodpoll/snippets/poll_results_explanation.html" %}
+    </details>
+</div>
+
+
+{% endblock %}
+

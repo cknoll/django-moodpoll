@@ -13,6 +13,9 @@ import importlib
 from collections import defaultdict
 
 from django.conf import settings, Settings
+from django.shortcuts import get_object_or_404
+from . import models
+from django.core.exceptions import PermissionDenied
 
 from ipydex import IPS, ST, ip_syshook, dirsearch, sys, activate_ips_on_exception
 
@@ -264,4 +267,16 @@ def safe_run_command(cmd, ask=True):
             print("\nDone.\n")
     else:
         print("Abort.")
+
+
+def get_poll_or_4xx(pk, key):
+    """retrieve a poll from db iff correct params have been given; else: throw HTTP 404/403"""
+    poll = get_object_or_404(models.Poll, pk=pk)
+
+    #check auth
+    if key != poll.key:
+        raise PermissionDenied()
+
+    return poll
+
 

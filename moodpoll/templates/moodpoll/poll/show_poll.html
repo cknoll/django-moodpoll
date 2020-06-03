@@ -1,0 +1,37 @@
+{% extends "moodpoll/base.html" %}
+
+{% block title %}{{c.poll.title}}{% endblock %}
+{% block content %}
+
+{# leave comment in html which will be recognized by unittest#}
+<!--utc_show_poll-->
+
+<div class="brick_form">
+
+    {% include "moodpoll/snippets/poll_title_description.html" %}
+
+    <form action="" method="post">
+        {% csrf_token %}
+
+        {% for option in options %}
+        <div class="row">
+            <div class="col-75">
+                {{option.text}}
+            </div>
+            <div class="col-25">
+                {# TODO load from cfg #}
+                <input name="option_{{option.pk}}" type="range" min="-10" max="+10">
+            </div>
+        </div>
+        {% endfor %}
+
+        <label for="name">
+            Name
+        </label>
+        <input type="text" name="name" id="name">
+
+        <input type="submit">
+    </form>
+</div>
+
+{% endblock %}

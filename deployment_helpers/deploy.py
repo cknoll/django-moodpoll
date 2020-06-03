@@ -61,6 +61,7 @@ instance_path = os.path.join(du.get_dir_of_this_file(), "specific")
 local_deployment_files_base_dir = du.get_dir_of_this_file()
 repo_base_dir = os.path.split(local_deployment_files_base_dir)[0]
 app_path = os.path.join(repo_base_dir, app_name)
+du.argparser.add_argument("-o", "--omit-tests", help="omit test execution (e.g. for dev branches)", action="store_true")
 
 args = du.parse_args()
 
@@ -198,8 +199,9 @@ c.run('python3 manage.py makemigrations', target_spec="both")
 # this creates the database
 c.run('python3 manage.py migrate', target_spec="both")
 
-print("\n", "run tests", "\n")
-c.run('python3 manage.py test moodpoll', target_spec="both")
+if not args.omit_tests:
+    print("\n", "run tests", "\n")
+    c.run('python3 manage.py test moodpoll', target_spec="both")
 
 # TODO: this should be simplified to f"python3 manage.py loaddata {init_fixture_path}"
 print("\n", "install initial data", "\n")

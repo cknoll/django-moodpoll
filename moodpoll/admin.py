@@ -1,9 +1,10 @@
 from django.contrib import admin
 
-from .models import User, Poll, MoodExpression
+from .models import Poll, PollOption, PollReply, PollOptionReply
 
 # Register your models here.
 
-admin.site.register(User)
 admin.site.register(Poll)
-admin.site.register(MoodExpression)
+admin.site.register(PollOption)
+admin.site.register(PollReply)
+admin.site.register(PollOptionReply)

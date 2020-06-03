@@ -130,5 +130,11 @@ BACKUP_PATH = os.path.join(BASE_DIR, "db_backups")
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+# this determines the range of possible values
+# in the future these values might be configurable for each poll
+MAX_MOOD_VALUE = 10
+MIN_MOOD_VALUE = -10  # the lowest value is considered as 'veto'
+
+
 # noinspection PyUnresolvedReferences
 from .site_specific_settings import *
