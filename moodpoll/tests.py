@@ -15,7 +15,20 @@ python3 manage.py test moodpoll
 python3 manage.py test moodpoll --nocapture --ips
 
 # one single test
-python3 manage.py test moodpoll.tests:TestViews.test_poll --nocapture --ips
+python3 manage.py test --nocapture --rednose --ips moodpoll.tests:TestViews.test_show_poll
+
+this assumes these settings
+
+INSTALLED_APPS = (
+    ...
+    'django_nose',
+    ...
+)
+
+and 
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
 """
 
 global_fixtures = ['for_unit_tests/data.json']

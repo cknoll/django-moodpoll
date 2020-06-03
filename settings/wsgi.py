@@ -1,5 +1,5 @@
 """
-WSGI config for moodpoll_site project.
+WSGI config for moodpoll project (not the app).
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'moodpoll_site.settings')
+# "settings" is the name of the django-project
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.settings')
 
 application = get_wsgi_application()

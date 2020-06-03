@@ -1,0 +1,1 @@
+At the moment this project is still an early prototype an by no means optimized for external contributions. Our goal is, that this will change after the release of a minimum viable product. However, feel free to open an issue or contact the contributors via email (see git logs).

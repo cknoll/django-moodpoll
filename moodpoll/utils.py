@@ -19,7 +19,7 @@ from django.core.exceptions import PermissionDenied
 
 from ipydex import IPS, ST, ip_syshook, dirsearch, sys, activate_ips_on_exception
 
-activate_ips_on_exception()
+# activate_ips_on_exception()
 
 
 class DatabaseEmptyError(ValueError):
