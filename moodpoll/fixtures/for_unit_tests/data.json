@@ -15,7 +15,7 @@
         "key" : 1,
         "poll" : 1,
         "update_datetime" : "2020-06-03T09:29:03.760Z",
-        "user_name" : "Anonymous"
+        "user_name" : "testuser1"
       },
     "model" : "moodpoll.pollreply",
     "pk" : 1

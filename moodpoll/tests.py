@@ -6,7 +6,7 @@ import time
 
 from . import utils
 from . import models
-from . import views
+from .views import poll_result
 from . import views_monolith
 
 from ipydex import IPS
@@ -110,21 +110,14 @@ class TestViews(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.vote_data1 = {
-            'option_0_range': '0',
-            'option_0_input': '0',
-            'option_1_range': '1',
-            'option_1_input': '1',
-            'option_2_range': '2',
-            'option_2_input': '2',
-            'option_3_range': '-1',
-            'option_3_input': '-1',
-            'option_4_range': '-2',
-            'option_4_input': '-2',
-            'option_5_range': '-3',
-            'option_5_input': '-3',
-            'option_6_range': '0',
-            'option_6_input': '0',
-            'username': 'testuser3'
+            'option_1': '1',
+            'option_2': '2',
+            'option_3': '-1',
+            'option_4': '-2',
+            'option_5': '-3',
+            'option_6': '0',
+            'option_7': '0',
+            'name': 'testuser2',
         }
 
     def test_index(self):
@@ -171,7 +164,8 @@ class TestViews(TestCase):
         self.assertContains(response3, '<a href="https://example.com">')
 
     def test_show_poll(self):
-        url = reverse('show_poll', kwargs={"pk": 1, "key": 1102838733})
+        key1 = 1102838733
+        url = reverse('show_poll', kwargs={"pk": 1, "key": key1})
 
         # noinspection PyUnresolvedReferences
         self.assertEqual(len(models.PollReply.objects.all()), 1)
@@ -180,45 +174,36 @@ class TestViews(TestCase):
         form = get_first_form(response)
         self.assertNotEqual(form, None)
 
-        c0 = views_monolith.evaluate_poll_results(pk=1)
+        # c0 = views_monolith.evaluate_poll_results(pk=1)
+        poll = utils.get_poll_or_4xx(pk=1, key=key1)
+        mood_sums1 = poll_result.get_mood_sums(poll)
 
+        # in the fixtures only one person had voted so far
+        self.assertEqual(len(mood_sums1), poll.polloption_set.count())
+        self.assertEqual(mood_sums1[0]["mood_votes"], 1)
+
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(voters[0]["user_name"], "testuser1")
+
+        # now perform voting
         vote_data1 = self.vote_data1
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
         response = self.client.post(url, post_data)
 
         # this should be a redirect to poll_results
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
+        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1, "key": key1}))
 
-        # noinspection PyUnresolvedReferences
-        me = models.MoodExpression.objects.all()
-        self.assertEqual(len(me), 3)
-        self.assertEqual(me[0].username, "testuser1")
+        # now a second voting act has taken place
+        mood_sums2 = poll_result.get_mood_sums(poll)
+        self.assertEqual(mood_sums2[0]["mood_votes"], 2)
 
-        ts0 = 1574332979
-        self.assertEqual(me[0].datetime.timestamp(), ts0)
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(voters[1]["user_name"], "testuser2")
 
-        c1 = views_monolith.evaluate_poll_results(pk=1)
-
-        self.assertEqual(c0.sorted_index_list, [5, 4, 6, 2, 3, 0, 1])
-
-        # test values for option0 and option1
-        i0 = c0.sorted_index_list.index(0)
-        i1 = c0.sorted_index_list.index(1)
-
-        # results for the negative votes for option 0
-        self.assertEqual(c0.neg_res[i0], (1, "5", -2))
-        self.assertEqual(c0.neu_res[i0], (1, "0", 1))
-        self.assertEqual(c0.pos_res[i1], (0, "0", 0))
-
-        # test values for option0 and option1 (after additional poll)
-
-        i0 = c1.sorted_index_list.index(0)
-        i1 = c1.sorted_index_list.index(1)
-        self.assertEqual(c1.neu_res[i0], (2, "0", 2))
-        self.assertEqual(c1.neg_res[i1], (1, "9", -3))
-        self.assertEqual(c1.neu_res[i1], (1, "0", 1))
-        self.assertEqual(c1.pos_res[i1], (1, "1", 1))
+        ts1 = voters[0]["update_datetime"].timestamp()
+        ts2 = voters[1]["update_datetime"].timestamp()
+        self.assertTrue(ts1 < ts2)
 
     def test_polling_act_name_conflict1(self):
         """
