@@ -45,10 +45,10 @@ project_src_path = "../"
 # might also be the place for a custom deploy_local.py script
 local_deployment_workdir = "../../local_testing"
 
-# directory for local deployment files (e.g. database files)
+# directory for deployment files (e.g. database files)
 deployment_dir = "moodpoll_deployment"
 
-app_name = "django-moodpoll"
+app_name = "moodpoll"
 
 # -------------------------- End Config section -----------------------
 
@@ -59,6 +59,8 @@ instance_path = os.path.join(du.get_dir_of_this_file(), "specific")
 # (After all, this code runs on your computer/server under your responsibility).
 
 local_deployment_files_base_dir = du.get_dir_of_this_file()
+repo_base_dir = os.path.split(local_deployment_files_base_dir)[0]
+app_path = os.path.join(repo_base_dir, app_name)
 
 args = du.parse_args()
 
@@ -70,11 +72,14 @@ if args.target == "remote":
     static_root_dir = f"{target_deployment_path}/collected_static"
     debug_mode = False
     pip_user_flag = " --user"  # this might be dropped if we use a virtualenv on the remote target
+    allowed_hosts = [f"{user}.uber.space"]
 else:
+    # settings for local deployment
     static_root_dir = ""
     target_deployment_path = os.path.join(local_deployment_workdir, deployment_dir)
     debug_mode = True
     pip_user_flag = ""  # assume activated virtualenv on local target
+    allowed_hosts = ["*"]
 
 # TODO
 init_fixture_path = os.path.join(target_deployment_path, "fixitures/init_fixture.json")
@@ -84,7 +89,7 @@ init_fixture_path = os.path.join(target_deployment_path, "fixitures/init_fixture
 app_settings = {
     "SECRET_KEY": secrets.token_urlsafe(50),
     "DEBUG": debug_mode,
-    "ALLOWED_HOSTS": ["{}.uber.space".format(user)],
+    "ALLOWED_HOSTS": allowed_hosts,
     "STATIC_ROOT": static_root_dir
     }
 
@@ -139,6 +144,7 @@ c.chdir(target_deployment_path)
 
 print("\n", "upload current application files for deployment", "\n")
 # omit irrelevant files (like .git)
+# TODO: this should be done more elegantly
 filters = \
     f"--exclude='.git/' " \
     f"--exclude='.idea/' " \
@@ -148,7 +154,6 @@ filters = \
     f"--exclude='deployment_utils/' " \
     f"--exclude='django_moodpoll.egg-info/' " \
     f"--exclude='db.sqlite3' " \
-    f"--exclude='deployment*.py' " \
     ""
 
 c.rsync_upload(project_src_path + "/", target_deployment_path, filters=filters, target_spec="both")
@@ -181,11 +186,9 @@ if args.target == "local" and len(loc) == 0:
 c.run(f'pip3 install{pip_user_flag} -r requirements.txt', target_spec="both")
 
 if args.symlink:
-    raise NotImplementedError
-# this is where symlinking comes into play
-# print("\n", "install the app from the local directory", "\n")
-# (-e allows easy hotfixing)
-# c.run('pip3 install --user -e .')
+    assert args.target == "local"
+    c.run(["rm", "-r", os.path.join(target_deployment_path, app_name)], target_spec="local")
+    c.run(["ln", "-s", app_path, os.path.join(target_deployment_path, app_name)], target_spec="local")
 
 print("\n", "prepare and create database", "\n")
 
