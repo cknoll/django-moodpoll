@@ -57,10 +57,11 @@ def init_settings():
 
     :return: settings
     """
+    IPS()
 
     if not isinstance(settings._wrapped, Settings):
         assert "manage.py" in os.listdir("./")
-        my_settings = importlib.import_module("{}_site.settings".format(appname))
+        my_settings = importlib.import_module("settings.settings".format(appname))
         settings.configure(my_settings)
     return settings
 
@@ -135,6 +136,8 @@ def save_stripped_fixtures(fname=None, jsonlint=True, backup=False):
     :return: fname of written file
     """
 
+    settings = init_settings()
+
     model_blacklist = ["contenttypes*", "sessions*", r"admin\.logentry",
                        r"auth\.permission", r"captcha\.captchastore"]
 
@@ -165,7 +168,6 @@ def save_stripped_fixtures(fname=None, jsonlint=True, backup=False):
     if backup:
         opfname = default_backup_fixture.replace("XXX", time.strftime("%Y-%m-%d__%H-%M-%S"))
 
-        settings = init_settings()
         backup_path = settings.BACKUP_PATH
         if not os.path.exists(backup_path):
             os.makedirs(backup_path)
