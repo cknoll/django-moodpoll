@@ -1,3 +1,4 @@
+import unittest
 from django.test import TestCase
 from django.urls import reverse
 from bs4 import BeautifulSoup
@@ -6,6 +7,7 @@ import time
 from . import utils
 from . import models
 from . import views
+from . import views_monolith
 
 from ipydex import IPS
 
@@ -54,7 +56,7 @@ class TestApp1(TestCase):
 class TestHelperFuncs(TestCase):
 
     def test_map_mean(self):
-        m09 = views.map_normed_mean_to_09
+        m09 = views_monolith.map_normed_mean_to_09
         self.assertEqual(m09([2, 2], 2), 0.9)
         self.assertEqual(m09([1, 2], 2), 0.5)
         self.assertEqual(m09([1, 1], 2), 0.1)
@@ -131,20 +133,21 @@ class TestViews(TestCase):
         self.assertNotContains(response, "__invalid_url__")
 
     def test_new_poll(self):
-        response1 = self.client.get(reverse('new_poll'))
+        new_poll_url = reverse('new_poll')
+        response1 = self.client.get(new_poll_url)
         self.assertEqual(response1.status_code, 200)
 
-        form, action_url = get_form_by_action_url(response1, "new_poll")
-        self.assertIsNotNone(form)
+        # form, action_url = get_form_by_action_url(response1, "new_poll")
+        form = get_first_form(response1)
 
         form_values = {"title": "unittest_poll", "description": "", "optionlist": "a\nb\nc"}
         post_data = generate_post_data_for_form(form, spec_values=form_values)
 
         # this causes a redirect (status-code 302)
-        response2 = self.client.post(action_url, post_data)
+        response2 = self.client.post(new_poll_url, post_data)
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
-        self.assertContains(response3, "utc_new_poll")
+        # self.assertContains(response3, "utc_new_poll")
         self.assertContains(response3, "utc_show_poll")
 
     def test_new_poll_with_md_description(self):
@@ -392,6 +395,19 @@ class TestViews(TestCase):
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests
 # ------------------------------------------------------------------------
+
+
+def get_first_form(response):
+    """
+    Auxiliary function that returns a bs-object of the first form which is specifies by action-url.
+
+    :param response:
+    :return:
+    """
+    bs = BeautifulSoup(response.content, 'html.parser')
+    forms = bs.find_all("form")
+
+    return forms[0]
 
 
 def get_form_by_action_url(response, url_name, **url_name_kwargs):

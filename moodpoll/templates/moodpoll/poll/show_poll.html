@@ -3,6 +3,9 @@
 {% block title %}{{c.poll.title}}{% endblock %}
 {% block content %}
 
+{# leave comment in html which will be recognized by unittest#}
+<!--utc_show_poll-->
+
 <div class="brick_form">
 
     {% include "moodpoll/snippets/poll_title_description.html" %}

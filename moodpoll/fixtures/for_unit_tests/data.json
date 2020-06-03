@@ -1,53 +1,143 @@
 [
   {
     "fields" : {
-        "creation_datetime" : "2019-12-15T12:10:30.028Z",
-        "description" : "Serves to demonstrate the app.",
-        "optionlist" : "Monday\r\nTuesday\r\nWednesday\r\nThursday\r\nFriday\r\nSaturday\r\nSunday",
-        "title" : "Demopoll: Which day of the week do you like most?"
+        "creation_datetime" : "2020-06-03T09:28:56.520Z",
+        "description" : "test *xyz*",
+        "key" : 1102838733,
+        "replies_hidden" : false,
+        "title" : "demopoll"
       },
     "model" : "moodpoll.poll",
     "pk" : 1
   },
   {
     "fields" : {
-        "creation_datetime" : "2019-12-22T19:36:19.676Z",
-        "description" : null,
-        "optionlist" : "January\r\nApril\r\nAugust\r\nDecember",
-        "title" : "Which month do you like most?"
+        "key" : 1,
+        "poll" : 1,
+        "update_datetime" : "2020-06-03T09:29:03.760Z",
+        "user_name" : "Anonymous"
       },
-    "model" : "moodpoll.poll",
+    "model" : "moodpoll.pollreply",
+    "pk" : 1
+  },
+  {
+    "fields" : {
+        "poll" : 1,
+        "text" : "Monday"
+      },
+    "model" : "moodpoll.polloption",
+    "pk" : 1
+  },
+  {
+    "fields" : {
+        "poll" : 1,
+        "text" : "Tuesday"
+      },
+    "model" : "moodpoll.polloption",
     "pk" : 2
   },
   {
     "fields" : {
-        "creation_datetime" : "2019-12-22T19:41:49.337Z",
-        "description" : null,
-        "optionlist" : "January\r\nApril\r\nAugust\r\nDecember",
-        "title" : "Which month do you like most?"
+        "poll" : 1,
+        "text" : "Wednesday"
       },
-    "model" : "moodpoll.poll",
+    "model" : "moodpoll.polloption",
     "pk" : 3
   },
   {
     "fields" : {
-        "datetime" : "2019-11-21T10:42:59Z",
-        "mood_values" : "[0, 0, 1, 1, 2, 2, 1]",
         "poll" : 1,
-        "username" : "testuser1"
+        "text" : "Thursday"
       },
-    "model" : "moodpoll.moodexpression",
+    "model" : "moodpoll.polloption",
+    "pk" : 4
+  },
+  {
+    "fields" : {
+        "poll" : 1,
+        "text" : "Friday"
+      },
+    "model" : "moodpoll.polloption",
+    "pk" : 5
+  },
+  {
+    "fields" : {
+        "poll" : 1,
+        "text" : "Saturday"
+      },
+    "model" : "moodpoll.polloption",
+    "pk" : 6
+  },
+  {
+    "fields" : {
+        "poll" : 1,
+        "text" : "Sunday"
+      },
+    "model" : "moodpoll.polloption",
+    "pk" : 7
+  },
+  {
+    "fields" : {
+        "mood_value" : 0,
+        "poll_option" : 1,
+        "poll_reply" : 1
+      },
+    "model" : "moodpoll.polloptionreply",
     "pk" : 1
   },
   {
     "fields" : {
-        "datetime" : "2019-12-20T13:00:00Z",
-        "mood_values" : "[-2, -3, 0, 0, 1, 2, 1]",
-        "poll" : 1,
-        "username" : "testuser2"
+        "mood_value" : 0,
+        "poll_option" : 2,
+        "poll_reply" : 1
       },
-    "model" : "moodpoll.moodexpression",
+    "model" : "moodpoll.polloptionreply",
     "pk" : 2
+  },
+  {
+    "fields" : {
+        "mood_value" : 0,
+        "poll_option" : 3,
+        "poll_reply" : 1
+      },
+    "model" : "moodpoll.polloptionreply",
+    "pk" : 3
+  },
+  {
+    "fields" : {
+        "mood_value" : 0,
+        "poll_option" : 4,
+        "poll_reply" : 1
+      },
+    "model" : "moodpoll.polloptionreply",
+    "pk" : 4
+  },
+  {
+    "fields" : {
+        "mood_value" : 0,
+        "poll_option" : 5,
+        "poll_reply" : 1
+      },
+    "model" : "moodpoll.polloptionreply",
+    "pk" : 5
+  },
+  {
+    "fields" : {
+        "mood_value" : 0,
+        "poll_option" : 6,
+        "poll_reply" : 1
+      },
+    "model" : "moodpoll.polloptionreply",
+    "pk" : 6
+  },
+  {
+    "fields" : {
+        "mood_value" : 0,
+        "poll_option" : 7,
+        "poll_reply" : 1
+      },
+    "model" : "moodpoll.polloptionreply",
+    "pk" : 7
   },
   {
     "fields" : {
@@ -68,5 +158,3 @@
     "pk" : 1
   }
 ]
-
-
