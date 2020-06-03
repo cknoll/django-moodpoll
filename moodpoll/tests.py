@@ -119,6 +119,7 @@ class TestViews(TestCase):
             'option_7': '0',
             'name': 'testuser2',
         }
+        cls.poll_key1 = 1102838733
 
     def test_index(self):
         response = self.client.get(reverse('landing-page'))
@@ -164,8 +165,8 @@ class TestViews(TestCase):
         self.assertContains(response3, '<a href="https://example.com">')
 
     def test_show_poll(self):
-        key1 = 1102838733
-        url = reverse('show_poll', kwargs={"pk": 1, "key": key1})
+        self.poll_key1 = 1102838733
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
         # noinspection PyUnresolvedReferences
         self.assertEqual(len(models.PollReply.objects.all()), 1)
@@ -175,12 +176,12 @@ class TestViews(TestCase):
         self.assertNotEqual(form, None)
 
         # c0 = views_monolith.evaluate_poll_results(pk=1)
-        poll = utils.get_poll_or_4xx(pk=1, key=key1)
-        mood_sums1 = poll_result.get_mood_sums(poll)
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        mood_sums = poll_result.get_mood_sums(poll)
 
         # in the fixtures only one person had voted so far
-        self.assertEqual(len(mood_sums1), poll.polloption_set.count())
-        self.assertEqual(mood_sums1[0]["mood_votes"], 1)
+        self.assertEqual(len(mood_sums), poll.polloption_set.count())
+        self.assertEqual(mood_sums[0]["mood_votes"], 1)
 
         voters = poll_result.get_voters(poll)
         self.assertEqual(voters[0]["user_name"], "testuser1")
@@ -192,11 +193,11 @@ class TestViews(TestCase):
 
         # this should be a redirect to poll_results
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1, "key": key1}))
+        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1, "key": self.poll_key1}))
 
         # now a second voting act has taken place
-        mood_sums2 = poll_result.get_mood_sums(poll)
-        self.assertEqual(mood_sums2[0]["mood_votes"], 2)
+        mood_sums = poll_result.get_mood_sums(poll)
+        self.assertEqual(mood_sums[0]["mood_votes"], 2)
 
         voters = poll_result.get_voters(poll)
         self.assertEqual(voters[1]["user_name"], "testuser2")
@@ -357,26 +358,29 @@ class TestViews(TestCase):
         """
         Provoke a name conflict and handle it via renaming (consistent case)
         """
-        url = reverse('show_poll', kwargs={"pk": 1})
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
         # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 1)
+
         response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        form = get_first_form(response)
         self.assertNotEqual(form, None)
 
         # now try emoty username
-        vote_data1 = {**self.vote_data1, "username": ""}
+        vote_data1 = {**self.vote_data1, "name": ""}
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
-        response = self.client.post(action_url, post_data)
+        response = self.client.post(url, post_data)
 
-        # this should display the poll_dialog again with a warning
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_invalid_data_warning:empty_name")
+        # new behaviour: post is accepted, user_name is 'Anonymous'
+        self.assertEqual(response.status_code, 302)
 
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 2)
+        self.assertEqual(voters.last()["user_name"], "Anonymous")
 
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests
