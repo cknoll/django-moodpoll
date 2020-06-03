@@ -165,7 +165,6 @@ class TestViews(TestCase):
         self.assertContains(response3, '<a href="https://example.com">')
 
     def test_show_poll(self):
-        self.poll_key1 = 1102838733
         url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
         # noinspection PyUnresolvedReferences
@@ -210,149 +209,39 @@ class TestViews(TestCase):
         """
         Provoke a name conflict and handle it via overwrite flag
         """
-        url = reverse('show_poll', kwargs={"pk": 1})
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
-        # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 1)
+
+        # evaluate lazy object (because db will change soon)
+        mood_sums1 = list(poll_result.get_mood_sums(poll))
+
         response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        form = get_first_form(response)
         self.assertNotEqual(form, None)
 
         vote_data1 = self.vote_data1
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
 
-        # perform another vote for testuser1. This should not add a new MoodExpression object to database
-        # but instead update the existing one
-        post_data.update(username="testuser1")
+        # perform another vote for testuser1 (conflicting name)
+        # new behaviour: allow multiple usages of the same name
+        # this is related to https://codeberg.org/cknoll/django-moodpoll/issues/16
+        self.assertEqual(voters[0]["user_name"], "testuser1")
+        post_data.update(name="testuser1")
 
-        response = self.client.post(action_url, post_data)
+        response = self.client.post(url, post_data)
 
-        # this should now not be a redirect but display the poll_dialog again with a warning and an
-        # overwrite-confirmation checkbox
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_overwrite_warning")
-        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
-
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        vote_data2 = {**vote_data1, "username": "testuser1", "overwrite_flag": True}
-        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
-        response = self.client.post(action_url, post_data)
-
-        # now we have the redirect to the result page
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
+        response = self.client.get(response.url)
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 2)
 
-        # noinspection PyUnresolvedReferences
-        me = models.MoodExpression.objects.all()
-        self.assertEqual(len(me), 2)
-        self.assertEqual(me[0].username, "testuser1")
-
-        timediff = views.timezone.now().timestamp() - me[0].datetime.timestamp()
-        # time of last modification should be very recent (but allow a quick escape from interactive shell)
-        self.assertTrue(timediff < 2)
-
-    def test_polling_act_name_conflict2(self):
-        """
-        Provoke a name conflict and handle it via renaming (insconsistent case)
-        """
-        url = reverse('show_poll', kwargs={"pk": 1})
-
-        # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        response = self.client.get(url)
-        self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        vote_data1 = self.vote_data1
-        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
-
-        # perform another vote for testuser1. This should not add a new MoodExpression object to database
-        # but instead update the existing one
-        post_data.update(username="testuser1")
-
-        response = self.client.post(action_url, post_data)
-
-        # this should now not be a redirect but display the poll_dialog again with a warning and an
-        # overwrite-confirmation checkbox
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_overwrite_warning")
-        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
-
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        # test renaming and overwrite flag (this is inconsistent)
-        vote_data2 = {**vote_data1, "username": "testuser1(1)", "overwrite_flag": True}
-        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
-        response = self.client.post(action_url, post_data)
-
-        # the poll dialog should be displayed again with an different warning
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_invalid_data_warning:flag_inconsistency")
-
-    def test_polling_act_name_conflict3(self):
-        """
-        Provoke a name conflict and handle it via renaming (consistent case)
-        """
-        url = reverse('show_poll', kwargs={"pk": 1})
-
-        # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        response = self.client.get(url)
-        self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        vote_data1 = self.vote_data1
-        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
-
-        # perform another vote for testuser1. This should not add a new MoodExpression object to database
-        # but instead update the existing one
-        post_data.update(username="testuser1")
-
-        response = self.client.post(action_url, post_data)
-
-        # this should now not be a redirect but display the poll_dialog again with a warning and an
-        # overwrite-confirmation checkbox
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_overwrite_warning")
-        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
-
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        # test renaming and overwrite flag (this is inconsistent)
-        vote_data2 = {**vote_data1, "username": "testuser1(1)", "overwrite_flag": False}
-        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
-        response = self.client.post(action_url, post_data)
-
-        # now we have the redirect to the result page
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
-
-        # noinspection PyUnresolvedReferences
-        me = models.MoodExpression.objects.all()
-        self.assertEqual(len(me), 3)
-        self.assertEqual(me[0].username, "testuser1")
-
-        last_me = me.last()
-        self.assertEqual(last_me.username, "testuser1(1)")
-
-        timediff = views.timezone.now().timestamp() - last_me.datetime.timestamp()
-        # time of last modification should be very recent (but allow a quick escape from interactive shell)
-        self.assertTrue(timediff < 2)
+        # assert that the values have changed:
+        mood_sums2 = poll_result.get_mood_sums(poll)
+        self.assertNotEqual(mood_sums1[0], mood_sums2[0])
 
     def test_polling_act_empty_name(self):
         """
