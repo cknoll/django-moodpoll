@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.db.models import Count, Sum
 from django.db.models.functions import Coalesce
 
-# Create your models here.
+# Todo: the models need servere refactoring!
 
 
 class Poll(models.Model):

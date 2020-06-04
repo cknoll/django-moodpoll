@@ -1,3 +1,4 @@
+import unittest
 from django.test import TestCase
 from django.urls import reverse
 from bs4 import BeautifulSoup
@@ -5,7 +6,8 @@ import time
 
 from . import utils
 from . import models
-from . import views
+from .views import poll_result
+from . import views_monolith
 
 from ipydex import IPS
 
@@ -15,7 +17,20 @@ python3 manage.py test moodpoll
 python3 manage.py test moodpoll --nocapture --ips
 
 # one single test
-python3 manage.py test moodpoll.tests:TestViews.test_poll --nocapture --ips
+python3 manage.py test --nocapture --rednose --ips moodpoll.tests:TestViews.test_show_poll
+
+this assumes these settings
+
+INSTALLED_APPS = (
+    ...
+    'django_nose',
+    ...
+)
+
+and 
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
 """
 
 global_fixtures = ['for_unit_tests/data.json']
@@ -41,7 +56,7 @@ class TestApp1(TestCase):
 class TestHelperFuncs(TestCase):
 
     def test_map_mean(self):
-        m09 = views.map_normed_mean_to_09
+        m09 = views_monolith.map_normed_mean_to_09
         self.assertEqual(m09([2, 2], 2), 0.9)
         self.assertEqual(m09([1, 2], 2), 0.5)
         self.assertEqual(m09([1, 1], 2), 0.1)
@@ -95,22 +110,16 @@ class TestViews(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.vote_data1 = {
-            'option_0_range': '0',
-            'option_0_input': '0',
-            'option_1_range': '1',
-            'option_1_input': '1',
-            'option_2_range': '2',
-            'option_2_input': '2',
-            'option_3_range': '-1',
-            'option_3_input': '-1',
-            'option_4_range': '-2',
-            'option_4_input': '-2',
-            'option_5_range': '-3',
-            'option_5_input': '-3',
-            'option_6_range': '0',
-            'option_6_input': '0',
-            'username': 'testuser3'
+            'option_1': '1',
+            'option_2': '2',
+            'option_3': '-1',
+            'option_4': '-2',
+            'option_5': '-3',
+            'option_6': '0',
+            'option_7': '0',
+            'name': 'testuser2',
         }
+        cls.poll_key1 = 1102838733
 
     def test_index(self):
         response = self.client.get(reverse('landing-page'))
@@ -118,27 +127,29 @@ class TestViews(TestCase):
         self.assertNotContains(response, "__invalid_url__")
 
     def test_new_poll(self):
-        response1 = self.client.get(reverse('new_poll'))
+        new_poll_url = reverse('new_poll')
+        response1 = self.client.get(new_poll_url)
         self.assertEqual(response1.status_code, 200)
 
-        form, action_url = get_form_by_action_url(response1, "new_poll")
-        self.assertIsNotNone(form)
+        # form, action_url = get_form_by_action_url(response1, "new_poll")
+        form = get_first_form(response1)
 
         form_values = {"title": "unittest_poll", "description": "", "optionlist": "a\nb\nc"}
         post_data = generate_post_data_for_form(form, spec_values=form_values)
 
         # this causes a redirect (status-code 302)
-        response2 = self.client.post(action_url, post_data)
+        response2 = self.client.post(new_poll_url, post_data)
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
-        self.assertContains(response3, "utc_new_poll")
+        # self.assertContains(response3, "utc_new_poll")
         self.assertContains(response3, "utc_show_poll")
 
     def test_new_poll_with_md_description(self):
-        response1 = self.client.get(reverse('new_poll'))
+        new_poll_url = reverse('new_poll')
+        response1 = self.client.get(new_poll_url)
         self.assertEqual(response1.status_code, 200)
 
-        form, action_url = get_form_by_action_url(response1, "new_poll")
+        form = get_first_form(response1)
         self.assertIsNotNone(form)
 
         md_description = "*test123* see: <https://example.com>"
@@ -146,7 +157,7 @@ class TestViews(TestCase):
         post_data = generate_post_data_for_form(form, spec_values=form_values)
 
         # this causes a redirect (status-code 302)
-        response2 = self.client.post(action_url, post_data)
+        response2 = self.client.post(new_poll_url, post_data)
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
 
@@ -154,231 +165,128 @@ class TestViews(TestCase):
         self.assertContains(response3, '<a href="https://example.com">')
 
     def test_show_poll(self):
-        url = reverse('show_poll', kwargs={"pk": 1})
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
         # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        self.assertEqual(len(models.PollReply.objects.all()), 1)
         response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        form = get_first_form(response)
         self.assertNotEqual(form, None)
 
-        c0 = views.evaluate_poll_results(pk=1)
+        # c0 = views_monolith.evaluate_poll_results(pk=1)
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        mood_sums = poll_result.get_mood_sums(poll)
 
+        # in the fixtures only one person had voted so far
+        self.assertEqual(len(mood_sums), poll.polloption_set.count())
+        self.assertEqual(mood_sums[0]["mood_votes"], 1)
+
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(voters[0]["user_name"], "testuser1")
+
+        # now perform voting
         vote_data1 = self.vote_data1
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
-        response = self.client.post(action_url, post_data)
+        response = self.client.post(url, post_data)
 
         # this should be a redirect to poll_results
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
+        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1, "key": self.poll_key1}))
 
-        # noinspection PyUnresolvedReferences
-        me = models.MoodExpression.objects.all()
-        self.assertEqual(len(me), 3)
-        self.assertEqual(me[0].username, "testuser1")
+        # now a second voting act has taken place
+        mood_sums = poll_result.get_mood_sums(poll)
+        self.assertEqual(mood_sums[0]["mood_votes"], 2)
 
-        ts0 = 1574332979
-        self.assertEqual(me[0].datetime.timestamp(), ts0)
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(voters[1]["user_name"], "testuser2")
 
-        c1 = views.evaluate_poll_results(pk=1)
-
-        self.assertEqual(c0.sorted_index_list, [5, 4, 6, 2, 3, 0, 1])
-
-        # test values for option0 and option1
-        i0 = c0.sorted_index_list.index(0)
-        i1 = c0.sorted_index_list.index(1)
-
-        # results for the negative votes for option 0
-        self.assertEqual(c0.neg_res[i0], (1, "5", -2))
-        self.assertEqual(c0.neu_res[i0], (1, "0", 1))
-        self.assertEqual(c0.pos_res[i1], (0, "0", 0))
-
-        # test values for option0 and option1 (after additional poll)
-
-        i0 = c1.sorted_index_list.index(0)
-        i1 = c1.sorted_index_list.index(1)
-        self.assertEqual(c1.neu_res[i0], (2, "0", 2))
-        self.assertEqual(c1.neg_res[i1], (1, "9", -3))
-        self.assertEqual(c1.neu_res[i1], (1, "0", 1))
-        self.assertEqual(c1.pos_res[i1], (1, "1", 1))
+        ts1 = voters[0]["update_datetime"].timestamp()
+        ts2 = voters[1]["update_datetime"].timestamp()
+        self.assertTrue(ts1 < ts2)
 
     def test_polling_act_name_conflict1(self):
         """
         Provoke a name conflict and handle it via overwrite flag
         """
-        url = reverse('show_poll', kwargs={"pk": 1})
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
-        # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 1)
+
+        # evaluate lazy object (because db will change soon)
+        mood_sums1 = list(poll_result.get_mood_sums(poll))
+
         response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        form = get_first_form(response)
         self.assertNotEqual(form, None)
 
         vote_data1 = self.vote_data1
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
 
-        # perform another vote for testuser1. This should not add a new MoodExpression object to database
-        # but instead update the existing one
-        post_data.update(username="testuser1")
+        # perform another vote for testuser1 (conflicting name)
+        # new behaviour: allow multiple usages of the same name
+        # this is related to https://codeberg.org/cknoll/django-moodpoll/issues/16
+        self.assertEqual(voters[0]["user_name"], "testuser1")
+        post_data.update(name="testuser1")
 
-        response = self.client.post(action_url, post_data)
+        response = self.client.post(url, post_data)
 
-        # this should now not be a redirect but display the poll_dialog again with a warning and an
-        # overwrite-confirmation checkbox
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_overwrite_warning")
-        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
-
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        vote_data2 = {**vote_data1, "username": "testuser1", "overwrite_flag": True}
-        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
-        response = self.client.post(action_url, post_data)
-
-        # now we have the redirect to the result page
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
+        response = self.client.get(response.url)
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 2)
 
-        # noinspection PyUnresolvedReferences
-        me = models.MoodExpression.objects.all()
-        self.assertEqual(len(me), 2)
-        self.assertEqual(me[0].username, "testuser1")
-
-        timediff = views.timezone.now().timestamp() - me[0].datetime.timestamp()
-        # time of last modification should be very recent (but allow a quick escape from interactive shell)
-        self.assertTrue(timediff < 2)
-
-    def test_polling_act_name_conflict2(self):
-        """
-        Provoke a name conflict and handle it via renaming (insconsistent case)
-        """
-        url = reverse('show_poll', kwargs={"pk": 1})
-
-        # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        response = self.client.get(url)
-        self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        vote_data1 = self.vote_data1
-        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
-
-        # perform another vote for testuser1. This should not add a new MoodExpression object to database
-        # but instead update the existing one
-        post_data.update(username="testuser1")
-
-        response = self.client.post(action_url, post_data)
-
-        # this should now not be a redirect but display the poll_dialog again with a warning and an
-        # overwrite-confirmation checkbox
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_overwrite_warning")
-        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
-
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        # test renaming and overwrite flag (this is inconsistent)
-        vote_data2 = {**vote_data1, "username": "testuser1(1)", "overwrite_flag": True}
-        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
-        response = self.client.post(action_url, post_data)
-
-        # the poll dialog should be displayed again with an different warning
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_invalid_data_warning:flag_inconsistency")
-
-    def test_polling_act_name_conflict3(self):
-        """
-        Provoke a name conflict and handle it via renaming (consistent case)
-        """
-        url = reverse('show_poll', kwargs={"pk": 1})
-
-        # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        response = self.client.get(url)
-        self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        vote_data1 = self.vote_data1
-        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
-
-        # perform another vote for testuser1. This should not add a new MoodExpression object to database
-        # but instead update the existing one
-        post_data.update(username="testuser1")
-
-        response = self.client.post(action_url, post_data)
-
-        # this should now not be a redirect but display the poll_dialog again with a warning and an
-        # overwrite-confirmation checkbox
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_overwrite_warning")
-        self.assertContains(response, '<input type="checkbox" id="overwrite_flag" name="overwrite_flag" value="True">')
-
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
-        self.assertNotEqual(form, None)
-
-        # test renaming and overwrite flag (this is inconsistent)
-        vote_data2 = {**vote_data1, "username": "testuser1(1)", "overwrite_flag": False}
-        post_data = generate_post_data_for_form(form, spec_values=vote_data2)
-        response = self.client.post(action_url, post_data)
-
-        # now we have the redirect to the result page
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("poll_result", kwargs={"pk": 1}))
-
-        # noinspection PyUnresolvedReferences
-        me = models.MoodExpression.objects.all()
-        self.assertEqual(len(me), 3)
-        self.assertEqual(me[0].username, "testuser1")
-
-        last_me = me.last()
-        self.assertEqual(last_me.username, "testuser1(1)")
-
-        timediff = views.timezone.now().timestamp() - last_me.datetime.timestamp()
-        # time of last modification should be very recent (but allow a quick escape from interactive shell)
-        self.assertTrue(timediff < 2)
+        # assert that the values have changed:
+        mood_sums2 = poll_result.get_mood_sums(poll)
+        self.assertNotEqual(mood_sums1[0], mood_sums2[0])
 
     def test_polling_act_empty_name(self):
         """
         Provoke a name conflict and handle it via renaming (consistent case)
         """
-        url = reverse('show_poll', kwargs={"pk": 1})
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
         # noinspection PyUnresolvedReferences
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 1)
+
         response = self.client.get(url)
         self.assertContains(response, "utc_show_poll")
-        form, action_url = get_form_by_action_url(response, "poll_eval", pk=1)
+        form = get_first_form(response)
         self.assertNotEqual(form, None)
 
         # now try emoty username
-        vote_data1 = {**self.vote_data1, "username": ""}
+        vote_data1 = {**self.vote_data1, "name": ""}
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
-        response = self.client.post(action_url, post_data)
+        response = self.client.post(url, post_data)
 
-        # this should display the poll_dialog again with a warning
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(models.MoodExpression.objects.all()), 2)
-        self.assertContains(response, "utc_show_poll")
-        self.assertContains(response, "utc_invalid_data_warning:empty_name")
+        # new behaviour: post is accepted, user_name is 'Anonymous'
+        self.assertEqual(response.status_code, 302)
 
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 2)
+        self.assertEqual(voters.last()["user_name"], "Anonymous")
 
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests
 # ------------------------------------------------------------------------
+
+
+def get_first_form(response):
+    """
+    Auxiliary function that returns a bs-object of the first form which is specifies by action-url.
+
+    :param response:
+    :return:
+    """
+    bs = BeautifulSoup(response.content, 'html.parser')
+    forms = bs.find_all("form")
+
+    return forms[0]
 
 
 def get_form_by_action_url(response, url_name, **url_name_kwargs):

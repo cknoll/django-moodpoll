@@ -30,8 +30,8 @@ class ShowPollView(View):
             poll=poll,
         )
 
-        if 'user_name' in request.POST and request.POST['user_name'] != '':
-            poll_reply.user_name = request.POST['user_name']
+        if 'name' in request.POST and request.POST['name'] != '':
+            poll_reply.user_name = request.POST['name']
 
         with transaction.atomic():
             poll_reply.save()
@@ -55,4 +55,3 @@ class ShowPollView(View):
 
         return redirect(reverse("poll_result", kwargs={"pk": poll.pk, "key": poll.key}))
 
-        
