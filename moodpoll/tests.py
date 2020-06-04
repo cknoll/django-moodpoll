@@ -117,7 +117,7 @@ class TestViews(TestCase):
             'option_5': '-3',
             'option_6': '0',
             'option_7': '0',
-            'name': 'testuser2',
+            'user_name': 'testuser2',
         }
         cls.poll_key1 = 1102838733
 
@@ -230,7 +230,7 @@ class TestViews(TestCase):
         # new behaviour: allow multiple usages of the same name
         # this is related to https://codeberg.org/cknoll/django-moodpoll/issues/16
         self.assertEqual(voters[0]["user_name"], "testuser1")
-        post_data.update(name="testuser1")
+        post_data.update(user_name="testuser1")
 
         response = self.client.post(url, post_data)
 
@@ -260,7 +260,7 @@ class TestViews(TestCase):
         self.assertNotEqual(form, None)
 
         # now try emoty username
-        vote_data1 = {**self.vote_data1, "name": ""}
+        vote_data1 = {**self.vote_data1, "user_name": ""}
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
         response = self.client.post(url, post_data)
 

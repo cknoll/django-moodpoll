@@ -49,7 +49,8 @@ class PollOption(models.Model):
         for result_row in query_result:
             vote_cnt_by_value[result_row['mood_value']] = result_row['mood_value_cnt']
 
-        print(vote_cnt_by_value)
+        # useful for debugging but annoying when running tests
+        # print(vote_cnt_by_value)
 
         return vote_cnt_by_value
 
