@@ -16,21 +16,35 @@
                     <div class="column col-6 col-sm-12">
                         <div class="columns">
                             <div class="column col-8">
+                                {# insert but hide to keep document structure #}
+                                <label class="btn btn-action moodpoll-expand-btn mr-2" style="visibility:hidden">
+                                    <i class="material-icons">expand_more</i>
+                                </label>
                                 Option
                             </div>
-                            <div class="column col-2">
-                                <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;">
+                            <div class="column col-2 text-right">
+                                <span class="tooltip" data-tooltip="total positive votes">
+                                    <i class="material-icons">sentiment_satisfied_alt</i>
+                                </span>
                             </div>
                             <div class="column col-2">
-                                <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;">
+                                <span class="tooltip" data-tooltip="total negative votes">
+                                    <i class="material-icons">sentiment_very_dissatisfied</i>
+                                </span>
                             </div>
                         </div>
                     </div>
-                    <div class="column col-1 col-sm-2">
-                        Sum
-                    </div>
-                    <div class="column col-5 col-sm-10">
-                        Histogram
+                    <div class="column col-6 col-sm-12">
+                        <div class="columns">
+                            <div class="column col-3 text-right">
+                                <span class="tooltip" data-tooltip="total votes">
+                                    <i class="material-icons">functions</i>
+                                </span>
+                            </div>
+                            <div class="column col-9">
+                                {# this is only spacer #}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </th>
@@ -42,28 +56,34 @@
         <tr>
             <td>
                 <div class="columns">
+                    {# TODO consider enabling autocomplete #}
+                    <input type="checkbox" class="moodpoll-collapsible" id="hist_{{option.id}}" style="display:none" autocomplete="off">
                     <div class="column col-6 col-sm-12">
                         <div class="columns">
                             <div class="column col-8">
-                                <label class="btn" for="hist_{{option.id}}">
-                                    ⋮
+                                <label class="btn btn-action moodpoll-expand-btn mr-2" for="hist_{{option.id}}">
+                                    <i class="material-icons">expand_more</i>
+                                </label>
+                                <label class="btn btn-action moodpoll-collapse-btn mr-2" for="hist_{{option.id}}">
+                                    <i class="material-icons">expand_less</i>
                                 </label>
                                 {{option.text}}
                             </div>
-                            <div class="column col-2">
-                                {{option.get_mood_praise}}
+                            <div class="column col-2 text-right">
+                                {{option.get_mood_praise|add_num_prefix}}
                             </div>
                             <div class="column col-2">
-                                {{option.get_mood_blame}}
+                                {{option.get_mood_blame|add_num_prefix}}
                             </div>
                         </div>
                     </div>
                     <div class="column col-6 col-sm-12">
                         <div class="columns">
-                            <div class="column col-2">
+                            <div class="column col-3 text-right">
+                                <i class="material-icons">how_to_vote</i>
                                 {{option.get_mood_sum}}
                             </div>
-                            <div class="column col-10">
+                            <div class="column col-9 center-flex">
                                 <div class="bar">
                                     <div class="bar-item"
                                          style="width:{% make_html_width mood_bar_min mood_bar_max option.get_mood_sum %}">
@@ -72,8 +92,6 @@
                             </div>
                         </div>
                     </div>
-                    {# TODO consider enabling autocomplete #}
-                    <input type="checkbox" class="moodpoll_collapsible" id="hist_{{option.id}}" style="display:none" autocomplete="off">
                     <div class="column col-12" style="display:none">
                         <div class="columns">
                         {% for mood_value, mood_cnt in option.get_vote_cnt_by_mood_value.items %}
@@ -103,13 +121,6 @@
         {% endfor %}
     </tbody>
 </table>
-
-<style>
- {# TODO move to better place #}
- .moodpoll_collapsible:checked ~ div {
-     display: block !important;
- }
-</style>
 
 <div class="columns">
     <div class="column col-12">

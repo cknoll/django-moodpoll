@@ -1,4 +1,5 @@
 {% extends "moodpoll/base.html" %}
+{% load extra_tags %}
 
 {% block title %}{{c.poll.title}}{% endblock %}
 {% block content %}
@@ -11,8 +12,27 @@
 <form action="" method="post">
     {% csrf_token %}
 
+
     <div class="columns">
-        <table class="table mb-2">
+        <div class="column col-12 py-2">
+            <div class="columns">
+                <div class="column card no-border my-2 col-mx-auto col-6 col-md-9 col-s-12">
+                    <div class="card-header">
+                        <div class="card-title h5">
+                            Please insert your name
+                        </div>
+                        <div class="card-body">
+                            <div class="has-icon-left" style="col-12">
+                                <input type="text" name="user_name" id="user_name" class="form-input" placeholder="Name" style="width:100%">
+                                <i class="form-icon icon material-icons">person</i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="table mb-2 column col-12">
             <tbody>
                 {% for option in options %}
                 <tr>
@@ -22,8 +42,18 @@
                                 {{option.text}}
                             </div>
                             <div class="col-6 col-md-8 col-sm-12">
-                                {# TODO load from cfg #}
-                                <input name="option_{{option.pk}}" type="range" class="slider" min="-10" max="+10" value="0">
+                                <div class="columns">
+                                    <div class="col-1 text-center">
+                                        <i class="material-icons">sentiment_very_dissatisfied</i>
+                                    </div>
+                                    <div class="col-10">
+                                        {# TODO load ranges from cfg #}
+                                        <input name="option_{{option.pk}}" type="range" class="slider" min="-10" max="+10" value="0">
+                                    </div>
+                                    <div class="col-1 text-center">
+                                        <i class="material-icons">sentiment_satisfied_alt</i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -33,13 +63,11 @@
         </table>
 
         <div class="col-12">
-            <div class="col-6 col-md-9 col-sm-12 col-ml-auto">
-                <div class="input-group">
-                    <input type="text" name="user_name" id="user_name" class="form-input" placeholder="Name">
-                    <button class="btn btn-primary input-group-btn">
-                        Submit
-                    </button>
-                </div>
+            <div class="col-6 col-md-9 col-sm-12 col-ml-auto text-right">
+                <button class="btn btn-lg btn-primary">
+                    Vote
+                    <i class="material-icons">how_to_vote</i>
+                </button>
             </div>
         </div>
     </div>

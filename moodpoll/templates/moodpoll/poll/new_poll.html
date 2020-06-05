@@ -4,6 +4,7 @@
 New Poll
 {% endblock %}
 
+
 {% block content %}
 
 <div class="columns">
@@ -19,15 +20,21 @@ New Poll
                 <label class="form-label col-2 col-sm-12" for="title">
                     Title
                 </label>
-                <input class="form-input col-10 col-sm-12" type="text" id="title" name="title" placeholder="optional: title">
+                <div class="has-icon-left col-10 col-sm-12">
+                    <input class="form-input col-12" type="text" id="title" name="title" placeholder="optional: title">
+                    <i class="form-icon icon material-icons">label</i>
+                </div>
             </div>
 
             <div class="form-group">
                 <label class="form-label col-2 col-sm-12" for="description">
                     Description
                 </label>
-                <textarea class="form-input col-10 col-sm-12" id="description" name="description" placeholder="optional: description
+                <div class="has-icon-left col-10 col-sm-12">
+                    <textarea class="form-input col-12" id="description" name="description" placeholder="optional: description
 markdown is enabled"></textarea>
+                    <i class="form-icon icon material-icons">notes</i>
+                </div>
             </div>
 
             <!-- 
@@ -41,14 +48,18 @@ markdown is enabled"></textarea>
                 <label class="form-label col-2 col-sm-12" for="options">
                     Options
                 </label>
-                <textarea class="form-input col-10 col-sm-12" id="options" rows="6" name="options" placeholder="options
+                <div class="has-icon-left col-10 col-sm-12">
+                    <textarea class="form-input col-12" id="options" rows="6" name="options" placeholder="options
 one per line"></textarea>
+                    <i class="form-icon icon material-icons">format_list_bulleted</i>
+                </div>
             </div>
 
             <div class="column col-12">
                 <div class="text-right">
                     <button class="btn btn-lg btn-primary">
                         Create New Poll
+                        <i class="material-icons">send</i>
                     </button>
                 </div>
             </div>
