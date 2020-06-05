@@ -50,6 +50,8 @@ deployment_dir = "moodpoll_deployment"
 
 app_name = "moodpoll"
 
+TIME_ZONE = 'Europe/Berlin'
+
 # -------------------------- End Config section -----------------------
 
 # it should not be necessary to change the data below, but it might be interesting what happens.
@@ -91,7 +93,8 @@ app_settings = {
     "SECRET_KEY": secrets.token_urlsafe(50),
     "DEBUG": debug_mode,
     "ALLOWED_HOSTS": allowed_hosts,
-    "STATIC_ROOT": static_root_dir
+    "STATIC_ROOT": static_root_dir,
+    "TIME_ZONE": TIME_ZONE,
     }
 
 # generate the file site_specific_settings.py from the above dictionary
@@ -191,12 +194,21 @@ if args.symlink:
     c.run(["rm", "-r", os.path.join(target_deployment_path, app_name)], target_spec="local")
     c.run(["ln", "-s", app_path, os.path.join(target_deployment_path, app_name)], target_spec="local")
 
-print("\n", "prepare and create database", "\n")
+if not args.initial:
+
+    print("\n", "backup old database", "\n")
+    res = c.run('python3 manage.py savefixtures', target_spec="both")
+
+
+print("\n", "prepare and create new database", "\n")
 
 # this currently fails (due to no matching directory structure)
 c.run('python3 manage.py makemigrations', target_spec="both")
 
-# this creates the database
+# delete old db
+c.run('rm -f db.sqlite3', target_spec="both")
+
+# this creates the new database
 c.run('python3 manage.py migrate', target_spec="both")
 
 if not args.omit_tests:
