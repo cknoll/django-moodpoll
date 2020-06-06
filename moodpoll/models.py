@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Q
 from django.db.models.functions import Coalesce
 from django.conf import settings
 
@@ -61,6 +61,17 @@ class PollOption(models.Model):
         if sum:
             return sum
         return 0
+
+    def get_vetos(self):
+        if not self.poll.min_eq_veto:
+            # minimum mood value is not considered as veto -> there are no vetos
+            return 0
+
+        vetos = PollOptionReply.objects.filter(poll_option=self). \
+                aggregate(vetos=Count("mood_value", filter=Q(mood_value=self.poll.min_mood_value)))['vetos']
+
+        return vetos
+
 
     def get_mood_blame(self):
         sum = PollOptionReply.objects.filter(poll_option=self, mood_value__lt=0).aggregate(Sum('mood_value'))['mood_value__sum']

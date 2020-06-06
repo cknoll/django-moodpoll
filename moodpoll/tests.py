@@ -270,7 +270,7 @@ class TestViews(TestCase):
         form = get_first_form(response)
         self.assertNotEqual(form, None)
 
-        # now try emoty username
+        # now try empty username
         vote_data1 = {**self.vote_data1, "user_name": ""}
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
         response = self.client.post(url, post_data)
@@ -281,6 +281,41 @@ class TestViews(TestCase):
         voters = poll_result.get_voters(poll)
         self.assertEqual(len(voters), 2)
         self.assertEqual(voters.last()["user_name"], "Anonymous")
+
+    def test_veto(self):
+        """
+        Provoke a name conflict and handle it via renaming (consistent case)
+        """
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+
+        # no vetos up to now
+        for po in models.PollOption.objects.filter(poll=poll):
+            self.assertEqual(po.get_vetos(), 0)
+
+        response = self.client.get(url)
+        form = get_first_form(response)
+
+        vote_data1 = {**self.vote_data1, "option_5": poll.min_mood_value}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+
+        # expect exactly one veto
+        for po in models.PollOption.objects.filter(poll=poll):
+
+            if po.id == 5:
+                # corresponds to option_5 above
+                self.assertEqual(po.get_vetos(), 1)
+            else:
+                self.assertEqual(po.get_vetos(), 0)
+
+        poll.min_eq_veto = False
+        poll.save()
+
+        # expect zero vetos
+        for i, po in enumerate(models.PollOption.objects.filter(poll=poll)):
+            self.assertEqual(po.get_vetos(), 0)
+
 
 # ------------------------------------------------------------------------
 # below lives auxiliary code which is related to testing but does not contain tests

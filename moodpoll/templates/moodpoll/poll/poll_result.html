@@ -15,7 +15,7 @@
                 <div class="columns">
                     <div class="column col-6 col-sm-12">
                         <div class="columns">
-                            <div class="column col-8">
+                            <div class="column col-6">
                                 {# insert but hide to keep document structure #}
                                 <label class="btn btn-action moodpoll-expand-btn mr-2" style="visibility:hidden">
                                     <i class="material-icons">expand_more</i>
@@ -30,6 +30,11 @@
                             <div class="column col-2">
                                 <span class="tooltip" data-tooltip="total negative votes">
                                     <i class="material-icons">sentiment_very_dissatisfied</i>
+                                </span>
+                            </div>
+                            <div class="column col-2">
+                                <span class="tooltip" data-tooltip="vetos">
+                                    <i class="material-icons">cancel</i>
                                 </span>
                             </div>
                         </div>
@@ -60,7 +65,7 @@
                     <input type="checkbox" class="moodpoll-collapsible" id="hist_{{option.id}}" style="display:none" autocomplete="off">
                     <div class="column col-6 col-sm-12">
                         <div class="columns">
-                            <div class="column col-8">
+                            <div class="column col-6">
                                 <label class="btn btn-action moodpoll-expand-btn mr-2" for="hist_{{option.id}}">
                                     <i class="material-icons">expand_more</i>
                                 </label>
@@ -74,6 +79,9 @@
                             </div>
                             <div class="column col-2">
                                 {{option.get_mood_blame|add_num_prefix}}
+                            </div>
+                            <div class="column col-2">
+                                {{option.get_vetos}}
                             </div>
                         </div>
                     </div>
