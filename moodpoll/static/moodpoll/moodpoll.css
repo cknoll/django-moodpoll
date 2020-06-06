@@ -1,0 +1,46 @@
+.form-icon.material-icons {
+    font-size: 18px;
+}
+
+textarea ~ .form-icon.material-icons {
+    top: 18px !important;
+}
+
+/*
+.btn-lg > .material-icons {
+    font-size: .9rem;
+}
+*/
+
+.avatar-sm > .material-icons {
+    font-size: 1.2rem;
+}
+
+.material-icons {
+    vertical-align: middle;
+}
+
+.moodpoll-collapsible:checked ~ div {
+    display: block !important;
+}
+
+.moodpoll-collapsible:checked ~ div .moodpoll-expand-btn {
+    display: none;
+}
+
+.moodpoll-collapsible ~ div .moodpoll-collapse-btn {
+    display: none;
+}
+
+.moodpoll-collapsible:checked ~ div .moodpoll-collapse-btn {
+    display: inline-block;
+}
+
+.center-flex {
+    display: flex;
+    align-items: center;
+}
+
+.no-border {
+    border: 0 !important;
+}

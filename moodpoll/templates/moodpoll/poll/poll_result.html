@@ -1,37 +1,146 @@
 {% extends "moodpoll/base.html" %}
 {% load static %}
+{% load extra_tags %}
+{% load extra_filters %}
 
 {% block title %}Result:{{c.poll.title}}{% endblock %}
 {% block content %}
 
-<div class="brick_form">
-    {% include "moodpoll/snippets/poll_title_description.html" %}
+{% include "moodpoll/snippets/poll_title_description.html" %}
 
-    {% for option in mood_sums %}
-    <div class="row">
-        <div class="col-75">
-            {{option.poll_option__text}}
-        </div>
-        <div class="col-25">
-            <img src="{% static 'moodpoll/img/symb_neg.svg' %}" style="height:0.8em;">
-            {{option.mood_blame}}
+<table class="table mb-2">
+    <thead>
+        <tr>
+            <th>
+                <div class="columns">
+                    <div class="column col-6 col-sm-12">
+                        <div class="columns">
+                            <div class="column col-8">
+                                {# insert but hide to keep document structure #}
+                                <label class="btn btn-action moodpoll-expand-btn mr-2" style="visibility:hidden">
+                                    <i class="material-icons">expand_more</i>
+                                </label>
+                                Option
+                            </div>
+                            <div class="column col-2 text-right">
+                                <span class="tooltip" data-tooltip="total positive votes">
+                                    <i class="material-icons">sentiment_satisfied_alt</i>
+                                </span>
+                            </div>
+                            <div class="column col-2">
+                                <span class="tooltip" data-tooltip="total negative votes">
+                                    <i class="material-icons">sentiment_very_dissatisfied</i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column col-6 col-sm-12">
+                        <div class="columns">
+                            <div class="column col-3 text-right">
+                                <span class="tooltip" data-tooltip="total votes">
+                                    <i class="material-icons">functions</i>
+                                </span>
+                            </div>
+                            <div class="column col-9">
+                                {# this is only spacer #}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </th>
+        </tr>
+    </thead>
+       
+    <tbody>
+        {% for option in poll_options %}
+        <tr>
+            <td>
+                <div class="columns">
+                    {# TODO consider enabling autocomplete #}
+                    <input type="checkbox" class="moodpoll-collapsible" id="hist_{{option.id}}" style="display:none" autocomplete="off">
+                    <div class="column col-6 col-sm-12">
+                        <div class="columns">
+                            <div class="column col-8">
+                                <label class="btn btn-action moodpoll-expand-btn mr-2" for="hist_{{option.id}}">
+                                    <i class="material-icons">expand_more</i>
+                                </label>
+                                <label class="btn btn-action moodpoll-collapse-btn mr-2" for="hist_{{option.id}}">
+                                    <i class="material-icons">expand_less</i>
+                                </label>
+                                {{option.text}}
+                            </div>
+                            <div class="column col-2 text-right">
+                                {{option.get_mood_praise|add_num_prefix}}
+                            </div>
+                            <div class="column col-2">
+                                {{option.get_mood_blame|add_num_prefix}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column col-6 col-sm-12">
+                        <div class="columns">
+                            <div class="column col-3 text-right">
+                                <i class="material-icons">how_to_vote</i>
+                                {{option.get_mood_sum}}
+                            </div>
+                            <div class="column col-9 center-flex">
+                                <div class="bar">
+                                    <div class="bar-item"
+                                         style="width:{% make_html_width mood_bar_min mood_bar_max option.get_mood_sum %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column col-12" style="display:none">
+                        <div class="columns">
+                        {% for mood_value, mood_cnt in option.get_vote_cnt_by_mood_value.items %}
+                            <div class="column col-2 text-right">
+                                {{mood_value|add_num_prefix}}
+                            </div>
+                            <div class="column col-10">
+                                <div class="bar">
+                                    <div class="bar-item"
+                                         style="width:{% make_html_width 0 poll_replies.count mood_cnt %};
+                                                min-width: 5px;
+                                                {# TODO load from cfg -2 #}
+                                                background:{% make_redgreen_css_gradient -10 10 mood_value %}">
+                                        {% if mood_cnt %}
+                                        {{mood_cnt}}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
 
-            <img src="{% static 'moodpoll/img/symb_neu.svg' %}" style="height:0.8em;">
-            {{option.mood_sum}}
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-            <img src="{% static 'moodpoll/img/symb_pos.svg' %}" style="height:0.8em;">
-            {{option.mood_praise}}
-        </div>
+<div class="columns">
+    <div class="column col-12">
+        Participants up to now:
     </div>
-    {%endfor%}
 
-    <hr class="hr_style_gradient opacity30">
-
-    <details>
-        {% include "moodpoll/snippets/poll_results_explanation.html" %}
-    </details>
+    <div class="column col-12">
+        <ul>
+            {% for reply in poll_replies %}
+            <li>
+                {{ reply.user_name }}
+            </li>
+                
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 
+<details>
+    {% include "moodpoll/snippets/poll_results_explanation.html" %}
+</details>
 
 {% endblock %}
-

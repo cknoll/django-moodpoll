@@ -12,21 +12,22 @@ from ..utils import get_poll_or_4xx
 class PollResultView(View):
     def get(self, request, pk, key):
         poll = get_poll_or_4xx(pk, key)
-
-        # note that this will return an empty set if no one has responded yet
-        mood_sums = get_mood_sums(poll)
-
         poll_options = models.PollOption.objects.filter(poll=poll)
+        poll_replies = models.PollReply.objects.filter(poll=poll)
 
         context = {
             'poll': poll,
-            'mood_sums': mood_sums,
+            'poll_options': poll_options,
+            'poll_replies': poll_replies,
+            'mood_bar_min': -10 * len(poll_replies),
+            'mood_bar_max': +10 * len(poll_replies),
         }
 
         return render(request, "moodpoll/poll/poll_result.html", context)
 
 
 def get_mood_sums(poll):
+    # todo: this seems to be obsolete?
     # noinspection PyUnresolvedReferences
     mood_sums = models.PollOptionReply.objects. \
         filter(poll_option__poll=poll). \
