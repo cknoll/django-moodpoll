@@ -104,7 +104,7 @@
                                          style="width:{% make_html_width 0 poll_replies.count mood_cnt %};
                                                 min-width: 5px;
                                                 {# TODO load from cfg -2 #}
-                                                background:{% make_redgreen_css_gradient -10 10 mood_value %}">
+                                                background:{% make_redgreen_css_gradient option.poll.min_mood_value option.poll.max_mood_value mood_value %}">
                                         {% if mood_cnt %}
                                         {{mood_cnt}}
                                         {% endif %}

@@ -64,6 +64,8 @@ local_deployment_files_base_dir = du.get_dir_of_this_file()
 repo_base_dir = os.path.split(local_deployment_files_base_dir)[0]
 app_path = os.path.join(repo_base_dir, app_name)
 du.argparser.add_argument("-o", "--omit-tests", help="omit test execution (e.g. for dev branches)", action="store_true")
+du.argparser.add_argument("-x", "--omit-backup",
+                          help="omit db-backup (avoid problems with changed models)", action="store_true")
 
 args = du.parse_args()
 
@@ -95,6 +97,9 @@ app_settings = {
     "ALLOWED_HOSTS": allowed_hosts,
     "STATIC_ROOT": static_root_dir,
     "TIME_ZONE": TIME_ZONE,
+    "MAX_MOOD_VALUE": 2,
+    "MIN_MOOD_VALUE": -3,
+    "MIN_EQ_VETO": True
     }
 
 # generate the file site_specific_settings.py from the above dictionary
@@ -194,7 +199,7 @@ if args.symlink:
     c.run(["rm", "-r", os.path.join(target_deployment_path, app_name)], target_spec="local")
     c.run(["ln", "-s", app_path, os.path.join(target_deployment_path, app_name)], target_spec="local")
 
-if not args.initial:
+if not args.initial and not args.omit_backup:
 
     print("\n", "backup old database", "\n")
     res = c.run('python3 manage.py savefixtures', target_spec="both")

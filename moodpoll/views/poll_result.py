@@ -19,8 +19,8 @@ class PollResultView(View):
             'poll': poll,
             'poll_options': poll_options,
             'poll_replies': poll_replies,
-            'mood_bar_min': -10 * len(poll_replies),
-            'mood_bar_max': +10 * len(poll_replies),
+            'mood_bar_min': poll.min_mood_value * len(poll_replies),
+            'mood_bar_max': poll.max_mood_value * len(poll_replies),
         }
 
         return render(request, "moodpoll/poll/poll_result.html", context)

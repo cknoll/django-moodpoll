@@ -47,8 +47,7 @@
                                         <i class="material-icons">sentiment_very_dissatisfied</i>
                                     </div>
                                     <div class="col-10">
-                                        {# TODO load ranges from cfg #}
-                                        <input name="option_{{option.pk}}" type="range" class="slider" min="-10" max="+10" value="0">
+                                        <input name="option_{{option.pk}}" type="range" class="slider" min="{{option.poll.min_mood_value}}" max="{{option.poll.max_mood_value}}" value="0">
                                     </div>
                                     <div class="col-1 text-center">
                                         <i class="material-icons">sentiment_satisfied_alt</i>

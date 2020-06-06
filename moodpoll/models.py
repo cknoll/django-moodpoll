@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.db.models import Count, Sum
 from django.db.models.functions import Coalesce
+from django.conf import settings
 
 # Todo: the models need servere refactoring!
 
@@ -13,6 +14,11 @@ class Poll(models.Model):
     description = models.CharField(max_length=500, null=True, blank=False,)
     key = models.PositiveIntegerField(null=False,)
     replies_hidden = models.BooleanField(null=False, default=False,)
+
+    # configuration values
+    min_mood_value = models.IntegerField(null=False, default=settings.MIN_MOOD_VALUE)
+    max_mood_value = models.IntegerField(null=False, default=settings.MAX_MOOD_VALUE)
+    min_eq_veto = models.BooleanField(null=False, default=settings.MIN_EQ_VETO)
 
 
 class PollReply(models.Model):
@@ -42,8 +48,7 @@ class PollOption(models.Model):
                     mood_value_cnt=Coalesce(Count('mood_value'), 0)
                     )
 
-        # TODO read from cfg
-        for i in range(-10, +10 + 1):
+        for i in range(self.poll.min_mood_value, self.poll.max_mood_value + 1):
             vote_cnt_by_value[i] = 0
 
         for result_row in query_result:

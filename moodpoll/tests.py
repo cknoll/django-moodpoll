@@ -1,8 +1,9 @@
 import unittest
-from django.test import TestCase
-from django.urls import reverse
 from bs4 import BeautifulSoup
 import time
+from django.test import TestCase
+from django.urls import reverse
+from django.conf import settings
 
 from . import utils
 from . import models
@@ -87,6 +88,16 @@ class TestLoginMechanics(TestCase):
 
         response = self.client.get(response.url)
         self.assertEqual(response.url, "/admin/login/")
+
+
+class TestModels(TestCase):
+    fixtures = global_fixtures
+
+    def testPollConfiguration(self):
+
+        poll = models.Poll.objects.first()
+
+        self.assertEqual(poll.min_mood_value, settings.MIN_MOOD_VALUE)
 
 
 class TestSimplePages(TestCase):

@@ -43,7 +43,8 @@ class ShowPollView(View):
                     break
                 
                 mood_value = int(request.POST[htmlname])
-                if mood_value < -10 or mood_value > 10:
+                # invalid mood values are not counted at all
+                if mood_value < option.poll.min_mood_value or mood_value > option.poll.max_mood_value:
                     break
                 
                 option_reply = models.PollOptionReply(

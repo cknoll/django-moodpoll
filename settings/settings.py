@@ -132,6 +132,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 # this determines the range of possible values
 # in the future these values might be configurable for each poll
+# note that this could be overridden by instance specific settings
 MAX_MOOD_VALUE = 10
 MIN_MOOD_VALUE = -10  # the lowest value is considered as 'veto'
 
