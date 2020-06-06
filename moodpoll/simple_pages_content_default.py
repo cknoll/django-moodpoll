@@ -50,7 +50,7 @@ Should there be any problem with the operation or the content of this website, p
 <br><br>
 Contact information: \n\n
 - <http://cknoll.github.io/pages/impressum.html>\n
-- <https://github.com/cknoll/django-moodpoll>
+- <https://codeberg.org/cknoll/django-moodpoll>
 """)
 
 
@@ -69,7 +69,7 @@ Sollte es ein Problem mit dem Betrieb oder den Inhalten der Seite geben, kontakt
 <br><br>
 Kontaktinformationen: \n\n
 - <http://cknoll.github.io/pages/impressum.html>\n
-- <https://github.com/cknoll/django-moodpoll>
+- <https://codeberg.org/cknoll/django-moodpoll>
 """)
 
 
@@ -82,7 +82,7 @@ new_sp(type="contact",
        content="""
 This site is maintained by Carsten Knoll. For contact information see: \n\n
 - <http://cknoll.github.io/pages/impressum.html>\n
-- <https://github.com/cknoll/django-moodpoll>
+- <https://codeberg.org/cknoll/django-moodpoll>
 """
        )
 
@@ -93,7 +93,7 @@ new_sp(type="contact__de",
 Diese Seite wird betrieben von Carsten Knoll.
 Weitere Kontaktinformationen: \n\n
 - <http://cknoll.github.io/pages/impressum.html>\n
-- <https://github.com/cknoll/django-moodpoll>
+- <https://codeberg.org/cknoll/django-moodpoll>
 """
 )
 
