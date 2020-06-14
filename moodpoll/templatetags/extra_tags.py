@@ -15,4 +15,3 @@ def make_redgreen_css_gradient(min, max, current):
     color_frac_g = int(216.0 * frac)
 
     return '#{:02x}{:02x}00'.format(color_frac_r, color_frac_g)
-    
