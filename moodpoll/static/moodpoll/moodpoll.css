@@ -102,7 +102,6 @@ textarea ~ .form-icon.material-icons {
 }
 
 .moodpoll-bar-bg {
-    width: 50%;
     z-index: 100;
     position:absolute;
     top:0;
