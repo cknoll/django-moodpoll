@@ -92,10 +92,13 @@
                                 {{option.get_mood_sum}}
                             </div>
                             <div class="column col-9 center-flex">
-                                <div class="bar">
-                                    <div class="bar-item"
-                                         style="width:{% make_html_width mood_bar_min mood_bar_max option.get_mood_sum %}">
+                                <div class="moodpoll-bar-bg-wrapper">
+                                    <div class="bar">
+                                        <div class="bar-item"
+                                             style="width:{% make_html_width mood_bar_min mood_bar_max option.get_mood_sum %}">
+                                        </div>
                                     </div>
+                                    <div class="moodpoll-bar-bg"></div>
                                 </div>
                             </div>
                         </div>
@@ -111,7 +114,6 @@
                                     <div class="bar-item"
                                          style="width:{% make_html_width 0 poll_replies.count mood_cnt %};
                                                 min-width: 5px;
-                                                {# TODO load from cfg -2 #}
                                                 background:{% make_redgreen_css_gradient option.poll.mood_value_min option.poll.mood_value_max mood_value %}">
                                         {% if mood_cnt %}
                                         {{mood_cnt}}
