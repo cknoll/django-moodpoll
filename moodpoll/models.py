@@ -16,9 +16,8 @@ class Poll(models.Model):
     replies_hidden = models.BooleanField(null=False, default=False,)
 
     # configuration values
-    min_mood_value = models.IntegerField(null=False, default=settings.MIN_MOOD_VALUE)
-    max_mood_value = models.IntegerField(null=False, default=settings.MAX_MOOD_VALUE)
-    min_eq_veto = models.BooleanField(null=False, default=settings.MIN_EQ_VETO)
+    mood_value_min = models.IntegerField(null=False, default=settings.MOOD_VALUE_MIN)
+    mood_value_max = models.IntegerField(null=False, default=settings.MOOD_VALUE_MAX)
 
 
 class PollReply(models.Model):
@@ -48,7 +47,7 @@ class PollOption(models.Model):
                     mood_value_cnt=Coalesce(Count('mood_value'), 0)
                     )
 
-        for i in range(self.poll.min_mood_value, self.poll.max_mood_value + 1):
+        for i in range(self.poll.mood_value_min, self.poll.mood_value_max + 1):
             vote_cnt_by_value[i] = 0
 
         for result_row in query_result:
@@ -62,16 +61,9 @@ class PollOption(models.Model):
             return sum
         return 0
 
-    def get_vetos(self):
-        if not self.poll.min_eq_veto:
-            # minimum mood value is not considered as veto -> there are no vetos
-            return 0
-
-        vetos = PollOptionReply.objects.filter(poll_option=self). \
-                aggregate(vetos=Count("mood_value", filter=Q(mood_value=self.poll.min_mood_value)))['vetos']
-
-        return vetos
-
+    def get_minimum_vote_cnt(self):
+        # note: can't be None as the other options because aggregation does not happen on DB level
+        return PollOptionReply.objects.filter(poll_option=self).aggregate(mood_value=self.poll.mood_value_min).count()
 
     def get_mood_blame(self):
         sum = PollOptionReply.objects.filter(poll_option=self, mood_value__lt=0).aggregate(Sum('mood_value'))['mood_value__sum']

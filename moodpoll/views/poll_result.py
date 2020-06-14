@@ -19,8 +19,8 @@ class PollResultView(View):
             'poll': poll,
             'poll_options': poll_options,
             'poll_replies': poll_replies,
-            'mood_bar_min': poll.min_mood_value * len(poll_replies),
-            'mood_bar_max': poll.max_mood_value * len(poll_replies),
+            'mood_bar_min': poll.mood_value_min * len(poll_replies),
+            'mood_bar_max': poll.mood_value_max * len(poll_replies),
         }
 
         return render(request, "moodpoll/poll/poll_result.html", context)
@@ -37,7 +37,7 @@ def get_mood_sums(poll):
             mood_praise=Coalesce(Sum('mood_value', filter=Q(mood_value__gt=0)), 0),
             mood_blame=Coalesce(Sum('mood_value', filter=Q(mood_value__lt=0)), 0),
             mood_neutrals=Coalesce(Count('mood_value', filter=Q(mood_value=0)), 0),
-            mood_vetos=Coalesce(Count('mood_value', filter=Q(mood_value=settings.MIN_MOOD_VALUE)), 0),
+            mood_vetos=Coalesce(Count('mood_value', filter=Q(mood_value=settings.MOOD_VALUE_MIN)), 0),
             mood_votes=Coalesce(Count('mood_value'), 0)
             )
 

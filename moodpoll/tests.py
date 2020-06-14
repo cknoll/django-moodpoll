@@ -97,7 +97,7 @@ class TestModels(TestCase):
 
         poll = models.Poll.objects.first()
 
-        self.assertEqual(poll.min_mood_value, settings.MIN_MOOD_VALUE)
+        self.assertEqual(poll.mood_value_min, settings.MOOD_VALUE_MIN)
 
 
 class TestSimplePages(TestCase):
@@ -296,7 +296,7 @@ class TestViews(TestCase):
         response = self.client.get(url)
         form = get_first_form(response)
 
-        vote_data1 = {**self.vote_data1, "option_5": poll.min_mood_value}
+        vote_data1 = {**self.vote_data1, "option_5": poll.mood_value_min}
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
         response = self.client.post(url, post_data)
 
@@ -308,13 +308,6 @@ class TestViews(TestCase):
                 self.assertEqual(po.get_vetos(), 1)
             else:
                 self.assertEqual(po.get_vetos(), 0)
-
-        poll.min_eq_veto = False
-        poll.save()
-
-        # expect zero vetos
-        for i, po in enumerate(models.PollOption.objects.filter(poll=poll)):
-            self.assertEqual(po.get_vetos(), 0)
 
 
 # ------------------------------------------------------------------------

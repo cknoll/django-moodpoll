@@ -97,9 +97,8 @@ app_settings = {
     "ALLOWED_HOSTS": allowed_hosts,
     "STATIC_ROOT": static_root_dir,
     "TIME_ZONE": TIME_ZONE,
-    "MAX_MOOD_VALUE": 2,
-    "MIN_MOOD_VALUE": -3,
-    "MIN_EQ_VETO": True
+    "MOOD_VALUE_MAX": 2,
+    "MOOD_VALUE_MIN": -3,
     }
 
 # generate the file site_specific_settings.py from the above dictionary
