@@ -32,11 +32,6 @@
                                     <i class="material-icons">sentiment_very_dissatisfied</i>
                                 </span>
                             </div>
-                            <div class="column col-2">
-                                <span class="tooltip" data-tooltip="vetos">
-                                    <i class="material-icons">cancel</i>
-                                </span>
-                            </div>
                         </div>
                     </div>
                     <div class="column col-6 col-sm-12">
@@ -77,11 +72,17 @@
                             <div class="column col-2 text-right">
                                 {{option.get_mood_praise|add_num_prefix}}
                             </div>
-                            <div class="column col-2">
+                            <div class="column col-4">
                                 {{option.get_mood_blame|add_num_prefix}}
-                            </div>
-                            <div class="column col-2">
-                                {{option.get_vetos}}
+
+                                {% if option.get_minimum_vote_cnt %}
+                                <span class="nobr ml-2 pl-2">
+                                    <span class="tooltip" data-tooltip="vetos">
+                                        <i class="material-icons">pan_tool</i>
+                                    </span>
+                                    x {{ option.get_minimum_vote_cnt }}
+                                    {% endif %}
+                                </span>
                             </div>
                         </div>
                     </div>

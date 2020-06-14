@@ -110,3 +110,7 @@ textarea ~ .form-icon.material-icons {
     border-right: white 1px solid;
     overflow:hidden;
 }
+
+.nobr {
+    white-space: nowrap;
+}

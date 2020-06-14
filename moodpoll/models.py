@@ -63,7 +63,7 @@ class PollOption(models.Model):
 
     def get_minimum_vote_cnt(self):
         # note: can't be None as the other options because aggregation does not happen on DB level
-        return PollOptionReply.objects.filter(poll_option=self).aggregate(mood_value=self.poll.mood_value_min).count()
+        return PollOptionReply.objects.filter(poll_option=self, mood_value=self.poll.mood_value_min).count()
 
     def get_mood_blame(self):
         sum = PollOptionReply.objects.filter(poll_option=self, mood_value__lt=0).aggregate(Sum('mood_value'))['mood_value__sum']
