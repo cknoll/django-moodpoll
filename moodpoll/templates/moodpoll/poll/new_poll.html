@@ -26,7 +26,20 @@ New Poll
                 </div>
             </div>
 
-            <div class="form-group">
+            <input type="checkbox" id="moodpoll-poll-settings-visible" class="moodpoll-collapsible">
+            <div class="form-group col-12">
+                <label class="btn btn-sm btn-action moodpoll-expand-btn mr-2" for="moodpoll-poll-settings-visible">
+                    <i class="material-icons">expand_more</i>
+                </label>
+                <label class="btn btn-sm btn-action moodpoll-collapse-btn mr-2" for="moodpoll-poll-settings-visible">
+                    <i class="material-icons">expand_less</i>
+                </label>
+                Additional Settings
+            </div>
+
+            <div class="divider moodpoll-collapsible-flex"></div>
+
+            <div class="form-group moodpoll-collapsible-flex">
                 <label class="form-label col-2 col-sm-12" for="description">
                     Description
                 </label>
@@ -37,12 +50,38 @@ markdown is enabled"></textarea>
                 </div>
             </div>
 
-            <!-- 
-            <label for="replies_hidden">
-                Hide Replies
-            </label>
-            <input type="checkbox" name="replies_hidden" id="replies_hidden">
-            -->
+            <div class="form-group moodpoll-collapsible-flex">
+                <div class="col-12">
+                    <h6>Range of Votes</h6>
+                </div>
+                <div class="col-12 pl-2">
+                    <p>
+                        Numbers less than 0 mean disagreement, greater 0 agreement.
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-group moodpoll-collapsible-flex">
+                <label class="form-label col-2 col-sm-12 pl-2" for="mood_value_max">
+                    Maximum
+                </label>
+                <div class="has-icon-left col-10 col-sm-12">
+                    <input type="number" min="0" class="form-input col-12" id="mood_value_max" name="mood_value_max" value="{{settings_mood_value_max}}">
+                    <i class="form-icon icon material-icons">publish</i>
+                </div>
+            </div>
+
+            <div class="form-group moodpoll-collapsible-flex">
+                <label class="form-label col-2 col-sm-12 pl-2" for="mood_value_min">
+                    Minimum
+                </label>
+                <div class="has-icon-left col-10 col-sm-12">
+                    <input type="number" max="0" class="form-input col-12" id="mood_value_min" name="mood_value_min" value="{{settings_mood_value_min}}">
+                    <i class="form-icon icon material-icons">get_app</i>
+                </div>
+            </div>
+
+            <div class="divider moodpoll-collapsible-flex"></div>
 
             <div class="form-group">
                 <label class="form-label col-2 col-sm-12" for="options">

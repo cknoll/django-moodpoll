@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.views import View
 from django.utils import timezone
 from django.db import transaction
+from django.conf import settings
 from .. import models
 from random import randrange
 
@@ -27,6 +28,18 @@ def fill_poll_from_post(post):
     # http will transmit a field only if the checkbox is checked
     new_poll.replies_hidden = 'replies_hidden' in post
 
+    try:
+        if 'mood_value_min' in post and int(post['mood_value_min']) <= 0:
+            new_poll.mood_value_min = int(post['mood_value_min'])
+    except ValueError:
+        pass
+
+    try:
+        if 'mood_value_max' in post and int(post['mood_value_max']) >= 0:
+            new_poll.mood_value_max = int(post['mood_value_max'])
+    except ValueError:
+        pass
+
     return new_poll
 
 
@@ -49,7 +62,10 @@ def save_poll_and_create_options(poll, options_array):
     
 class NewPollView(View):
     def get(self, request):
-        context = {}
+        context = {
+            'settings_mood_value_min': settings.MOOD_VALUE_MIN,
+            'settings_mood_value_max': settings.MOOD_VALUE_MAX,
+        }
         return render(request, "moodpoll/poll/new_poll.html", context)
 
     def post(self, request):

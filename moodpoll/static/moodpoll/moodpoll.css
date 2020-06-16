@@ -20,7 +20,19 @@ textarea ~ .form-icon.material-icons {
     vertical-align: middle;
 }
 
-.moodpoll-collapsible:checked ~ div {
+input.moodpoll-collapsible {
+    display: none;
+}
+
+div.moodpoll-collapsible-flex {
+    display: none !important;
+}
+
+.moodpoll-collapsible:checked ~ div.moodpoll-collapsible-flex {
+    display: flex !important;
+}
+
+.moodpoll-collapsible:checked ~ div.moodpoll-collapsible-block {
     display: block !important;
 }
 
