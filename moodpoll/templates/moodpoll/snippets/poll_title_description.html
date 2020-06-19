@@ -1,15 +1,66 @@
 {% load extra_filters %}
+{% load extra_tags %}
 
-{% if poll.title %}
-<h2>{{poll.title}}</h2>
-{% endif %}
+<div class="column col-12">
+    <div class="columns">
+        {% if poll.title %}
+        <div class="col-12">
+            <h2>{{poll.title}}</h2>
+        </div>
+        {% endif %}
 
-{% if poll.description %}
-<div class="poll_description">
-    {{poll.description|render_markdown_bleach|safe}}
+
+        {% if poll.description %}
+        <div class="col-12">
+            {{poll.description|render_markdown_bleach|safe}}
+        </div>
+        {% endif %}
+
+        <div class="col-12">
+            <div class="columns">
+                
+                <div class="col-sm-12 col-8 mb-2">
+                    <span class="input-prefix">
+                        Share this poll via this link:
+                    </span>
+                    <div class="input-group input-group-restrict-width">
+                        <div class="has-icon-left">
+                            <input type="text" id="share-link" class="form-input" value="{% get_poll_link poll request %}" onclick="link_select()" readonly>
+                            <i class="form-icon material-icons">link</i>
+                        </div>
+                        <script>
+                         function link_select() {
+                             el = document.getElementById('share-link')
+                             el.select()
+                             el.setSelectionRange(0, 9999999)
+                         }
+
+                         function link_copy() {
+                             link_select()
+                             document.execCommand('copy')
+                         }
+                        </script>
+                        <button class="btn input-group-btn" type="button" onclick="link_copy()">
+                            <i class="form-icon material-icons">content_copy</i>
+                            Copy
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 col-4 mb-2 text-right" style="vertical-align: bottom">
+                    <div class="btn-bottom-pusher"></div>
+                    <a href="{% url 'show_poll' pk=poll.pk key=poll.key %}" class="btn btn-sm btn-link">
+                        Vote
+                    </a>
+                    <a href="{% url 'poll_result' pk=poll.pk key=poll.key %}" class="btn btn-sm btn-link">
+                        Results
+                    </a>
+                </div>
+
+
+                <div class="divider col-12"></div>
+            </div>
+        </div>
+
+    </div>
 </div>
-{% endif %}
-
-{% if poll.description or poll.title %}
-<hr class="hr_style_gradient opacity30">
-{% endif %}

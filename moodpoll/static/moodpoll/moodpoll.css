@@ -126,3 +126,28 @@ div.moodpoll-collapsible-flex {
 .nobr {
     white-space: nowrap;
 }
+
+.input-group .has-icon-left {
+    flex: 1 1 auto;
+    width: 1%
+}
+
+.input-group .has-icon-left input {
+    width: 100%;
+}
+
+.input-group-restrict-width {
+    max-width: 18rem;
+}
+
+.input-prefix {
+    vertical-align: middle;
+    line-height: 1.8rem;
+}
+
+.btn-bottom-pusher {
+    width: 1px;
+    height: 100%;
+    vertical-align: bottom;
+    display: inline-block;
+}

@@ -3,6 +3,7 @@ from django.views import View
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.http import HttpRequest
 from .. import models
 from ..utils import get_poll_or_4xx
 
@@ -15,6 +16,7 @@ class ShowPollView(View):
         context = {
             'poll': poll,
             'options': poll_options,
+            'request': request,
         }
 
         return render(request, "moodpoll/poll/show_poll.html", context)

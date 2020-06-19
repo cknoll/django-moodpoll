@@ -21,6 +21,7 @@ class PollResultView(View):
             'poll_replies': poll_replies,
             'mood_bar_min': poll.mood_value_min * len(poll_replies),
             'mood_bar_max': poll.mood_value_max * len(poll_replies),
+            'request': request,
         }
 
         return render(request, "moodpoll/poll/poll_result.html", context)
