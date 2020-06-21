@@ -27,7 +27,7 @@ Complete deployment should (at best) be a onliner.
 ```
 
 - run `python3 deploy.py local`
-    - If you plan to play arround with the source files you can symlink them instead of copy: `deploy.py  -l local`.
+    - If you plan to play arround with the source files you can symlink them instead of copy use: `python3 deploy.py  -l local`. To get a full list of options (like omiting tests, omiting backup, ...) use `python3 deploy.py  -h`.
 - go to `[project_root]/local_deployment/` and run `python3 manage.py runserver`
 - note: if you want to deploy inside a virtual environment you have to manage that yourself
 

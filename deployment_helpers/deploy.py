@@ -2,14 +2,22 @@ import time
 import os
 import secrets
 import re
+from packaging import version
 
+min_du_version = version.parse("0.0.4")
 try:
     # this is not listed in the requirements because it is not needed on the deployment server
     # noinspection PyPackageRequirements,PyUnresolvedReferences
     import deploymentutils as du
+
+    vsn = version.parse(du.__version__)
+    if vsn < min_du_version:
+        print(f"You need to install `deploymentutils` in version {min_du_version} or later. Quit.")
+        exit()
+
+
 except ImportError as err:
     print("You need to install the package `deploymentutils` to run this script.")
-    exit()
 
 from ipydex import IPS, activate_ips_on_exception
 
@@ -66,6 +74,7 @@ app_path = os.path.join(repo_base_dir, app_name)
 du.argparser.add_argument("-o", "--omit-tests", help="omit test execution (e.g. for dev branches)", action="store_true")
 du.argparser.add_argument("-x", "--omit-backup",
                           help="omit db-backup (avoid problems with changed models)", action="store_true")
+du.argparser.add_argument("-p", "--purge", help="purge target directory before deploying", action="store_true")
 
 args = du.parse_args()
 
@@ -112,7 +121,7 @@ du.render_template(tmpl_path, context=dict(user=user, deployment_dir=target_depl
 
 # TODO: make a backup of the remote-data
 # print a warning for data destruction
-du.warn_user(app_name, args.target, args.unsafe)
+du.warn_user(app_name, args.target, args.unsafe, deployment_path=target_deployment_path)
 
 
 c = du.StateConnection(remote, user=user, target=args.target)
@@ -144,6 +153,17 @@ if args.initial:
 
         assert "uwsgi" in res1.stdout
         assert "RUNNING" in res1.stdout
+
+if args.purge:
+    if not args.omit_backup:
+        print("\n", du.bred("  The `--purge` option explicitly requires the `--omit-backup` option. Quit."), "\n")
+        exit()
+    else:
+        answer = input(f"purging <{args.target}>/{target_deployment_path} (y/N)")
+        if answer != "y":
+            print(du.bred("Aborted."))
+            exit()
+        c.run(f"rm -r {target_deployment_path}", target_spec="both")
 
 print("\n", "ensure that deployment path exists", "\n")
 c.run(f"mkdir -p {target_deployment_path}", target_spec="both")
