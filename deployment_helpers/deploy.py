@@ -235,10 +235,6 @@ c.run('rm -f db.sqlite3', target_spec="both")
 # this creates the new database
 c.run('python3 manage.py migrate', target_spec="both")
 
-if not args.omit_tests:
-    print("\n", "run tests", "\n")
-    c.run('python3 manage.py test moodpoll', target_spec="both")
-
 # TODO: this should be simplified to f"python3 manage.py loaddata {init_fixture_path}"
 print("\n", "install initial data", "\n")
 
@@ -247,7 +243,10 @@ c.run(f"python3 manage.py loaddata {init_fixture_path}", target_spec="both")
 print("\n", "copy static files to final location", "\n")
 c.run('python3 manage.py collectstatic --no-input', target_spec="remote")
 
-print(final_msg)
+
+if not args.omit_tests:
+    print("\n", "run tests", "\n")
+    c.run('python3 manage.py test moodpoll', target_spec="both")
 
 if args.target == "local":
     print("\n", f"now you can go to {target_deployment_path} and run `python3 manage.py runserver", "\n")
@@ -255,3 +254,4 @@ else:
     print("\n", "restart uwsgi service", "\n")
     c.run(f"supervisorctl restart uwsgi", target_spec="remote")
 
+print(final_msg)
