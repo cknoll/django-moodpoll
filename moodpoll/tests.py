@@ -291,7 +291,7 @@ class TestViews(TestCase):
 
         # no vetos up to now
         for po in models.PollOption.objects.filter(poll=poll):
-            self.assertEqual(po.get_vetos(), 0)
+            self.assertEqual(po.get_minimum_vote_cnt(), 0)
 
         response = self.client.get(url)
         form = get_first_form(response)
@@ -305,9 +305,9 @@ class TestViews(TestCase):
 
             if po.id == 5:
                 # corresponds to option_5 above
-                self.assertEqual(po.get_vetos(), 1)
+                self.assertEqual(po.get_minimum_vote_cnt(), 1)
             else:
-                self.assertEqual(po.get_vetos(), 0)
+                self.assertEqual(po.get_minimum_vote_cnt(), 0)
 
 
 # ------------------------------------------------------------------------
@@ -432,7 +432,12 @@ def generate_post_data_for_form(form, default_value="xyz", spec_values=None):
         post_data[f.attrs['name']] = f.attrs['value']
 
     for f in fields:
-        name = f.attrs['name']
+        name = f.attrs.get('name')
+
+        if name is None:
+            # ignore fields without a name (relevant for dropdown checkbox)
+            continue
+
         if name.startswith("captcha"):
             # special case for captcha fields (assume CAPTCHA_TEST_MODE=True)
             post_data[name] = "passed"
