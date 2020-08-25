@@ -27,7 +27,6 @@ class ShowPollView(View):
 
         # TODO randomize key
         poll_reply = models.PollReply(
-            key=1,
             user_name='Anonymous',
             poll=poll,
         )

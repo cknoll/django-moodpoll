@@ -3,16 +3,20 @@ from django.utils import timezone
 from django.db.models import Count, Sum, Q
 from django.db.models.functions import Coalesce
 from django.conf import settings
+from random import randrange
 
 # Todo: the models need servere refactoring!
 
+def get_rdm_key():
+    # note: copied from django doc
+    return randrange(1, 2147483647)
 
 class Poll(models.Model):
     id = models.AutoField(primary_key=True)
     creation_datetime = models.DateTimeField(null=False, default=timezone.now,)
     title = models.CharField(max_length=200, null=True, blank=False,)
     description = models.CharField(max_length=500, null=True, blank=False,)
-    key = models.PositiveIntegerField(null=False,)
+    key = models.PositiveIntegerField(null=False, default=get_rdm_key,)
     replies_hidden = models.BooleanField(null=False, default=False,)
 
     # configuration values
@@ -24,8 +28,22 @@ class PollReply(models.Model):
     id = models.AutoField(primary_key=True)
     update_datetime = models.DateTimeField(null=False, default=timezone.now,)
     user_name = models.CharField(max_length=50, null=True, blank=False,)
-    key = models.PositiveIntegerField(null=False,)
+    key = models.PositiveIntegerField(null=False,default=get_rdm_key,)
     poll = models.ForeignKey('Poll', on_delete=models.CASCADE, null=False,)
+
+    def get_cancel_time_left(self):
+        # can be cancelled if < 120s since submission
+        delta = timezone.now() - self.update_datetime
+        return 120 - delta.seconds
+
+    def is_cancelable(self):
+        return self.get_cancel_time_left() > 0
+
+    def cancel(self):
+        if not self.is_cancelable():
+            return
+
+        self.delete()
 
 
 class PollOption(models.Model):

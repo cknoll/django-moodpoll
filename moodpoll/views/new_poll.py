@@ -4,7 +4,6 @@ from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
 from .. import models
-from random import randrange
 
 def tidy_options(text):
     '''split given multiline string on newline, remove leading/trailing spaces, remove empty lines'''
@@ -43,11 +42,6 @@ def fill_poll_from_post(post):
     return new_poll
 
 
-def get_rdm_key():
-    # note: copied from django doc
-    return randrange(1, 2147483647)
-
-
 def save_poll_and_create_options(poll, options_array):
     '''save poll object and create options from given array'''
     poll.save()
@@ -76,8 +70,6 @@ class NewPollView(View):
             options_tidy = tidy_options(request.POST['options'])
         if 0 == len(options_tidy):
             raise NotImplementedError
-
-        new_poll.key = get_rdm_key()
 
         # all params checked, create
         with transaction.atomic():

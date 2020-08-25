@@ -143,12 +143,44 @@
             {% for reply in poll_replies %}
             <li>
                 {{ reply.user_name }}
+                {% if reply.is_cancelable %}
+                <form method="post" action="{% url 'reply_cancel' pk=reply.pk key=reply.key %}" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-link">
+                        cancel:
+                        <span class="moodpoll-sec-counter">
+                            {{ reply.get_cancel_time_left }}
+                        </span>
+                        seconds left
+                    </button>
+                </form>
+                {% endif %}
             </li>
                 
             {% endfor %}
         </ul>
     </div>
 </div>
+
+<script>
+ function dec_sec() {
+     console.log('timer')
+     elements = document.querySelectorAll('.moodpoll-sec-counter') 
+     if (0 == elements.length) {
+         clearInterval(timer_sec)
+     }
+
+     elements.forEach(function (el){
+         el.innerText -= 1;
+         if (el.innerText <= 0) {
+             // rm form
+             el.parentElement.parentElement.remove()
+         }
+     })
+ }
+
+ var timer_sec = setInterval(dec_sec, 1000);
+</script>
 
 
 {% endblock %}
