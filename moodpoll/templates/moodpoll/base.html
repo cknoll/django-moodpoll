@@ -33,10 +33,13 @@
             
         <main class="columns">
             <div class="column col-mx-auto col-9 col-md-11 col-xs-12">
+                {% block toasts %}
+                {% include "moodpoll/snippets/toasts.html" with keep_toasts=True %}
+                {% endblock %}
+
                 {% block content %}
                 If you can see this, please file a bug report.
                 {% endblock %}
-
             </div>
         </main>
 
@@ -47,3 +50,6 @@
         </footer>
     </body>
 </html>
+
+{# toasts have been printed, but not cleared yet. do that #}
+{% include "moodpoll/snippets/toasts.html" with not_print_toasts=True %}

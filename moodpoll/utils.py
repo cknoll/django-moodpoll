@@ -75,3 +75,18 @@ def get_poll_or_4xx(pk, key):
         raise PermissionDenied()
 
     return poll
+
+
+def init_session_toasts(request):
+    """init structure of session to hold toasts"""
+    if not 'toasts' in request.session:
+        request.session['toasts'] = {}
+
+    if not 'error' in request.session['toasts']:
+        request.session['toasts']['error'] = []
+    if not 'warning' in request.session['toasts']:
+        request.session['toasts']['warning'] = []
+    if not 'info' in request.session['toasts']:
+        request.session['toasts']['info'] = []
+    if not 'success' in request.session['toasts']:
+        request.session['toasts']['success'] = []

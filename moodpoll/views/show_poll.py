@@ -16,7 +16,6 @@ class ShowPollView(View):
         context = {
             'poll': poll,
             'options': poll_options,
-            'request': request,
         }
 
         return render(request, "moodpoll/poll/show_poll.html", context)

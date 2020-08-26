@@ -2,6 +2,8 @@
 {% load extra_tags %}
 
 {% block title %}{{c.poll.title}}{% endblock %}
+{% block toasts %}{# toasts are displayed not in the default block #}{% endblock %}
+
 {% block content %}
 
 {# leave comment in html which will be recognized by unittest#}

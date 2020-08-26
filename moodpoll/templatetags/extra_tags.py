@@ -1,5 +1,6 @@
 from django import template
 from django.urls import reverse
+from ..utils import init_session_toasts
 
 register = template.Library()
 
@@ -26,3 +27,10 @@ def get_poll_link(poll, request):
     path = reverse('show_poll', kwargs=urlargs)
 
     return request.build_absolute_uri(path)
+
+@register.simple_tag
+def pop_toasts(request):
+    init_session_toasts(request)
+    request.session.pop('toasts')
+
+    return ""

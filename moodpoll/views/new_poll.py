@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
 from .. import models
+from ..helpers import toasts as t
 
 def tidy_options(text):
     '''split given multiline string on newline, remove leading/trailing spaces, remove empty lines'''
@@ -60,6 +61,7 @@ class NewPollView(View):
             'settings_mood_value_min': settings.MOOD_VALUE_MIN,
             'settings_mood_value_max': settings.MOOD_VALUE_MAX,
         }
+
         return render(request, "moodpoll/poll/new_poll.html", context)
 
     def post(self, request):

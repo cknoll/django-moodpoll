@@ -1,0 +1,33 @@
+{% load extra_tags %}
+
+{% if not not_print_toasts %}
+
+{% for text in request.session.toasts.error %}
+<div class="toast toast-error my-1">
+    {{text}}
+</div>
+{% endfor %}
+
+{% for text in request.session.toasts.warning %}
+<div class="toast toast-warning my-1">
+    {{text}}
+</div>
+{% endfor %}
+
+{% for text in request.session.toasts.info %}
+<div class="toast toast-primary my-1">
+    {{text}}
+</div>
+{% endfor %}
+
+{% for text in request.session.toasts.success %}
+<div class="toast toast-success my-1">
+    {{text}}
+</div>
+{% endfor %}
+
+{% endif %}
+
+{% if not keep_toasts %}
+{% pop_toasts request %}
+{% endif %}

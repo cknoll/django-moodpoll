@@ -7,6 +7,7 @@ from django.db.models.functions import Coalesce
 from django.conf import settings
 from .. import models
 from ..utils import get_poll_or_4xx
+from ..helpers import toasts as t
 
 
 class PollResultView(View):
@@ -21,7 +22,6 @@ class PollResultView(View):
             'poll_replies': poll_replies,
             'mood_bar_min': poll.mood_value_min * len(poll_replies),
             'mood_bar_max': poll.mood_value_max * len(poll_replies),
-            'request': request,
         }
 
         return render(request, "moodpoll/poll/poll_result.html", context)

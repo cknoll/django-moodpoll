@@ -3,6 +3,8 @@
 {% load extra_tags %}
 {% load extra_filters %}
 
+{% block toasts %}{# toasts are displayed not in the default block #}{% endblock %}
+
 {% block title %}Result:{{c.poll.title}}{% endblock %}
 {% block content %}
 
