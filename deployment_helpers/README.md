@@ -45,7 +45,7 @@ Note: We describe deployment on uberspace because from what we know it provides 
 
 - Create an [uberspace](https://uberspace.de)-account (first month is free), then pay what you like.
 - Set up your ssh key in the webfrontend
-- Locally `pip install deployment_requirements.txt`
+- Locally run `pip install deployment_requirements.txt`
 
 ### Deployment
 
