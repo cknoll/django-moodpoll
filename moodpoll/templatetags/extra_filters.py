@@ -4,7 +4,7 @@ import bleach
 # from moodpoll.release import __version__
 
 register = template.Library()
-bleach.sanitizer.ALLOWED_TAGS += ["p", "br"]
+bleach.sanitizer.ALLOWED_TAGS += ["p", "br", "h1", "h2", "h3", "h4"]
 
 
 @register.filter
