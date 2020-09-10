@@ -1,7 +1,7 @@
 # moodpoll
 App for **easy and good decision making**.
 
-<!-- Note: this file contains some comment-markers which enable the reusage of the text-content at sober-arguments.net/about  -->
+<!-- Note: This file contains some comment-markers which enable the reusage of the text-content at the testing instance  -->
 <!-- marker_1 -->
 
 *Easy* because creating a poll and taking part is fast and self-explaining.
@@ -9,6 +9,8 @@ App for **easy and good decision making**.
 *Good* because it becomes clear, which options raise the most support and which raise the most resistance inside the group. This insight enables wiser decisions and more focused discussions.
 
 <!-- marker_2 -->
+
+Testing instance: [moodpoll.uber.space/](https://moodpoll.uber.space/).
 
 ## Challenge
 
@@ -43,10 +45,5 @@ While in this situation (few voters, few options) "ordinary communication" would
 
 The app is currently in *minimum viable product*-state. It should be applicable for the basic use case but obviously is not finished.
 
-Some missing features:
-
-- Graphical visualization of the results
-- Sorting options of the results
-- Protecting polls against unwanted read/write-access
-- Internationalization
+For planned but yet missing features see the [list of issues](https://codeberg.org/cknoll/django-moodpoll/issues)
 
