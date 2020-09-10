@@ -8,9 +8,13 @@ New Poll
 
 {% block content %}
 
+{# !!hcl #}
+<p><code>moodpoll</code> is an app for easy and good decision making. <a href="/about"> Learn more.</a></p>
+<div class="divider"></div>
+
 <div class="columns">
     <div class="column col-12">
-        
+
         <form action="" method="post" class="form-horizontal">
             {% csrf_token %}
             <h3>

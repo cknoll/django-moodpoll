@@ -9,7 +9,7 @@ from .views.poll_reply_cancel import PollReplyCancelView
 from . import views_monolith as views
 
 urlpatterns = [
-  url(r'^$', views.view_simple_page, name='landing-page', kwargs={"pagetype": "landing"}),
+  url(r'^$', NewPollView.as_view(), name='landing-page'),
   path('new', NewPollView.as_view(), name='new_poll'),
   path('show/<int:pk>/<int:key>', ShowPollView.as_view(), name='show_poll'),
   path('res/<int:pk>/<int:key>', PollResultView.as_view(), name='poll_result'),
