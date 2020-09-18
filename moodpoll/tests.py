@@ -1,6 +1,4 @@
-import unittest
 from bs4 import BeautifulSoup
-import time
 from django.test import TestCase
 from django.urls import reverse
 from django.conf import settings
@@ -10,6 +8,7 @@ from . import models
 from .views import poll_result
 from . import views_monolith
 
+# noinspection PyUnresolvedReferences
 from ipydex import IPS
 
 """
@@ -19,6 +18,10 @@ python3 manage.py test moodpoll --nocapture --ips
 
 # one single test
 python3 manage.py test --nocapture --rednose --ips moodpoll.tests:TestViews.test_show_poll
+
+# with alias:
+pmrn moodpoll.tests:TestViews.test_show_poll
+
 
 this assumes these settings
 
@@ -38,20 +41,6 @@ global_fixtures = ['for_unit_tests/data.json']
 
 # admin account only for unit tests
 global_login_data_admin = dict(username="admin", password="ahfahHe8")
-
-
-class TestApp1(TestCase):
-
-    def _test_interactive(self):
-        option_list = ["Option 1",
-                       "Option 2",
-                       "Option 3",
-                       "Option 4",
-                       "Option 'A'",
-                       'Option "B"',
-                       "Option Ä",
-                       ]
-        IPS()
 
 
 class TestHelperFuncs(TestCase):
@@ -95,6 +84,7 @@ class TestModels(TestCase):
 
     def testPollConfiguration(self):
 
+        # noinspection PyUnresolvedReferences
         poll = models.Poll.objects.first()
 
         self.assertEqual(poll.mood_value_min, settings.MOOD_VALUE_MIN)
@@ -246,6 +236,8 @@ class TestViews(TestCase):
         response = self.client.post(url, post_data)
 
         self.assertEqual(response.status_code, 302)
+
+        # noinspection PyUnusedLocal
         response = self.client.get(response.url)
         voters = poll_result.get_voters(poll)
         self.assertEqual(len(voters), 2)
@@ -290,6 +282,7 @@ class TestViews(TestCase):
         poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
 
         # no vetos up to now
+        # noinspection PyUnresolvedReferences
         for po in models.PollOption.objects.filter(poll=poll):
             self.assertEqual(po.get_minimum_vote_cnt(), 0)
 
@@ -298,9 +291,11 @@ class TestViews(TestCase):
 
         vote_data1 = {**self.vote_data1, "option_5": poll.mood_value_min}
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        # noinspection PyUnusedLocal
         response = self.client.post(url, post_data)
 
         # expect exactly one veto
+        # noinspection PyUnresolvedReferences
         for po in models.PollOption.objects.filter(poll=poll):
 
             if po.id == 5:
@@ -447,4 +442,3 @@ def generate_post_data_for_form(form, default_value="xyz", spec_values=None):
     post_data.update(spec_values)
 
     return post_data
-
