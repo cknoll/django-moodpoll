@@ -13,7 +13,7 @@ def tidy_options(text):
         stripped = line.strip()
         if '' != stripped:
             options_tidied.append(stripped)
-    
+
     return options_tidied
 
 
@@ -54,7 +54,30 @@ def save_poll_and_create_options(poll, options_array):
             )
         poll_option.save()
 
-    
+
+def process_special_options(poll, option_list):
+    """
+    Some options might not be poll options, but contain other information (such as the title).
+    They are handled here.
+
+    :param poll:
+    :param option_list:
+    :return: None (Note: the option list might be altered (special options are removed))
+    """
+
+    # if the first option starts with `#` and poll has no title yet, then the first option
+    # is interpreted as the title
+
+    from ipydex import IPS
+    if option_list[0].startswith("#") and \
+       len(option_list) > 1 and not poll.title:
+
+        title_candidate = option_list[0][1:].strip()
+        if len(title_candidate) > 0:
+            poll.title = title_candidate
+            option_list.pop(0)
+
+
 class NewPollView(View):
     def get(self, request):
         context = {
@@ -66,10 +89,15 @@ class NewPollView(View):
 
     def post(self, request):
         new_poll = fill_poll_from_post(request.POST)
-        
+
         options_tidy = []
         if 'options' in request.POST:
             options_tidy = tidy_options(request.POST['options'])
+        if 0 == len(options_tidy):
+            raise NotImplementedError
+
+        process_special_options(new_poll, options_tidy)
+
         if 0 == len(options_tidy):
             raise NotImplementedError
 

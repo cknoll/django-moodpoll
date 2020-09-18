@@ -135,7 +135,7 @@ class TestViews(TestCase):
         # form, action_url = get_form_by_action_url(response1, "new_poll")
         form = get_first_form(response1)
 
-        form_values = {"title": "unittest_poll", "description": "", "optionlist": "a\nb\nc"}
+        form_values = {"title": "unittest_poll", "description": "", "options": "a\nb\nc"}
         post_data = generate_post_data_for_form(form, spec_values=form_values)
 
         # this causes a redirect (status-code 302)
@@ -144,6 +144,30 @@ class TestViews(TestCase):
         response3 = self.client.get(response2.url)
         # self.assertContains(response3, "utc_new_poll")
         self.assertContains(response3, "utc_show_poll")
+
+    def test_new_poll_with_inline_title(self):
+        new_poll_url = reverse('new_poll')
+        response1 = self.client.get(new_poll_url)
+        self.assertEqual(response1.status_code, 200)
+
+        # form, action_url = get_form_by_action_url(response1, "new_poll")
+        form = get_first_form(response1)
+
+        # specify the title as a special option
+        form_values = {"title": "", "options": "# test-title_ABC\na\nb\nc"}
+        post_data = generate_post_data_for_form(form, spec_values=form_values)
+
+        # this causes a redirect (status-code 302)
+        response2 = self.client.post(new_poll_url, post_data)
+
+        self.assertEqual(response2.status_code, 302)
+        response3 = self.client.get(response2.url)
+        # self.assertContains(response3, "utc_new_poll")
+        self.assertContains(response3, "utc_show_poll")
+
+        # noinspection PyUnresolvedReferences
+        poll = models.Poll.objects.last()
+        self.assertEquals(poll.title, "test-title_ABC")
 
     def test_new_poll_with_md_description(self):
         new_poll_url = reverse('new_poll')
@@ -154,7 +178,7 @@ class TestViews(TestCase):
         self.assertIsNotNone(form)
 
         md_description = "*test123* see: <https://example.com>"
-        form_values = {"title": "unittest_poll", "description": md_description, "optionlist": "a\nb\nc"}
+        form_values = {"title": "unittest_poll", "description": md_description, "options": "a\nb\nc"}
         post_data = generate_post_data_for_form(form, spec_values=form_values)
 
         # this causes a redirect (status-code 302)
