@@ -6,7 +6,7 @@ from django.db.models import Sum, Q, F, Count
 from django.db.models.functions import Coalesce
 from django.conf import settings
 from .. import models
-from ..utils import get_poll_or_4xx
+from ..utils import get_poll_or_4xx, init_session_reply_list
 from ..helpers import toasts as t
 
 
@@ -15,6 +15,8 @@ class PollResultView(View):
         poll = get_poll_or_4xx(pk, key)
         poll_options = models.PollOption.objects.filter(poll=poll)
         poll_replies = models.PollReply.objects.filter(poll=poll)
+
+        init_session_reply_list(request)
 
         context = {
             'poll': poll,

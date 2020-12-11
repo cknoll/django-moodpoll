@@ -90,3 +90,17 @@ def init_session_toasts(request):
         request.session['toasts']['info'] = []
     if not 'success' in request.session['toasts']:
         request.session['toasts']['success'] = []
+
+def init_session_reply_list(request):
+    """init structure of session to hold replies"""
+    if 'poll_replies' not in request.session:
+        request.session['poll_replies'] = []
+
+    cancelable = []
+
+    for pk in request.session['poll_replies']:
+        reply_list = models.PollReply.objects.filter(pk=pk)
+        if len(reply_list) == 1 and reply_list[0].is_cancelable():
+            cancelable.append(pk)
+
+    request.session['poll_replies'] = cancelable

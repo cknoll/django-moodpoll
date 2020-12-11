@@ -25,7 +25,7 @@
                         </div>
                         <div class="card-body">
                             <div class="has-icon-left" style="col-12">
-                                <input type="text" name="user_name" id="user_name" class="form-input" placeholder="Name" style="width:100%">
+                                <input type="text" name="user_name" id="user_name" class="form-input" placeholder="Name" style="width:100%" autocomplete="off">
                                 <i class="form-icon icon material-icons">person</i>
                             </div>
                         </div>
@@ -50,7 +50,7 @@
                                     </div>
                                     <div class="col-10 moodpoll-slider-bg-wrapper">
                                         <div class="moodpoll-slider-bg-input-div">
-                                            <input name="option_{{option.pk}}" type="range" class="slider" min="{{option.poll.mood_value_min}}" max="{{option.poll.mood_value_max}}" value="0">
+                                            <input name="option_{{option.pk}}" type="range" class="slider" min="{{option.poll.mood_value_min}}" max="{{option.poll.mood_value_max}}" value="0" autocomplete="off">
                                         </div>
                                         <div class="moodpoll-slider-bg-all">
                                             <div class="moodpoll-slider-bg-red" style="width: {% make_html_width poll.mood_value_min poll.mood_value_max 0 %}"></div>

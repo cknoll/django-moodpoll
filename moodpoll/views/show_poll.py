@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import HttpRequest
 from .. import models
-from ..utils import get_poll_or_4xx
+from ..utils import get_poll_or_4xx, init_session_reply_list
 from ..helpers import toasts as t
 
 
@@ -41,12 +41,12 @@ class ShowPollView(View):
             for option in poll_options:
                 htmlname = 'option_{}'.format(option.pk)
                 if htmlname not in request.POST:
-                    break
+                    continue
                 
                 mood_value = int(request.POST[htmlname])
                 # invalid mood values are not counted at all
                 if mood_value < option.poll.mood_value_min or mood_value > option.poll.mood_value_max:
-                    break
+                    continue
                 
                 option_reply = models.PollOptionReply(
                     poll_option=option,
@@ -54,6 +54,9 @@ class ShowPollView(View):
                     mood_value=mood_value,
                 )
                 option_reply.save()
+
+            init_session_reply_list(request)
+            request.session['poll_replies'].append(poll_reply.pk)
 
         t.success(request, 'vote submitted')
 
