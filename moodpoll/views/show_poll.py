@@ -33,6 +33,14 @@ class ShowPollView(View):
 
         if 'user_name' in request.POST and request.POST['user_name'] != '':
             poll_reply.user_name = request.POST['user_name']
+        else:
+            # add counter behind name for non-user-entered names
+            old_name = poll_reply.user_name
+            counter = 1
+            while models.PollReply.objects.filter(poll=poll, user_name='{} #{}'.format(old_name, counter)).count() > 0:
+                counter += 1
+
+            poll_reply.user_name = '{} #{}'.format(old_name, counter)
 
         with transaction.atomic():
             poll_reply.save()
