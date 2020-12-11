@@ -6,6 +6,7 @@ from django.db import transaction
 from django.http import HttpRequest
 from .. import models
 from ..utils import get_poll_or_4xx
+from ..helpers import toasts as t
 
 
 class ShowPollView(View):
@@ -53,6 +54,8 @@ class ShowPollView(View):
                     mood_value=mood_value,
                 )
                 option_reply.save()
+
+        t.success(request, 'vote submitted')
 
         return redirect(reverse("poll_result", kwargs={"pk": poll.pk, "key": poll.key}))
 
