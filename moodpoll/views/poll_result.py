@@ -26,6 +26,7 @@ class PollResultView(View):
             'mood_bar_max': poll.mood_value_max * len(poll_replies),
         }
 
+        # note: result will be hidden by view if not yet visible
         return render(request, "moodpoll/poll/poll_result.html", context)
 
 

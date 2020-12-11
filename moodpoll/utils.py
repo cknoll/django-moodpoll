@@ -10,6 +10,7 @@ from collections import defaultdict
 from django.shortcuts import get_object_or_404
 from . import models
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
 
 # noinspection PyUnresolvedReferences
 from ipydex import IPS, ST, ip_syshook, dirsearch, sys, activate_ips_on_exception
@@ -104,3 +105,27 @@ def init_session_reply_list(request):
             cancelable.append(pk)
 
     request.session['poll_replies'] = cancelable
+
+def get_number_and_unit(x, unit):
+    final_s = 's'
+    if 1 == x:
+        final_s = ''
+    return '{}  {}{}'.format(x, unit, final_s)
+
+def get_time_until(future, now=timezone.now()):
+    """return string describing how much time is left to the given time point"""
+    if future < now:
+        return 'passed'
+
+    delta = future - now
+
+    if delta.days > 7:
+        return get_number_and_unit(int(delta.days / 7), 'week')
+    if delta.days > 1:
+        return get_number_and_unit(delta.days, 'day')
+    if delta.seconds > 3600:
+        return get_number_and_unit(int(delta.seconds / 3600), 'hour')
+    if delta.seconds > 60:
+        return '{} min'.format(int(delta.seconds / 60))
+
+    return get_number_and_unit(delta.seconds, 'second')

@@ -14,6 +14,9 @@ class ShowPollView(View):
         poll = get_poll_or_4xx(pk, key)
         poll_options = models.PollOption.objects.filter(poll=poll)
 
+        if not poll.is_vote_possible():
+            return redirect(reverse("poll_result", kwargs={"pk": poll.pk, "key": poll.key}))
+
         context = {
             'poll': poll,
             'options': poll_options,
@@ -24,6 +27,9 @@ class ShowPollView(View):
     def post(self, request, pk, key):
         poll = get_poll_or_4xx(pk, key)
         poll_options = models.PollOption.objects.filter(poll=poll)
+
+        if not poll.is_vote_possible():
+            return redirect(reverse("poll_result", kwargs={"pk": poll.pk, "key": poll.key}))
 
         # TODO randomize key
         poll_reply = models.PollReply(

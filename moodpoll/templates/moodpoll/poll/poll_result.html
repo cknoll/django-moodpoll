@@ -10,6 +10,7 @@
 
 {% include "moodpoll/snippets/poll_title_description.html" %}
 
+{% if poll.is_result_visible %}
 <table class="table mb-2">
     <thead>
         <tr>
@@ -133,6 +134,20 @@
         {% endfor %}
     </tbody>
 </table>
+{% else %}
+
+<div class="empty mb-2">
+    <div class="empty-icon">
+        <i class="material-icons" style="font-size:4rem">hourglass_top</i>
+    </div>
+    <p class="empty-title h5">Still waiting for votes...</p>
+    <p class="empty-subtitle">
+        Results will be displayed here after voting has ended.
+    </p>
+</div>
+
+{% endif %}
+
 
 <div class="columns">
     <div class="column col-12">

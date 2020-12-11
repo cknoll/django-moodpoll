@@ -9,7 +9,6 @@
         </div>
         {% endif %}
 
-
         {% if poll.description %}
         <div class="col-12">
             {{poll.description|render_markdown_bleach|safe}}
@@ -47,20 +46,36 @@
                     </div>
                 </div>
 
+                {% if poll.is_vote_possible and poll.is_result_visible %}
                 <div class="col-sm-12 col-4 mb-2 text-right" style="vertical-align: bottom">
                     <div class="btn-bottom-pusher"></div>
                     <a href="{% url 'show_poll' pk=poll.pk key=poll.key %}" class="btn btn-sm btn-link">
                         Vote
                     </a>
+
                     <a href="{% url 'poll_result' pk=poll.pk key=poll.key %}" class="btn btn-sm btn-link">
                         Results
                     </a>
                 </div>
+                {% endif %}
 
 
                 <div class="divider col-12"></div>
             </div>
         </div>
+
+        {% if poll.deadline %}
+        <div class="col-12 text-center mt-2">
+            <h5>
+                voting until:
+                <i class="form-icon material-icons">today</i>
+                {{ poll.deadline|date:"Y-m-d H:i" }}
+                ({{ poll.deadline|time_until }})
+            </h5>
+        </div>
+        <div class="divider col-12"></div>
+        {% endif %}
+
 
     </div>
 </div>

@@ -59,6 +59,21 @@ markdown is enabled"></textarea>
             </div>
 
             <div class="form-group moodpoll-collapsible-flex">
+                <label class="form-label col-2 col-sm-12" for="deadline_day">
+                    Deadline
+                </label>
+                <label for="deadline_time" style="display:none">Deadline (Time)</label>
+                <div class="has-icon-left col-5 col-sm-6">
+                    <input type="date" class="form-input col-12" id="deadline_date" name="deadline_date" min="{{now|date:"Y-m-d"}}" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}">
+                    <i class="form-icon icon material-icons">today</i>
+                </div>
+                <div class="has-icon-left col-5 col-sm-6">
+                    <input type="time" class="form-input col-12" id="deadline_time" name="deadline_time" placeholder="HH:MM" value="23:59" pattern="[0-9]{2}:[0-9]{2}">
+                    <i class="form-icon icon material-icons">schedule</i>
+                </div>
+            </div>
+
+            <div class="form-group moodpoll-collapsible-flex">
                 <div class="col-12">
                     <h6>Range of Votes</h6>
                 </div>

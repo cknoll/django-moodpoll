@@ -5,6 +5,7 @@ from django.db import transaction
 from django.conf import settings
 from .. import models
 from ..helpers import toasts as t
+from datetime import datetime as dt
 
 def tidy_options(text):
     '''split given multiline string on newline, remove leading/trailing spaces, remove empty lines'''
@@ -27,6 +28,19 @@ def fill_poll_from_post(post):
         new_poll.description = post['description']
     # http will transmit a field only if the checkbox is checked
     new_poll.replies_hidden = 'replies_hidden' in post
+
+    if 'deadline_time' in post and post['deadline_time'] != '' and 'deadline_date' in post and post['deadline_date'] != '':
+        full_date_str = '{} {}'.format(post['deadline_date'], post['deadline_time'])
+        try:
+            print('parsing date: {}'.format(full_date_str))
+            parsed_deadline = timezone.make_aware(dt.strptime(full_date_str, "%Y-%m-%d %H:%M"))
+
+            # only allow deadline if in future
+            if parsed_deadline > timezone.now():
+                new_poll.deadline = parsed_deadline
+
+        except ValueError:
+            pass
 
     try:
         if 'mood_value_min' in post and int(post['mood_value_min']) <= 0:
@@ -83,6 +97,7 @@ class NewPollView(View):
         context = {
             'settings_mood_value_min': settings.MOOD_VALUE_MIN,
             'settings_mood_value_max': settings.MOOD_VALUE_MAX,
+            'now': timezone.now(),
         }
 
         return render(request, "moodpoll/poll/new_poll.html", context)

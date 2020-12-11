@@ -22,6 +22,17 @@ class Poll(models.Model):
     # configuration values
     mood_value_min = models.IntegerField(null=False, default=settings.MOOD_VALUE_MIN)
     mood_value_max = models.IntegerField(null=False, default=settings.MOOD_VALUE_MAX)
+    deadline = models.DateTimeField(null=True, default=None)
+
+    def is_vote_possible(self):
+        if self.deadline and self.deadline < timezone.now():
+            return False
+        return True
+
+    def is_result_visible(self):
+        if self.deadline and self.deadline >= timezone.now():
+            return False
+        return True
 
 
 class PollReply(models.Model):

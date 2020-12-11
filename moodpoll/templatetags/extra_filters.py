@@ -1,6 +1,8 @@
 from django import template
 import markdown
 import bleach
+from .. import utils
+from django.utils import timezone
 # from moodpoll.release import __version__
 
 register = template.Library()
@@ -26,3 +28,10 @@ def add_num_prefix(num):
         return '±{}'.format(num)
     return '{}'.format(num)
 
+
+@register.filter
+def time_until(time):
+    if time < timezone.now():
+        return 'passed'
+    else:
+        return '{} left'.format(utils.get_time_until(time))
