@@ -142,7 +142,7 @@
 
     <div class="column col-12">
         <ul>
-            {% for reply in poll_replies %}
+            {% for reply in poll_replies reversed %}
             <li>
                 {{ reply.user_name }}
                 {% if reply.pk in request.session.poll_replies %}
