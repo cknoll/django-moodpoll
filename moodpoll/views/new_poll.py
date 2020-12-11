@@ -105,5 +105,7 @@ class NewPollView(View):
         with transaction.atomic():
             save_poll_and_create_options(new_poll, options_tidy)
 
+        t.success(request, 'poll has been created')
+
         return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk, "key": new_poll.key}))
 

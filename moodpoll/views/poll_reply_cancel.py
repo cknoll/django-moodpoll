@@ -5,6 +5,7 @@ from django.db import transaction
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from .. import models
+from ..helpers import toasts as t
 
 class PollReplyCancelView(View):
     def post(self, request, pk, key):
@@ -21,6 +22,7 @@ class PollReplyCancelView(View):
 
         # cancel
         poll_reply.cancel()
+        t.info(request, 'vote has been cancelled')
 
         return redirect(reverse("show_poll", kwargs={"pk": poll.pk, "key": poll.key}))
 
