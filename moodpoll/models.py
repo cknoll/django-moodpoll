@@ -48,7 +48,9 @@ class PollReply(models.Model):
         return 120 - delta.seconds
 
     def is_cancelable(self):
-        return self.get_cancel_time_left() > 0
+        if self.get_cancel_time_left() > 0:
+            return self.poll.is_vote_possible()
+        return False
 
     def cancel(self):
         if not self.is_cancelable():
