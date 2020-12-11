@@ -143,6 +143,11 @@
         <ul>
             {% for reply in poll_replies reversed %}
             <li>
+                {# display date first: in most fonts all numbers have the same width, so we get a table-like display #}
+                {# TODO: make configurable via settings (and maybe dependent on locale) #}
+
+                {{ reply.update_datetime|date:"Y-m-d H:i" }}:
+
                 {{ reply.user_name }}
                 {% if reply.pk in request.session.poll_replies %}
                 {% if reply.is_cancelable %}
