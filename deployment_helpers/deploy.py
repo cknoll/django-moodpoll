@@ -39,8 +39,8 @@ It is largely based on this tutorial: <https://lab.uberspace.de/guide_django.htm
 # -------------------------- Begin Essential Config section  ------------------------
 
 # this must be changed according to your uberspace accound details (machine name and user name)
-remote = "klemola.uberspace.de"
-user = "moodpoll"
+remote = "daphnis.uberspace.de"
+user = "moodpol2"
 
 # -------------------------- Begin Optional Config section -------------------------
 # if you know what you are doing you can adapt these seetings to your needs
