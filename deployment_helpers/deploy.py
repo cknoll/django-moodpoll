@@ -2,6 +2,7 @@ import time
 import os
 import secrets
 import re
+import os
 from packaging import version
 
 min_du_version = version.parse("0.0.4")
@@ -51,7 +52,7 @@ project_src_path = "../"
 
 # base directory for local testing deployment
 # might also be the place for a custom deploy_local.py script
-local_deployment_workdir = "../../local_testing"
+local_deployment_workdir = os.path.abspath("../../local_testing")
 
 # directory for deployment files (e.g. database files)
 deployment_dir = "moodpoll_deployment"
