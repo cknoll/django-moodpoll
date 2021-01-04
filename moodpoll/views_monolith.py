@@ -11,6 +11,7 @@ from django.utils import timezone
 from . import models
 from . import utils
 from .simple_pages_interface import get_sp
+from .views.show_poll import ShowPollView
 
 # debugging helper
 # noinspection PyUnresolvedReferences
@@ -94,7 +95,6 @@ def view_test(request):
     context = {"option_list": pol}
 
     return render(request, "{}/main_form.html".format(appname), context)
-
 
 
 class ViewPollEvaluation(View):
@@ -196,7 +196,7 @@ class ViewPollEvaluation(View):
         c.name_conflict_mode = True
         c.old_username = old_me.username
 
-        return ViewPoll.get(request, pk, c=c)
+        return ShowPollView.get(request, pk, c=c)
 
     @staticmethod
     def handle_invalid_data(request, pk, c):
@@ -420,7 +420,7 @@ def sort_poll_results(c):
         """
         # noinspection PyRedundantParentheses
         return (-c.neg_res[i][2], c.neg_res[i][0], -c.pos_res[i][2], -c.pos_res[i][0],)
-        
+
     c.sorted_index_list = list(range(c.n_opts))
     c.key_tuples = [key_func(i) for i in range(c.n_opts)]
 
