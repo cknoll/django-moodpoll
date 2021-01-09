@@ -7,6 +7,7 @@ from .. import models
 from ..helpers import toasts as t
 from datetime import datetime as dt
 
+
 def tidy_options(text):
     '''split given multiline string on newline, remove leading/trailing spaces, remove empty lines'''
     options_tidied = []
@@ -82,9 +83,7 @@ def process_special_options(poll, option_list):
     # if the first option starts with `#` and poll has no title yet, then the first option
     # is interpreted as the title
 
-    from ipydex import IPS
-    if option_list[0].startswith("#") and \
-       len(option_list) > 1 and not poll.title:
+    if option_list[0].startswith("#") and not poll.title:
 
         title_candidate = option_list[0][1:].strip()
         if len(title_candidate) > 0:
@@ -109,18 +108,21 @@ class NewPollView(View):
         if 'options' in request.POST:
             options_tidy = tidy_options(request.POST['options'])
         if 0 == len(options_tidy):
-            raise NotImplementedError
+            msg = "Empty option list received. This is unexpected due to `required` attribute of respective form field"
+            raise ValueError(msg)
 
         process_special_options(new_poll, options_tidy)
 
         if 0 == len(options_tidy):
-            raise NotImplementedError
+            # this might be the case if the first line started with # (interpreted as title)
+            t.error(request, 'no valid poll option found <!--utc_toast_error: empty_poll_option_list-->')
+            return redirect(reverse("new_poll"))
 
         # all params checked, create
         with transaction.atomic():
             save_poll_and_create_options(new_poll, options_tidy)
 
-        t.success(request, 'poll has been created')
+        t.success(request, 'poll has been created <!--utc_toast_success-->')
 
         return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk, "key": new_poll.key}))
 

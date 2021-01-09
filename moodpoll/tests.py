@@ -162,12 +162,33 @@ class TestViews(TestCase):
 
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
-        # self.assertContains(response3, "utc_new_poll")
         self.assertContains(response3, "utc_show_poll")
+        self.assertContains(response3, "utc_toast_success")
 
         # noinspection PyUnresolvedReferences
         poll = models.Poll.objects.last()
         self.assertEquals(poll.title, "test-title_ABC")
+
+        # noinspection PyUnresolvedReferences
+        poll_options = models.PollOption.objects.filter(poll=poll)
+        for po, title in zip(poll_options, ["a", "b", "c"]):
+            self.assertEqual(po.text, title)
+
+        # try again but now with only the title
+
+        response1 = self.client.get(new_poll_url)
+        form = get_first_form(response1)
+
+        # specify the title as a special option (but nothing more)
+        form_values = {"title": "", "options": "# test-title_ABC2\n"}
+        post_data = generate_post_data_for_form(form, spec_values=form_values)
+        response2 = self.client.post(new_poll_url, post_data)
+
+        # ensure redirect
+        self.assertEqual(response2.status_code, 302)
+        response3 = self.client.get(response2.url)
+        self.assertContains(response3, "utc_new_poll")
+        self.assertContains(response3, "utc_toast_error: empty_poll_option_list")
 
     def test_new_poll_with_md_description(self):
         new_poll_url = reverse('new_poll')

@@ -136,6 +136,9 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 MOOD_VALUE_MAX = 10
 MOOD_VALUE_MIN = -10  # the lowest value is considered a 'veto'
 
+BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a',
+                       'h1', 'h2', 'h3', 'h4', 'h5', 'ul', 'ol', 'li', 'pre', 'code']
+BLEACH_STRIP_COMMENTS = False
 
 # noinspection PyUnresolvedReferences
 from .site_specific_settings import *
