@@ -17,14 +17,14 @@
 </div>
 {% endfor %}
 
-{% for text in request.session.toasts.info %}
-<div class="toast toast-primary my-1">
+{% for text in request.session.toasts.success %}
+<div class="toast toast-success my-1">
     {{text|bleach}}
 </div>
 {% endfor %}
 
-{% for text in request.session.toasts.success %}
-<div class="toast toast-success my-1">
+{% for text in request.session.toasts.info %}
+<div class="toast toast-primary my-1">
     {{text|bleach}}
 </div>
 {% endfor %}
