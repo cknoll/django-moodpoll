@@ -42,8 +42,20 @@ class ShowPollView(View):
         )
 
         if 'user_name' in request.POST and request.POST['user_name'] != '':
-            poll_reply.user_name = request.POST['user_name']
+
+            if poll.require_name and \
+                    models.PollReply.objects.filter(poll=poll, user_name=request.POST['user_name']).count() > 0:
+
+                utc = "<!--utc_toast_error:user_name_collision-->"
+                msg = f'The name "{request.POST["user_name"]}" was already used. Please choose a different name. {utc}'
+                t.error(request, msg)
+                return redirect(reverse("show_poll", kwargs={"pk": poll.pk, "key": poll.key}))
+            else:
+                # the submitted name is accaptible
+                poll_reply.user_name = request.POST['user_name']
+
         else:
+            # empty user_name was submitted
 
             if poll.require_name:
                 # in this case empty name should have been prevented by the require attribute of the input field
