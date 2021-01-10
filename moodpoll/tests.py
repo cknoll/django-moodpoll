@@ -434,6 +434,7 @@ class TestViews(TestCase):
 
         veto = poll.mood_value_min
         # ensure that empty name provokes an error
+        # (for real users this is prevented by the `require` attribute of the input field)
         vote_data1 = {**self.vote_data1, "user_name": "", "option_5": veto}
         post_data = generate_post_data_for_form(form, spec_values=vote_data1)
         response = self.client.post(url, post_data)

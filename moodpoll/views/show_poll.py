@@ -47,9 +47,10 @@ class ShowPollView(View):
         else:
 
             if poll.require_name:
+                # in this case empty name should have been prevented by the require attribute of the input field
+                # nevertheless it does not harm
                 utc = "<!--utc_toast_error:empty_user_name-->"
-                msg = f'Empty name not allowed for this poll ' \
-                      f'(use back-function of your browser to restore your voting values) {utc}'
+                msg = f'Empty name not allowed for this poll! {utc}'
                 t.error(request, msg)
                 return redirect(reverse("show_poll", kwargs={"pk": poll.pk, "key": poll.key}))
 
