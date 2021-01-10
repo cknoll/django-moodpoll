@@ -76,6 +76,25 @@ markdown is enabled"></textarea>
             </div>
 
             <div class="form-group moodpoll-collapsible-flex">
+                <label class="form-label col-2 col-sm-12" for="require_name">
+                    Require Name
+                </label>
+                <div class="has-icon-left col-10 col-sm-12">
+                    <input type="checkbox" class="" id="require_name" name="require_name" value="True">
+                </div>
+            </div>
+            <div class="form-group moodpoll-collapsible-flex">
+                <label class="form-label col-2 col-sm-12" for="expose_veto_names">
+                    <span title="The name of those users which have voted with the most negative value (regarded as veto) on at least one option will be published on the result view of the poll.
+
+This implies `require_names=True`.">Expose Veto Names*</span>
+                </label>
+                <div class="has-icon-left col-10 col-sm-12">
+                    <input type="checkbox" class="" id="expose_veto_names" name="expose_veto_names" value="True">
+                </div>
+            </div>
+
+            <div class="form-group moodpoll-collapsible-flex">
                 <div class="col-12">
                     <h6>Range of Votes</h6>
                 </div>
@@ -113,7 +132,7 @@ markdown is enabled"></textarea>
                     Options
                 </label>
                 <div class="has-icon-left col-10 col-sm-12">
-                    <textarea class="form-input col-12" id="options" rows="6" name="options" placeholder="options
+                    <textarea class="form-input col-12" id="options" rows="6" name="options" placeholder="poll options
 one per line" required></textarea>
                     <i class="form-icon icon material-icons">format_list_bulleted</i>
                 </div>

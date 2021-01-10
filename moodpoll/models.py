@@ -23,6 +23,11 @@ class Poll(models.Model):
     mood_value_min = models.IntegerField(null=False, default=settings.MOOD_VALUE_MIN)
     mood_value_max = models.IntegerField(null=False, default=settings.MOOD_VALUE_MAX)
     deadline = models.DateTimeField(null=True, default=None)
+    require_name = models.BooleanField(null=False, default=False,)
+
+    # if True: The name of those users which have voted with the most negative value
+    # (regarded as veto) on at least one option will be published on the result view of the poll
+    expose_veto_names = models.BooleanField(null=False, default=False,)
 
     def is_vote_possible(self):
         if self.deadline and self.deadline < timezone.now():
@@ -118,7 +123,7 @@ class PollOptionReply(models.Model):
         unique_together = [
             ['poll_reply', 'poll_option'],
         ]
-    
+
     mood_value = models.IntegerField(null=False, default=0,)
     poll_option = models.ForeignKey('PollOption', on_delete=models.CASCADE, null=False,)
     poll_reply = models.ForeignKey('PollReply', on_delete=models.CASCADE, null=False,)
