@@ -147,6 +147,7 @@ if args.initial:
 
         c.run('supervisorctl reread', target_spec="remote")
         c.run('supervisorctl update', target_spec="remote")
+        c.run('uberspace web backend set / --http --port 8000', target_spec="remote")
         print("waiting 10s for uwsgi to start")
         time.sleep(10)
 
@@ -170,6 +171,11 @@ print("\n", "ensure that deployment path exists", "\n")
 c.run(f"mkdir -p {target_deployment_path}", target_spec="both")
 
 c.chdir(target_deployment_path)
+
+if not args.initial and not args.omit_backup:
+
+    print("\n", "backup old database", "\n")
+    res = c.run('python3 manage.py savefixtures', target_spec="both")
 
 print("\n", "upload current application files for deployment", "\n")
 # omit irrelevant files (like .git)
@@ -219,16 +225,11 @@ if args.symlink:
     c.run(["rm", "-r", os.path.join(target_deployment_path, app_name)], target_spec="local")
     c.run(["ln", "-s", app_path, os.path.join(target_deployment_path, app_name)], target_spec="local")
 
-if not args.initial and not args.omit_backup:
-
-    print("\n", "backup old database", "\n")
-    res = c.run('python3 manage.py savefixtures', target_spec="both")
-
 
 print("\n", "prepare and create new database", "\n")
 
-# this currently fails (due to no matching directory structure)
-c.run('python3 manage.py makemigrations', target_spec="both")
+# this was only necessary when there where no migrations in the repo
+# c.run('python3 manage.py makemigrations', target_spec="both")
 
 # delete old db
 c.run('rm -f db.sqlite3', target_spec="both")
