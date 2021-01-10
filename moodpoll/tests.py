@@ -322,7 +322,7 @@ class TestViews(TestCase):
         mood_sums2 = poll_result.get_mood_sums(poll)
         self.assertNotEqual(mood_sums1[0], mood_sums2[0])
 
-    def test_polling_act_empty_name(self):
+    def test_polling_act_empty_name_default(self):
         """
         default case for empty name: "Anonymous #1" etc
         """
@@ -349,6 +349,38 @@ class TestViews(TestCase):
         voters = poll_result.get_voters(poll)
         self.assertEqual(len(voters), 2)
         self.assertEqual(voters.last()["user_name"], "Anonymous #1")
+
+    def test_polling_act_empty_name_with_require_name(self):
+        """
+        if poll.require_name: reject empty name for polling
+        """
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
+
+        # noinspection PyUnresolvedReferences
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        poll.require_name = True
+        poll.save()
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 1)
+
+        response = self.client.get(url)
+        self.assertContains(response, "utc_show_poll")
+        form = get_first_form(response)
+        self.assertNotEqual(form, None)
+
+        # now try empty username
+        vote_data1 = {**self.vote_data1, "user_name": ""}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+
+        # should redirect to show_poll again with error message
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(response.url)
+        self.assertContains(response, "utc_show_poll")
+        self.assertContains(response, "utc_toast_error:empty_user_name")
+
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 1)
 
     def test_veto(self):
         """
