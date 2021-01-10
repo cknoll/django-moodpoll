@@ -43,6 +43,16 @@ def fill_poll_from_post(post):
         except ValueError:
             pass
 
+    expose_veto_names = post.get("expose_veto_names")
+    new_poll.expose_veto_names = (expose_veto_names == "True")
+
+    # expose_veto_names should imply require_names
+    if new_poll.expose_veto_names:
+        new_poll.require_name = True
+    else:
+        require_name = post.get("require_name")
+        new_poll.require_name = (require_name == "True")
+
     try:
         if 'mood_value_min' in post and int(post['mood_value_min']) <= 0:
             new_poll.mood_value_min = int(post['mood_value_min'])

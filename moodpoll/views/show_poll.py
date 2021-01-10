@@ -22,6 +22,10 @@ class ShowPollView(View):
             'options': poll_options,
         }
 
+        if poll.expose_veto_names:
+            utc = "<!--utc_toast_info:anonymous_vetos_disabled-->"
+            t.info(request, f"<b>Note</b>: Anonymous vetos are disabled for this poll. {utc}")
+
         return render(request, "moodpoll/poll/show_poll.html", context)
 
     def post(self, request, pk, key):
@@ -50,18 +54,18 @@ class ShowPollView(View):
 
         with transaction.atomic():
             poll_reply.save()
-            
+
             # note: iterate over poll options, as only submission for these options have been authenticated
             for option in poll_options:
                 htmlname = 'option_{}'.format(option.pk)
                 if htmlname not in request.POST:
                     continue
-                
+
                 mood_value = int(request.POST[htmlname])
                 # invalid mood values are not counted at all
                 if mood_value < option.poll.mood_value_min or mood_value > option.poll.mood_value_max:
                     continue
-                
+
                 option_reply = models.PollOptionReply(
                     poll_option=option,
                     poll_reply=poll_reply,

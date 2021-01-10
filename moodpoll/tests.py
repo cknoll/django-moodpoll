@@ -131,8 +131,6 @@ class TestViews(TestCase):
         new_poll_url = reverse('new_poll')
         response1 = self.client.get(new_poll_url)
         self.assertEqual(response1.status_code, 200)
-
-        # form, action_url = get_form_by_action_url(response1, "new_poll")
         form = get_first_form(response1)
 
         form_values = {"title": "unittest_poll", "description": "", "options": "a\nb\nc"}
@@ -142,8 +140,41 @@ class TestViews(TestCase):
         response2 = self.client.post(new_poll_url, post_data)
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
-        # self.assertContains(response3, "utc_new_poll")
         self.assertContains(response3, "utc_show_poll")
+        # noinspection PyUnresolvedReferences
+        poll = models.Poll.objects.last()
+        self.assertFalse(poll.require_name)
+        self.assertFalse(poll.expose_veto_names)
+
+    def test_new_poll2(self):
+        new_poll_url = reverse('new_poll')
+        response1 = self.client.get(new_poll_url)
+        form = get_first_form(response1)
+
+        # test with require_name
+        form_values = {"title": "unittest_poll", "options": "a\nb\nc", "require_name": "True"}
+        post_data = generate_post_data_for_form(form, spec_values=form_values)
+
+        response2 = self.client.post(new_poll_url, post_data)
+        response3 = self.client.get(response2.url)
+        self.assertContains(response3, "utc_show_poll")
+        # noinspection PyUnresolvedReferences
+        poll = models.Poll.objects.last()
+        self.assertTrue(poll.require_name)
+        self.assertFalse(poll.expose_veto_names)
+
+        # test with only expose_veto_names
+        form_values = {"title": "unittest_poll", "options": "a\nb\nc", "expose_veto_names": "True"}
+        post_data = generate_post_data_for_form(form, spec_values=form_values)
+
+        response2 = self.client.post(new_poll_url, post_data)
+        response3 = self.client.get(response2.url)
+        self.assertContains(response3, "utc_show_poll")
+        # noinspection PyUnresolvedReferences
+        poll = models.Poll.objects.last()
+        self.assertTrue(poll.require_name)
+        self.assertTrue(poll.expose_veto_names)
+        self.assertContains(response3, "utc_toast_info:anonymous_vetos_disabled")
 
     def test_new_poll_with_inline_title(self):
         new_poll_url = reverse('new_poll')
