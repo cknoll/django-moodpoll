@@ -253,7 +253,7 @@ class TestViews(TestCase):
 
     def test_polling_act_name_conflict1(self):
         """
-        Provoke a name conflict and handle it via overwrite flag
+        Handle a name conflict: allow multiple usages of same name
         """
         url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
@@ -293,7 +293,7 @@ class TestViews(TestCase):
 
     def test_polling_act_empty_name(self):
         """
-        Provoke a name conflict and handle it via renaming (consistent case)
+        default case for empty name: "Anonymous #1" etc
         """
         url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
@@ -317,7 +317,7 @@ class TestViews(TestCase):
 
         voters = poll_result.get_voters(poll)
         self.assertEqual(len(voters), 2)
-        self.assertEqual(voters.last()["user_name"], "Anonymous")
+        self.assertEqual(voters.last()["user_name"], "Anonymous #1")
 
     def test_veto(self):
         """
