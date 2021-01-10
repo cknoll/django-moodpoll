@@ -2,6 +2,7 @@ import time
 import os
 import secrets
 import re
+import os
 from packaging import version
 
 min_du_version = version.parse("0.0.4")
@@ -39,8 +40,8 @@ It is largely based on this tutorial: <https://lab.uberspace.de/guide_django.htm
 # -------------------------- Begin Essential Config section  ------------------------
 
 # this must be changed according to your uberspace accound details (machine name and user name)
-remote = "klemola.uberspace.de"
-user = "moodpoll"
+remote = "daphnis.uberspace.de"
+user = "moodpol2"
 
 # -------------------------- Begin Optional Config section -------------------------
 # if you know what you are doing you can adapt these seetings to your needs
@@ -51,7 +52,7 @@ project_src_path = "../"
 
 # base directory for local testing deployment
 # might also be the place for a custom deploy_local.py script
-local_deployment_workdir = "../../local_testing"
+local_deployment_workdir = os.path.abspath("../../local_testing")
 
 # directory for deployment files (e.g. database files)
 deployment_dir = "moodpoll_deployment"

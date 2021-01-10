@@ -6,7 +6,6 @@ from django.conf import settings
 from . import utils
 from . import models
 from .views import poll_result
-from . import views_monolith
 
 # noinspection PyUnresolvedReferences
 from ipydex import IPS
@@ -43,22 +42,6 @@ global_fixtures = ['for_unit_tests/data.json']
 global_login_data_admin = dict(username="admin", password="ahfahHe8")
 
 
-class TestHelperFuncs(TestCase):
-
-    def test_map_mean(self):
-        m09 = views_monolith.map_normed_mean_to_09
-        self.assertEqual(m09([2, 2], 2), 0.9)
-        self.assertEqual(m09([1, 2], 2), 0.5)
-        self.assertEqual(m09([1, 1], 2), 0.1)
-        self.assertEqual(m09([0], 2), 0.0)
-        self.assertEqual(m09([], 2), 0.0)
-
-        self.assertEqual(m09([-3, -3], -3), 0.9)
-        self.assertEqual(m09([-1, -1], -3), 0.1)
-        self.assertEqual(m09([-1, -1, -1, -1, -3], -3), 0.3)
-        self.assertEqual(m09([-1, -1, -1, -1, -2], -3), 0.2)
-
-
 class TestLoginMechanics(TestCase):
     fixtures = global_fixtures
 
@@ -68,15 +51,6 @@ class TestLoginMechanics(TestCase):
         response = self.client.get(reverse('landing-page'))
 
         self.assertTrue(response.wsgi_request.user.is_superuser)
-
-    def test_no_backup_without_login(self):
-        response = self.client.get(reverse('do_backup'))
-
-        self.assertFalse(response.wsgi_request.user.is_authenticated)
-        self.assertEqual(response.status_code, 302)
-
-        response = self.client.get(response.url)
-        self.assertEqual(response.url, "/admin/login/")
 
 
 class TestModels(TestCase):
@@ -131,8 +105,6 @@ class TestViews(TestCase):
         new_poll_url = reverse('new_poll')
         response1 = self.client.get(new_poll_url)
         self.assertEqual(response1.status_code, 200)
-
-        # form, action_url = get_form_by_action_url(response1, "new_poll")
         form = get_first_form(response1)
 
         form_values = {"title": "unittest_poll", "description": "", "options": "a\nb\nc"}
@@ -142,8 +114,41 @@ class TestViews(TestCase):
         response2 = self.client.post(new_poll_url, post_data)
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
-        # self.assertContains(response3, "utc_new_poll")
         self.assertContains(response3, "utc_show_poll")
+        # noinspection PyUnresolvedReferences
+        poll = models.Poll.objects.last()
+        self.assertFalse(poll.require_name)
+        self.assertFalse(poll.expose_veto_names)
+
+    def test_new_poll2(self):
+        new_poll_url = reverse('new_poll')
+        response1 = self.client.get(new_poll_url)
+        form = get_first_form(response1)
+
+        # test with require_name
+        form_values = {"title": "unittest_poll", "options": "a\nb\nc", "require_name": "True"}
+        post_data = generate_post_data_for_form(form, spec_values=form_values)
+
+        response2 = self.client.post(new_poll_url, post_data)
+        response3 = self.client.get(response2.url)
+        self.assertContains(response3, "utc_show_poll")
+        # noinspection PyUnresolvedReferences
+        poll = models.Poll.objects.last()
+        self.assertTrue(poll.require_name)
+        self.assertFalse(poll.expose_veto_names)
+
+        # test with only expose_veto_names
+        form_values = {"title": "unittest_poll", "options": "a\nb\nc", "expose_veto_names": "True"}
+        post_data = generate_post_data_for_form(form, spec_values=form_values)
+
+        response2 = self.client.post(new_poll_url, post_data)
+        response3 = self.client.get(response2.url)
+        self.assertContains(response3, "utc_show_poll")
+        # noinspection PyUnresolvedReferences
+        poll = models.Poll.objects.last()
+        self.assertTrue(poll.require_name)
+        self.assertTrue(poll.expose_veto_names)
+        self.assertContains(response3, "utc_toast_info:anonymous_vetos_disabled")
 
     def test_new_poll_with_inline_title(self):
         new_poll_url = reverse('new_poll')
@@ -162,12 +167,33 @@ class TestViews(TestCase):
 
         self.assertEqual(response2.status_code, 302)
         response3 = self.client.get(response2.url)
-        # self.assertContains(response3, "utc_new_poll")
         self.assertContains(response3, "utc_show_poll")
+        self.assertContains(response3, "utc_toast_success")
 
         # noinspection PyUnresolvedReferences
         poll = models.Poll.objects.last()
         self.assertEquals(poll.title, "test-title_ABC")
+
+        # noinspection PyUnresolvedReferences
+        poll_options = models.PollOption.objects.filter(poll=poll)
+        for po, title in zip(poll_options, ["a", "b", "c"]):
+            self.assertEqual(po.text, title)
+
+        # try again but now with only the title
+
+        response1 = self.client.get(new_poll_url)
+        form = get_first_form(response1)
+
+        # specify the title as a special option (but nothing more)
+        form_values = {"title": "", "options": "# test-title_ABC2\n"}
+        post_data = generate_post_data_for_form(form, spec_values=form_values)
+        response2 = self.client.post(new_poll_url, post_data)
+
+        # ensure redirect
+        self.assertEqual(response2.status_code, 302)
+        response3 = self.client.get(response2.url)
+        self.assertContains(response3, "utc_new_poll")
+        self.assertContains(response3, "utc_toast_error: empty_poll_option_list")
 
     def test_new_poll_with_md_description(self):
         new_poll_url = reverse('new_poll')
@@ -232,7 +258,7 @@ class TestViews(TestCase):
 
     def test_polling_act_name_conflict1(self):
         """
-        Provoke a name conflict and handle it via overwrite flag
+        Handle a name conflict: allow multiple usages of same name
         """
         url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
@@ -270,9 +296,9 @@ class TestViews(TestCase):
         mood_sums2 = poll_result.get_mood_sums(poll)
         self.assertNotEqual(mood_sums1[0], mood_sums2[0])
 
-    def test_polling_act_empty_name(self):
+    def test_polling_act_empty_name_default(self):
         """
-        Provoke a name conflict and handle it via renaming (consistent case)
+        default case for empty name: "Anonymous #1" etc
         """
         url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
 
@@ -296,11 +322,43 @@ class TestViews(TestCase):
 
         voters = poll_result.get_voters(poll)
         self.assertEqual(len(voters), 2)
-        self.assertEqual(voters.last()["user_name"], "Anonymous")
+        self.assertEqual(voters.last()["user_name"], "Anonymous #1")
 
-    def test_veto(self):
+    def test_polling_act_empty_name_with_require_name(self):
         """
-        Provoke a name conflict and handle it via renaming (consistent case)
+        if poll.require_name: reject empty name for polling
+        """
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
+
+        # noinspection PyUnresolvedReferences
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        poll.require_name = True
+        poll.save()
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 1)
+
+        response = self.client.get(url)
+        self.assertContains(response, "utc_show_poll")
+        form = get_first_form(response)
+        self.assertNotEqual(form, None)
+
+        # now try empty username
+        vote_data1 = {**self.vote_data1, "user_name": ""}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+
+        # should redirect to show_poll again with error message
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(response.url)
+        self.assertContains(response, "utc_show_poll")
+        self.assertContains(response, "utc_toast_error:empty_user_name")
+
+        voters = poll_result.get_voters(poll)
+        self.assertEqual(len(voters), 1)
+
+    def test_anonymous_veto(self):
+        """
+        test special handling of minimum vote-value (-> veto)
         """
         url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
         poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
@@ -327,6 +385,56 @@ class TestViews(TestCase):
                 self.assertEqual(po.get_minimum_vote_cnt(), 1)
             else:
                 self.assertEqual(po.get_minimum_vote_cnt(), 0)
+
+        # ensure that no names are listed
+        response = self.client.get(response.url)
+        self.assertNotContains(response, "utc_exposed_veto_name")
+
+        # two people voted (testuser1 is in the fixtures)
+        self.assertContains(response, "utc_number_of_participants:2")
+
+    def test_expose_veto_names(self):
+        """
+        if poll.expose_veto_names: all veto users should be listed on result_view
+        """
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        poll.expose_veto_names = True
+        poll.require_name = True  # this would be enforced during creation
+        poll.save()
+
+        response = self.client.get(url)
+        form = get_first_form(response)
+
+        veto = poll.mood_value_min
+        # ensure that empty name provokes an error
+        # (for real users this is prevented by the `require` attribute of the input field)
+        vote_data1 = {**self.vote_data1, "user_name": "", "option_5": veto}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+        response = self.client.get(response.url)
+        self.assertContains(response, "utc_toast_error:empty_user_name")
+
+        # ensure that the names are listed
+        vote_data1 = {**self.vote_data1, "option_5": veto}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+        response = self.client.get(response.url)
+        self.assertContains(response, "utc_exposed_veto_name:testuser2 (1)")
+
+        vote_data1 = {**self.vote_data1, "user_name": "neysayer", "option_1": veto, "option_2": veto, "option_5": veto}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        self.client.post(url, post_data)
+        vote_data1 = {**self.vote_data1, "user_name": "ayesayer", "option_5": 1}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+        response = self.client.get(response.url)
+        self.assertContains(response, "utc_exposed_veto_name:testuser2 (1)")
+        self.assertContains(response, "utc_exposed_veto_name:neysayer (3)")
+        self.assertNotContains(response, "utc_exposed_veto_name:ayesayer")
+
+        # four people voted (testuser1 is in the fixtures)
+        self.assertContains(response, "utc_number_of_participants:4")
 
 
 # ------------------------------------------------------------------------

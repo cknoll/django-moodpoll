@@ -30,7 +30,7 @@
                 {% include "moodpoll/snippets/base/header.html" with base=base only%}
             </div>
         </header>
-            
+
         <main class="columns">
             <div class="column col-mx-auto col-9 col-md-11 col-xs-12">
                 {% block toasts %}
@@ -45,7 +45,7 @@
 
         <footer class="columns">
             <div class="column col-mx-auto col-9 col-md-11 col-xs-12">
-                {% include "moodpoll/snippets/base/footer.html" with base=base only%}
+                {% include "moodpoll/snippets/base/footer.html" with base=base app_version=app_version only%}
             </div>
         </footer>
     </body>

@@ -10,6 +10,9 @@
 
 {% include "moodpoll/snippets/poll_title_description.html" %}
 
+{# html comment to simplify unit testing#}
+<!--utc_new_poll-->
+
 {% if poll.is_result_visible %}
 <table class="table mb-2">
     <thead>
@@ -53,7 +56,7 @@
             </th>
         </tr>
     </thead>
-       
+
     <tbody>
         {% for option in poll_options %}
         <tr>
@@ -151,7 +154,9 @@
 
 <div class="columns">
     <div class="column col-12">
-        Participants up to now:
+        {#TODO: "up to now" is slightly misleading if deadline is over#}
+        {{poll_replies|length}} Participants up to now:
+        <!--utc_number_of_participants:{{poll_replies|length}}-->
     </div>
 
     <div class="column col-12">
@@ -176,16 +181,36 @@
                 {% endif %}
                 {% endif %}
             </li>
-                
+
             {% endfor %}
         </ul>
     </div>
 </div>
 
+{% if poll.expose_veto_names and poll.is_result_visible and poll_veto_users%}
+<div class="columns">
+    <div class="column col-12">
+        The following users voted with at least one veto:
+    </div>
+
+    <div class="column col-12">
+        <ul>
+            {% for user_name in poll_veto_users %}
+            <li>
+                {{ user_name }}
+                <!--utc_exposed_veto_name:{{ user_name }}-->
+            </li>
+
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
 <script>
  function dec_sec() {
      console.log('timer')
-     elements = document.querySelectorAll('.moodpoll-sec-counter') 
+     elements = document.querySelectorAll('.moodpoll-sec-counter')
      if (0 == elements.length) {
          clearInterval(timer_sec)
      }

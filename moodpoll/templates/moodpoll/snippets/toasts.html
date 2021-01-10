@@ -1,28 +1,31 @@
 {% load extra_tags %}
+{% load bleach_tags %}
+
+{# use bleach to sanitize html (allow for utc-mechanism (unit test comments)) #}
 
 {% if not not_print_toasts %}
 
 {% for text in request.session.toasts.error %}
 <div class="toast toast-error my-1">
-    {{text}}
+    {{text|bleach}}
 </div>
 {% endfor %}
 
 {% for text in request.session.toasts.warning %}
 <div class="toast toast-warning my-1">
-    {{text}}
-</div>
-{% endfor %}
-
-{% for text in request.session.toasts.info %}
-<div class="toast toast-primary my-1">
-    {{text}}
+    {{text|bleach}}
 </div>
 {% endfor %}
 
 {% for text in request.session.toasts.success %}
 <div class="toast toast-success my-1">
-    {{text}}
+    {{text|bleach}}
+</div>
+{% endfor %}
+
+{% for text in request.session.toasts.info %}
+<div class="toast toast-primary my-1">
+    {{text|bleach}}
 </div>
 {% endfor %}
 
