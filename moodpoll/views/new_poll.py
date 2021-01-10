@@ -6,6 +6,7 @@ from django.conf import settings
 from .. import models
 from ..helpers import toasts as t
 from datetime import datetime as dt
+from ..release import __version__
 
 
 def tidy_options(text):
@@ -107,6 +108,7 @@ class NewPollView(View):
             'settings_mood_value_min': settings.MOOD_VALUE_MIN,
             'settings_mood_value_max': settings.MOOD_VALUE_MAX,
             'now': timezone.now(),
+            'app_version': __version__,
         }
 
         return render(request, "moodpoll/poll/new_poll.html", context)

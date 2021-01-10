@@ -9,6 +9,7 @@ from django.conf import settings
 from .. import models
 from ..utils import get_poll_or_4xx, init_session_reply_list
 from ..helpers import toasts as t
+from ..release import __version__
 
 
 class PollResultView(View):
@@ -31,6 +32,7 @@ class PollResultView(View):
             'poll_veto_users': poll_veto_users,
             'mood_bar_min': poll.mood_value_min * len(poll_replies),
             'mood_bar_max': poll.mood_value_max * len(poll_replies),
+            'app_version': __version__,
         }
 
         # note: result will be hidden by view if not yet visible

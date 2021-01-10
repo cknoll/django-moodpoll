@@ -7,6 +7,7 @@ from django.http import HttpRequest
 from .. import models
 from ..utils import get_poll_or_4xx, init_session_reply_list
 from ..helpers import toasts as t
+from ..release import __version__
 
 
 class ShowPollView(View):
@@ -20,6 +21,7 @@ class ShowPollView(View):
         context = {
             'poll': poll,
             'options': poll_options,
+            'app_version': __version__,
         }
 
         if poll.expose_veto_names:

@@ -12,6 +12,7 @@ from . import models
 from . import utils
 from .simple_pages_interface import get_sp
 from .views.show_poll import ShowPollView
+from .release import __version__
 
 # debugging helper
 # noinspection PyUnresolvedReferences
@@ -238,7 +239,7 @@ def view_simple_page(request, pagetype=None, base_container=None):
     if format_dict:
         sp.content = sp.content.format(**format_dict)
 
-    context = {"pagetype": pagetype, "sp": sp, "base": base_container}
+    context = {"pagetype": pagetype, "sp": sp, "base": base_container, "app_version": __version__}
     return render(request, 'moodpoll/main_simple_page.html', context)
 
 
