@@ -1,3 +1,4 @@
+from collections import Counter
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.views import View
 from django.utils import timezone
@@ -18,10 +19,16 @@ class PollResultView(View):
 
         init_session_reply_list(request)
 
+        if poll.expose_veto_names:
+            poll_veto_users = get_veto_users(poll)
+        else:
+            poll_veto_users = None
+
         context = {
             'poll': poll,
             'poll_options': poll_options,
             'poll_replies': poll_replies,
+            'poll_veto_users': poll_veto_users,
             'mood_bar_min': poll.mood_value_min * len(poll_replies),
             'mood_bar_max': poll.mood_value_max * len(poll_replies),
         }
@@ -32,7 +39,6 @@ class PollResultView(View):
 
 def get_mood_sums(poll):
     # todo: this seems to be obsolete?
-    # noinspection PyUnresolvedReferences
     mood_sums = models.PollOptionReply.objects. \
         filter(poll_option__poll=poll). \
         values('poll_option', 'poll_option__text'). \
@@ -49,11 +55,21 @@ def get_mood_sums(poll):
 
 
 def get_voters(poll):
-    # noinspection PyUnresolvedReferences
     voters = models.PollReply.objects. \
         filter(poll=poll). \
         values('user_name', 'update_datetime')
 
     return voters
 
+
+def get_veto_users(poll):
+    qs = models.PollOptionReply.objects. \
+        filter(poll_reply__poll=poll, mood_value=poll.mood_value_min). \
+        values("poll_reply__user_name")
+
+    # in general contains every user_name multiple times:
+    veto_user_list = [elt["poll_reply__user_name"] for elt in qs]
+    poll_veto_users = [f"{item[0]} ({item[1]})" for item in Counter(veto_user_list).items()]
+
+    return poll_veto_users
 

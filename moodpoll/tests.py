@@ -382,9 +382,9 @@ class TestViews(TestCase):
         voters = poll_result.get_voters(poll)
         self.assertEqual(len(voters), 1)
 
-    def test_veto(self):
+    def test_anonymous_veto(self):
         """
-        Provoke a name conflict and handle it via renaming (consistent case)
+        test special handling of minimum vote-value (-> veto)
         """
         url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
         poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
@@ -411,6 +411,55 @@ class TestViews(TestCase):
                 self.assertEqual(po.get_minimum_vote_cnt(), 1)
             else:
                 self.assertEqual(po.get_minimum_vote_cnt(), 0)
+
+        # ensure that no names are listed
+        response = self.client.get(response.url)
+        self.assertNotContains(response, "utc_exposed_veto_name")
+
+        # two people voted (testuser1 is in the fixtures)
+        self.assertContains(response, "utc_number_of_participants:2")
+
+    def test_expose_veto_names(self):
+        """
+        if poll.expose_veto_names: all veto users should be listed on result_view
+        """
+        url = reverse('show_poll', kwargs={"pk": 1, "key": self.poll_key1})
+        poll = utils.get_poll_or_4xx(pk=1, key=self.poll_key1)
+        poll.expose_veto_names = True
+        poll.require_name = True  # this would be enforced during creation
+        poll.save()
+
+        response = self.client.get(url)
+        form = get_first_form(response)
+
+        veto = poll.mood_value_min
+        # ensure that empty name provokes an error
+        vote_data1 = {**self.vote_data1, "user_name": "", "option_5": veto}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+        response = self.client.get(response.url)
+        self.assertContains(response, "utc_toast_error:empty_user_name")
+
+        # ensure that the names are listed
+        vote_data1 = {**self.vote_data1, "option_5": veto}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+        response = self.client.get(response.url)
+        self.assertContains(response, "utc_exposed_veto_name:testuser2 (1)")
+
+        vote_data1 = {**self.vote_data1, "user_name": "neysayer", "option_1": veto, "option_2": veto, "option_5": veto}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        self.client.post(url, post_data)
+        vote_data1 = {**self.vote_data1, "user_name": "ayesayer", "option_5": 1}
+        post_data = generate_post_data_for_form(form, spec_values=vote_data1)
+        response = self.client.post(url, post_data)
+        response = self.client.get(response.url)
+        self.assertContains(response, "utc_exposed_veto_name:testuser2 (1)")
+        self.assertContains(response, "utc_exposed_veto_name:neysayer (3)")
+        self.assertNotContains(response, "utc_exposed_veto_name:ayesayer")
+
+        # four people voted (testuser1 is in the fixtures)
+        self.assertContains(response, "utc_number_of_participants:4")
 
 
 # ------------------------------------------------------------------------
