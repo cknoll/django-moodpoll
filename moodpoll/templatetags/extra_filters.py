@@ -11,9 +11,7 @@ bleach.sanitizer.ALLOWED_TAGS += ["p", "br", "h1", "h2", "h3", "h4"]
 
 @register.filter
 def render_markdown_bleach(txt):
-    # !!! here we should check if there is no harmfull code in txt
-    # because we will pass it through `safe` later
-    # however it should be possible to discuss about code (even javascript)
+    # Todo: should become obsolete. use |bleach in template
 
     if txt is None:
         txt = ""

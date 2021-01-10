@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.shortcuts import render, redirect, reverse
 from django.views import View
 from django.utils import timezone
 from django.db import transaction
@@ -34,7 +34,6 @@ def fill_poll_from_post(post):
     if 'deadline_time' in post and post['deadline_time'] != '' and 'deadline_date' in post and post['deadline_date'] != '':
         full_date_str = '{} {}'.format(post['deadline_date'], post['deadline_time'])
         try:
-            print('parsing date: {}'.format(full_date_str))
             parsed_deadline = timezone.make_aware(dt.strptime(full_date_str, "%Y-%m-%d %H:%M"))
 
             # only allow deadline if in future
@@ -137,4 +136,3 @@ class NewPollView(View):
         t.success(request, 'poll has been created <!--utc_toast_success-->')
 
         return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk, "key": new_poll.key}))
-

@@ -1,9 +1,6 @@
-from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.shortcuts import render, redirect, reverse
 from django.views import View
-from django.utils import timezone
-from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.http import HttpRequest
 from .. import models
 from ..utils import get_poll_or_4xx, init_session_reply_list
 from ..helpers import toasts as t
@@ -91,4 +88,3 @@ class ShowPollView(View):
         t.success(request, 'vote submitted')
 
         return redirect(reverse("poll_result", kwargs={"pk": poll.pk, "key": poll.key}))
-

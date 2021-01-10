@@ -14,8 +14,6 @@ urlpatterns = [
   path('show/<int:pk>/<int:key>', ShowPollView.as_view(), name='show_poll'),
   path('res/<int:pk>/<int:key>', PollResultView.as_view(), name='poll_result'),
   path('cancel/<int:pk>/<int:key>', PollReplyCancelView.as_view(), name='reply_cancel'),
-  path('poll_eval/<int:pk>', views.ViewPollEvaluation.as_view(), name='poll_eval'),
-  path('backup', views.view_do_backup, name='do_backup'),
 
   path('imprint', views.view_simple_page, name='imprint-page', kwargs={"pagetype": "imprint"}),
   path('privacy', views.view_simple_page, name='privacy-page', kwargs={"pagetype": "privacy"}),

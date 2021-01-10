@@ -6,7 +6,6 @@ from django.conf import settings
 from . import utils
 from . import models
 from .views import poll_result
-from . import views_monolith
 
 # noinspection PyUnresolvedReferences
 from ipydex import IPS
@@ -43,22 +42,6 @@ global_fixtures = ['for_unit_tests/data.json']
 global_login_data_admin = dict(username="admin", password="ahfahHe8")
 
 
-class TestHelperFuncs(TestCase):
-
-    def test_map_mean(self):
-        m09 = views_monolith.map_normed_mean_to_09
-        self.assertEqual(m09([2, 2], 2), 0.9)
-        self.assertEqual(m09([1, 2], 2), 0.5)
-        self.assertEqual(m09([1, 1], 2), 0.1)
-        self.assertEqual(m09([0], 2), 0.0)
-        self.assertEqual(m09([], 2), 0.0)
-
-        self.assertEqual(m09([-3, -3], -3), 0.9)
-        self.assertEqual(m09([-1, -1], -3), 0.1)
-        self.assertEqual(m09([-1, -1, -1, -1, -3], -3), 0.3)
-        self.assertEqual(m09([-1, -1, -1, -1, -2], -3), 0.2)
-
-
 class TestLoginMechanics(TestCase):
     fixtures = global_fixtures
 
@@ -68,15 +51,6 @@ class TestLoginMechanics(TestCase):
         response = self.client.get(reverse('landing-page'))
 
         self.assertTrue(response.wsgi_request.user.is_superuser)
-
-    def test_no_backup_without_login(self):
-        response = self.client.get(reverse('do_backup'))
-
-        self.assertFalse(response.wsgi_request.user.is_authenticated)
-        self.assertEqual(response.status_code, 302)
-
-        response = self.client.get(response.url)
-        self.assertEqual(response.url, "/admin/login/")
 
 
 class TestModels(TestCase):

@@ -1,14 +1,11 @@
 from collections import Counter
-from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.shortcuts import render
 from django.views import View
-from django.utils import timezone
-from django.core.exceptions import PermissionDenied
 from django.db.models import Sum, Q, F, Count
 from django.db.models.functions import Coalesce
 from django.conf import settings
 from .. import models
 from ..utils import get_poll_or_4xx, init_session_reply_list
-from ..helpers import toasts as t
 from ..release import __version__
 
 
@@ -74,4 +71,3 @@ def get_veto_users(poll):
     poll_veto_users = [f"{item[0]} ({item[1]})" for item in Counter(veto_user_list).items()]
 
     return poll_veto_users
-
