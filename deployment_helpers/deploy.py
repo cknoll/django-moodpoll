@@ -4,6 +4,7 @@ import secrets
 import re
 import os
 from packaging import version
+from ipydex import IPS, activate_ips_on_exception
 
 min_du_version = version.parse("0.0.4")
 try:
@@ -20,46 +21,44 @@ try:
 except ImportError as err:
     print("You need to install the package `deploymentutils` to run this script.")
 
-from ipydex import IPS, activate_ips_on_exception
-
 # simplify debugging
 activate_ips_on_exception()
-
 
 """
 This script serves to deploy and maintain the django app `moodpoll` on an uberspace account.
 It is largely based on this tutorial: <https://lab.uberspace.de/guide_django.html>.
-
 """
-
 
 # call this before running the script:
 # eval $(ssh-agent); ssh-add -t 10m
 
 
-# -------------------------- Begin Essential Config section  ------------------------
+# -------------------------- Essential Config section  ------------------------
 
-# this must be changed according to your uberspace accound details (machine name and user name)
-remote = "daphnis.uberspace.de"
-user = "moodpol2"
+config = du.get_nearest_config("config.ini")
+
+remote = config("remote")
+user = config("user")
 
 # -------------------------- Begin Optional Config section -------------------------
-# if you know what you are doing you can adapt these seetings to your needs
+# if you know what you are doing you can adapt these settings to your needs
 
 # this is the root dir of the project (where setup.py lies)
 # if you maintain more than one instance (and deploy.py lives outside the project dir, this has to change)
-project_src_path = "../"
+project_src_path = os.path.dirname(du.get_dir_of_this_file())
+assert os.path.isfile(os.path.join(project_src_path, "manage.py"))
 
+# this is deprecated
 # base directory for local testing deployment
 # might also be the place for a custom deploy_local.py script
 local_deployment_workdir = os.path.abspath("../../local_testing")
 
 # directory for deployment files (e.g. database files)
-deployment_dir = "moodpoll_deployment"
+deployment_dir = config("deployment_dir")
 
-app_name = "moodpoll"
+app_name = config("app_name")
 
-TIME_ZONE = 'Europe/Berlin'
+TIME_ZONE = config("TIME_ZONE")
 
 # -------------------------- End Config section -----------------------
 
@@ -72,6 +71,7 @@ instance_path = os.path.join(du.get_dir_of_this_file(), "specific")
 local_deployment_files_base_dir = du.get_dir_of_this_file()
 repo_base_dir = os.path.split(local_deployment_files_base_dir)[0]
 app_path = os.path.join(repo_base_dir, app_name)
+
 du.argparser.add_argument("-o", "--omit-tests", help="omit test execution (e.g. for dev branches)", action="store_true")
 du.argparser.add_argument("-d", "--omit-database",
                           help="omit database-related-stuff (and requirements)", action="store_true")
