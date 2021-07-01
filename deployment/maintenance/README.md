@@ -5,6 +5,8 @@ Sometimes an instance has to go offline. To keep users informed whats going on a
 
 
 ```
-cp -R ~/moodpoll_deployment/deployment_helpers/maintenance/ ~/html/
+cp -R ~/django_project_deployment/deployment/maintenance/* ~/html/
 uberspace web backend set / --apache
 ```
+
+Note that the file-duplication (css, favicon etc.) is intended for robustness reasons.

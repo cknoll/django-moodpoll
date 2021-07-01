@@ -204,6 +204,10 @@ c.rsync_upload(project_src_path + "/", target_deployment_path, filters=filters, 
 filters = "--exclude='README.md' --exclude='*/template_*'"
 c.rsync_upload(instance_path + "/", target_deployment_path, filters=filters, target_spec="both")
 
+
+if args.initial:
+    c.run(f"cp -R {target_deployment_path}/deployment/maintenance/* ~/html/")
+
 # .............................................................................................
 
 print("\n", "install dependencies", "\n")
