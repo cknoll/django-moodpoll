@@ -196,8 +196,8 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # this determines the range of possible values
 # in the future these values might be configurable for each poll
 # note that this could be overridden by instance specific settings
-MOOD_VALUE_MAX = config("MOOD_VALUE_MAX")
-MOOD_VALUE_MIN = config("MOOD_VALUE_MIN")  # the lowest value is considered a 'veto'
+MOOD_VALUE_MAX = config("MOOD_VALUE_MAX", cast=int)
+MOOD_VALUE_MIN = config("MOOD_VALUE_MIN", cast=int)  # the lowest value is considered a 'veto'
 
 BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a',
                        'h1', 'h2', 'h3', 'h4', 'h5', 'ul', 'ol', 'li', 'pre', 'code']

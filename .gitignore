@@ -5,3 +5,4 @@
 .directory
 db*.sqlite3*
 *.log
+config*.ini

@@ -89,6 +89,7 @@ if args.target == "remote":
     target_deployment_path = f"/home/{user}/{deployment_dir}"
     static_root_dir = f"{target_deployment_path}/collected_static"
     debug_mode = False
+    pip_command = "python3 -m pip"
     pip_user_flag = " --user"  # this might be dropped if we use a virtualenv on the remote target
     allowed_hosts = [f"{user}.uber.space"]
 else:
@@ -96,6 +97,7 @@ else:
     static_root_dir = ""
     target_deployment_path = os.path.join(local_deployment_workdir, deployment_dir)
     debug_mode = True
+    pip_command = "python3 -m pip"
     pip_user_flag = ""  # assume activated virtualenv on local target
     allowed_hosts = ["*"]
 
@@ -135,7 +137,8 @@ c = du.StateConnection(remote, user=user, target=args.target)
 
 if args.initial:
     print("\n", "install uwsgi", "\n")
-    c.run(f'pip3 install uwsgi{pip_user_flag}', target_spec="remote")
+    c.run(f'{pip_command} install -U {pip_user_flag} pip', target_spec="remote")
+    c.run(f'{pip_command} install -U {pip_user_flag} uwsgi', target_spec="remote")
 
     print("\n", "upload config files for initial deployment", "\n")
 
@@ -150,6 +153,7 @@ if args.initial:
 
         c.run('supervisorctl reread', target_spec="remote")
         c.run('supervisorctl update', target_spec="remote")
+        c.run('supervisorctl restart uwsgi', target_spec="remote")
         c.run('uberspace web backend set / --http --port 8000', target_spec="remote")
         print("waiting 10s for uwsgi to start")
         time.sleep(10)
@@ -197,20 +201,20 @@ c.rsync_upload(project_src_path + "/", target_deployment_path, filters=filters, 
 
 # now rsync instance-specific data (this might overwrite generic data from the project)
 # this file should usually not be overwritten
-filters = "--exclude='README.md'"
+filters = "--exclude='README.md' --exclude='*/template_*'"
 c.rsync_upload(instance_path + "/", target_deployment_path, filters=filters, target_spec="both")
 
 # .............................................................................................
 
 print("\n", "install dependencies", "\n")
-res = c.run(f'pip3 show django', target_spec="both")
+res = c.run(f'{pip_command} show django', target_spec="both")
 loc = re.findall("Location:.*", res.stdout)
 if args.target == "local" and len(loc) == 0:
     msg = f"{du.bred('Caution:')} django seems not to be installed on local system.\n" \
           f"This might indicate some problem with pip or the virtualenv not activated.\n"
     print(msg)
 
-    cmd = ["python", "-c", "import sys; print('; '.join(sys.path))"]
+    cmd = ["python3", "-c", "import sys; print('; '.join(sys.path))"]
     syspath = c.run(cmd, target_spec="local").stdout
 
     print("This is your current python-path:\n\n", syspath)
@@ -220,7 +224,7 @@ if args.target == "local" and len(loc) == 0:
         print(du.bred("Aborted."))
         exit()
 
-c.run(f'pip3 install{pip_user_flag} -r requirements.txt', target_spec="both")
+c.run(f'{pip_command} install{pip_user_flag} -r requirements.txt', target_spec="both")
 
 if args.symlink:
     assert args.target == "local"
@@ -248,13 +252,14 @@ if not args.omit_database:
 
 if not args.omit_static:
     print("\n", "collect static files", "\n")
-    c.run('python manage.py collectstatic --no-input', target_spec="remote")
+    c.run('python3 manage.py collectstatic --no-input', target_spec="remote")
 
     if args.target == "remote":
         print("\n", "copy static files to the right place where apache can find it", "\n")
         c.chdir(f"/var/www/virtual/{user}/html")
         c.run('rm -rf static')
         c.run(f'cp -r {static_root_dir} static')
+        c.chdir(target_deployment_path)
 
 
 if not args.omit_tests:

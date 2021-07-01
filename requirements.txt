@@ -6,3 +6,4 @@ bleach
 django-bleach
 django-nose
 demjson
+deploymentutils
