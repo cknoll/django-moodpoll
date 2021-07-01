@@ -11,22 +11,38 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import sys
+import deploymentutils as du
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
+# ensure BASEDIR is as expected
+assert os.path.isfile(os.path.join(BASEDIR, "manage.py"))
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '4(bbovkj6lx0txurbo4uozpr+sk&y%cu-o$8w0kww&cgyp)hww'
+# get the devmode from environment variable (default: False, except when the server was started with runserver)
+# export DJANGO_DEVMODE=True; py3 manage.py some_custom_command
+env_devmode = os.getenv("DJANGO_DEVMODE")
+if env_devmode is None:
+    DEVMODE = "runserver" in sys.argv
+else:
+    DEVMODE = (env_devmode.lower() == "true")
+
+config = du.get_nearest_config("config.ini", devmode=DEVMODE)
+
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", cast=bool)
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+# prevent accidentally using DEBUG == "False" (which evaluates to `True`)
+assert DEBUG in (True, False)
+assert DEVMODE in (True, False)
 
+# BASEURL = config("BASEURL")
+
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=config.Csv())
 
 # Application definition
 
@@ -79,7 +95,7 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASEDIR, 'db.sqlite3'),
     }
 }
 
@@ -103,6 +119,49 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{asctime} {levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file1': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': config("DJANGO_LOGFILE").replace("__BASEDIR__", BASEDIR),
+            'formatter': 'verbose',
+        },
+        'file2': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': config("MYAPP_LOGFILE").replace("__BASEDIR__", BASEDIR),
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file1'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'myapp': {
+            'handlers': ['file2'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
@@ -120,25 +179,27 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
+# this will be used when rendering the templates
 STATIC_URL = '/static/'
 
+# this is the target of manage.py collectstatic
+STATIC_ROOT = config("STATIC_ROOT").replace("__BASEDIR__", BASEDIR)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # path where db-backups are dumped to
-BACKUP_PATH = os.path.join(BASE_DIR, "db_backups")
+BACKUP_PATH = os.path.join(BASEDIR, "db_backups")
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 # this determines the range of possible values
 # in the future these values might be configurable for each poll
 # note that this could be overridden by instance specific settings
-MOOD_VALUE_MAX = 10
-MOOD_VALUE_MIN = -10  # the lowest value is considered a 'veto'
+MOOD_VALUE_MAX = config("MOOD_VALUE_MAX")
+MOOD_VALUE_MIN = config("MOOD_VALUE_MIN")  # the lowest value is considered a 'veto'
 
 BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a',
                        'h1', 'h2', 'h3', 'h4', 'h5', 'ul', 'ol', 'li', 'pre', 'code']
 BLEACH_STRIP_COMMENTS = False
 
-# noinspection PyUnresolvedReferences
-from .site_specific_settings import *

@@ -3,3 +3,5 @@
 */__pycache__/*
 */.directory
 .directory
+db*.sqlite3*
+*.log
