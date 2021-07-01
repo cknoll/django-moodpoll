@@ -73,6 +73,9 @@ local_deployment_files_base_dir = du.get_dir_of_this_file()
 repo_base_dir = os.path.split(local_deployment_files_base_dir)[0]
 app_path = os.path.join(repo_base_dir, app_name)
 du.argparser.add_argument("-o", "--omit-tests", help="omit test execution (e.g. for dev branches)", action="store_true")
+du.argparser.add_argument("-d", "--omit-database",
+                          help="omit database-related-stuff (and requirements)", action="store_true")
+du.argparser.add_argument("-s", "--omit-static", help="omit static file handling", action="store_true")
 du.argparser.add_argument("-x", "--omit-backup",
                           help="omit db-backup (avoid problems with changed models)", action="store_true")
 du.argparser.add_argument("-p", "--purge", help="purge target directory before deploying", action="store_true")
@@ -186,7 +189,6 @@ filters = \
     f"--exclude='settings/__pycache__/*' " \
     f"--exclude='{app_name}/__pycache__/*' " \
     f"--exclude='__pycache__/' " \
-    f"--exclude='deployment_utils/' " \
     f"--exclude='django_moodpoll.egg-info/' " \
     f"--exclude='db.sqlite3' " \
     ""
@@ -226,24 +228,33 @@ if args.symlink:
     c.run(["ln", "-s", app_path, os.path.join(target_deployment_path, app_name)], target_spec="local")
 
 
-print("\n", "prepare and create new database", "\n")
+if not args.omit_database:
 
-# this was only necessary when there where no migrations in the repo
-# c.run('python3 manage.py makemigrations', target_spec="both")
+    print("\n", "prepare and create new database", "\n")
 
-# delete old db
-c.run('rm -f db.sqlite3', target_spec="both")
+    # this was only necessary when there where no migrations in the repo
+    # c.run('python3 manage.py makemigrations', target_spec="both")
 
-# this creates the new database
-c.run('python3 manage.py migrate', target_spec="both")
+    # delete old db
+    c.run('rm -f db.sqlite3', target_spec="both")
 
-# TODO: this should be simplified to f"python3 manage.py loaddata {init_fixture_path}"
-print("\n", "install initial data", "\n")
+    # this creates the new database
+    c.run('python3 manage.py migrate', target_spec="both")
 
-c.run(f"python3 manage.py loaddata {init_fixture_path}", target_spec="both")
+    # TODO: this should be simplified to f"python3 manage.py loaddata {init_fixture_path}"
+    print("\n", "install initial data", "\n")
 
-print("\n", "copy static files to final location", "\n")
-c.run('python3 manage.py collectstatic --no-input', target_spec="remote")
+    c.run(f"python3 manage.py loaddata {init_fixture_path}", target_spec="both")
+
+if not args.omit_static:
+    print("\n", "collect static files", "\n")
+    c.run('python manage.py collectstatic --no-input', target_spec="remote")
+
+    if args.target == "remote":
+        print("\n", "copy static files to the right place where apache can find it", "\n")
+        c.chdir(f"/var/www/virtual/{user}/html")
+        c.run('rm -rf static')
+        c.run(f'cp -r {static_root_dir} static')
 
 
 if not args.omit_tests:
