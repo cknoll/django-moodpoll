@@ -151,3 +151,22 @@ div.moodpoll-collapsible-flex {
     vertical-align: bottom;
     display: inline-block;
 }
+
+.hr_style_gradient,
+.hr_style_gradient03 {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75) 40%, rgba(0, 0, 0, 0.75) 60%, rgba(0, 0, 0, 0));
+    margin:1em;
+}
+
+.hr_style_gradient03 {
+    opacity:0.3;
+}
+
+
+/*This overwrites the invisibility directive from <head>*/
+html {
+    visibility: visible;
+    opacity: 1;
+}
