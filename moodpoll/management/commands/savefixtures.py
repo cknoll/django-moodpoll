@@ -20,7 +20,7 @@ class Command(BaseCommand):
         - ignore models on the hardcoded blacklist
         - use predefined path
     """
-    help = 'Closes the specified poll for voting'
+    help = 'Simimilar to dumpdata, but with tweeked usability.'
 
     def add_arguments(self, parser):
         # Positional arguments

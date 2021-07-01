@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.urls import reverse
 from django.conf import settings
+from django.utils import timezone
+from django.core.management import call_command
 
 from . import utils
 from . import models
@@ -476,6 +478,21 @@ class TestViews(TestCase):
 
         # four people voted (testuser1 is in the fixtures)
         self.assertContains(response, "utc_number_of_participants:4")
+
+
+class TestCommands(TestCase):
+    fixtures = global_fixtures
+
+    def test_removespam(self):
+        poll_number1 = models.Poll.objects.all().count()
+        p = models.Poll(creation_datetime=timezone.now() - timezone.timedelta(hours=3))
+        p.save()
+
+        poll_number2 = models.Poll.objects.all().count()
+        self.assertEqual(poll_number2, poll_number1 + 1)
+        call_command("removespam")
+        poll_number3 = models.Poll.objects.all().count()
+        self.assertEqual(poll_number3, poll_number1)
 
 
 # ------------------------------------------------------------------------
