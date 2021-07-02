@@ -6,7 +6,7 @@ import os
 from packaging import version
 from ipydex import IPS, activate_ips_on_exception
 
-min_du_version = version.parse("0.0.4")
+min_du_version = version.parse("0.3.0")
 try:
     # this is not listed in the requirements because it is not needed on the deployment server
     # noinspection PyPackageRequirements,PyUnresolvedReferences
@@ -127,7 +127,7 @@ du.render_template(tmpl_path, context=dict(user=user, deployment_dir=target_depl
 
 # TODO: make a backup of the remote-data
 # print a warning for data destruction
-du.warn_user(app_name, args.target, args.unsafe, deployment_path=target_deployment_path)
+du.warn_user(app_name, args.target, args.unsafe, deployment_path=target_deployment_path, user=user, host=remote)
 
 
 c = du.StateConnection(remote, user=user, target=args.target)
@@ -205,8 +205,22 @@ filters = "--exclude='README.md' --exclude='*/template_*'"
 c.rsync_upload(instance_path + "/", target_deployment_path, filters=filters, target_spec="both")
 
 
-if args.initial:
+if args.initial and args.target == "remote":
+
+    # copy maintenance page to where static pages live
     c.run(f"cp -R {target_deployment_path}/deployment/maintenance/* ~/html/")
+
+    # install cron service for spam removal
+    res = c.run("crontab -l", target_spec="remote", warn=False)
+    old_crontab = res.stdout # this is empty if crontab does not yet exist
+
+    if "manage.py removespam" not in res.stdout:
+        new_cron_line = f"12 4 * * * python3 {target_deployment_path}/manage.py removespam"
+        new_cron_tab = f"{old_crontab}\n{new_cron_line}"
+        cron_command = f'echo "{new_cron_tab}" | crontab -'
+        res = c.run(cron_command, target_spec="remote")
+    else:
+        print(du.bgreen("crontab entry already present"))
 
 # .............................................................................................
 
