@@ -17,7 +17,7 @@
 
         <div class="col-12">
             <div class="columns">
-                
+
                 <div class="col-sm-12 col-8 mb-2">
                     <span class="input-prefix">
                         Share this poll via this link:
@@ -69,7 +69,7 @@
             <h5>
                 voting until:
                 <i class="form-icon material-icons">today</i>
-                {{ poll.deadline|date:"Y-m-d H:i" }}
+                <span title="Server time zone: {% server_timezone %}"> {{ poll.deadline|date:"Y-m-d H:i" }}* </span>
                 ({{ poll.deadline|time_until }})
             </h5>
         </div>

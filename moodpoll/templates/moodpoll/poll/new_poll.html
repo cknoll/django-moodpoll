@@ -1,4 +1,5 @@
 {% extends "moodpoll/base.html" %}
+{% load extra_tags %}
 
 {% block title %}
 New Poll
@@ -62,7 +63,7 @@ markdown is enabled"></textarea>
 
             <div class="form-group moodpoll-collapsible-flex">
                 <label class="form-label col-2 col-sm-12" for="deadline_date">
-                    Deadline
+                    <span title="Server time zone: {% server_timezone %}">Deadline*</span>
                 </label>
                 <label for="deadline_time" style="display:none">Deadline (Time)</label>
                 <div class="has-icon-left col-5 col-sm-6">

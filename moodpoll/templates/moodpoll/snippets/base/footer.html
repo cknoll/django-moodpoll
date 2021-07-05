@@ -1,11 +1,13 @@
 {% load i18n %}
+{% load extra_tags %}
 
 <hr class="section_divider hr_style_gradient">
 <div class="box_base box_footer">
 
     <div class="box_footer_text modest_links">
     This web site is powered by the free software
-    <a href="https://codeberg.org/cknoll/django-moodpoll">moodpoll</a>, version {{app_version}}.
+    <a href="https://codeberg.org/cknoll/django-moodpoll">moodpoll</a>, version {{app_version}}.<br>
+        Server time: <span title="Server time zone: {% server_timezone %}">{% server_time %}*</span>
     </div>
 
     <div class="footer_menu">

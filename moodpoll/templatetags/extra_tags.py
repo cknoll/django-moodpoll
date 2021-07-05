@@ -1,8 +1,10 @@
 from django import template
 from django.urls import reverse
+from django.conf import settings
 from ..import utils
 
 register = template.Library()
+from django.utils import timezone
 
 
 @register.simple_tag
@@ -38,3 +40,13 @@ def pop_toasts(request):
     request.session.pop('toasts')
 
     return ""
+
+
+@register.simple_tag
+def server_time():
+    return timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+@register.simple_tag
+def server_timezone():
+    return settings.TIME_ZONE
