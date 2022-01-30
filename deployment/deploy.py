@@ -281,6 +281,21 @@ if not args.omit_static:
     print("\n", "collect static files", "\n")
     c.run('python3 manage.py collectstatic --no-input', target_spec="remote")
 
+    # download external frontent dependencies: fonts
+    c.chdir(f"{static_root_dir}/moodpoll/font")
+
+    # this returns a css file in which a randomized source url for the font is contained
+    # this must be postprocessed to download the actual font
+    # for simplicity we keep the file in the repo for now
+    # du.run("wget https://fonts.googleapis.com/icon?family=Material+Icons")
+
+    # download external frontent dependencies: fonts
+    c.chdir(f"{static_root_dir}/moodpoll")
+
+    c.run("rm -f spectre*min.css")  # ensure new files are taken
+    c.run("wget https://unpkg.com/spectre.css/dist/spectre.min.css")
+    c.run("wget https://unpkg.com/spectre.css/dist/spectre-exp.min.css")
+
     if args.target == "remote":
         print("\n", "copy static files to the right place where apache can find it", "\n")
         c.chdir(f"/var/www/virtual/{user}/html")
