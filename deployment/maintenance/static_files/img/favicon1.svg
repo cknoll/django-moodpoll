@@ -13,9 +13,9 @@
    height="284.04065"
    id="svg3867"
    version="1.1"
-   inkscape:version="0.48.5 r10040"
-   sodipodi:docname="symb_neu.svg"
-   inkscape:export-filename="/media/workcard/workstickdir/projekte/sober/deployment/django-sober/sober/static/sober/img/favicon1.png"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="favicon1.svg"
+   inkscape:export-filename="./favicon1.png"
    inkscape:export-xdpi="12.167273"
    inkscape:export-ydpi="12.167273"
    viewBox="0 0 266.38306 266.28812">
@@ -28,9 +28,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="167.64975"
-     inkscape:cy="131.13795"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="-545.18021"
+     inkscape:cy="333.77062"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -39,9 +39,9 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1920"
-     inkscape:window-height="1025"
-     inkscape:window-x="-2"
-     inkscape:window-y="-3"
+     inkscape:window-height="1021"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:snap-page="true"
      inkscape:snap-grids="false"
@@ -68,7 +68,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -85,7 +85,7 @@
        x="183.94656"
        y="153.51822" />
     <path
-       transform="matrix(4.8702756,-2.0173343,2.0173343,4.8702756,-2620.2114,-1335.9645)"
+       transform="matrix(4.1273522,-1.7096053,1.7096053,4.1273522,-2172.1364,-1088.4596)"
        d="M 416.27596,516.88814 397,524.8725 l -19.27596,-7.98436 -7.98436,-19.27596 7.98436,-19.27595 19.27596,-7.98437 19.27596,7.98437 7.98436,19.27595 z"
        inkscape:randomized="0"
        inkscape:rounded="0"
@@ -98,17 +98,18 @@
        sodipodi:cx="397"
        sodipodi:sides="8"
        id="path3844"
-       style="fill:#ecece8;fill-opacity:1;stroke:none"
+       style="fill:#f1f5fe;fill-opacity:1;stroke:#aaaaaa;stroke-width:4.47686291;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0.80000001;stroke-opacity:1"
        sodipodi:type="star" />
-    <g
-       style="font-size:15.08055782px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:0%;letter-spacing:0px;word-spacing:0px;fill:#75765e;fill-opacity:1;stroke:none;font-family:STIXIntegralsD;-inkscape-font-specification:STIXIntegralsD Bold"
+    <text
        id="text3846"
-       transform="matrix(0.7757786,0,0,1,71.109149,0)">
-      <path
-         d="m 231.42482,240.39583 171.42655,0 0,31.42374 -171.42655,0 0,-31.42374 m 0,60.84171 171.42655,0 0,31.69118 -171.42655,0 0,-31.69118"
-         style="font-size:273.85458374px;line-height:1.25;fill:#75765e"
-         id="path3864"
-         inkscape:connector-curvature="0" />
-    </g>
+       y="346.517"
+       x="232.217"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:9.19578171px;line-height:0%;font-family:STIXIntegralsD;-inkscape-font-specification:'STIXIntegralsD Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.99999994"
+       xml:space="preserve"><tspan
+         y="346.517"
+         x="232.217"
+         id="tspan3848"
+         sodipodi:role="line"
+         style="font-size:166.99029541px;line-height:1.25;stroke-width:0.99999994">M</tspan></text>
   </g>
 </svg>

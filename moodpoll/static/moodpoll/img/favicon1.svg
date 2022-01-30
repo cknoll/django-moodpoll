@@ -13,9 +13,9 @@
    height="284.04065"
    id="svg3867"
    version="1.1"
-   inkscape:version="0.92.1 r15371"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
    sodipodi:docname="favicon1.svg"
-   inkscape:export-filename="/media/workcard/workstickdir/projekte/sober/deployment/django-sober/sober/static/sober/img/favicon1.png"
+   inkscape:export-filename="./favicon1.png"
    inkscape:export-xdpi="12.167273"
    inkscape:export-ydpi="12.167273"
    viewBox="0 0 266.38306 266.28812">
@@ -28,9 +28,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8284271"
-     inkscape:cx="102.30853"
-     inkscape:cy="121.75741"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="-545.18021"
+     inkscape:cy="333.77062"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -39,7 +39,7 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1920"
-     inkscape:window-height="1142"
+     inkscape:window-height="1021"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -102,14 +102,14 @@
        sodipodi:type="star" />
     <text
        id="text3846"
-       y="365.07855"
-       x="240.64223"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:0%;font-family:STIXIntegralsD;-inkscape-font-specification:'STIXIntegralsD Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       y="346.517"
+       x="232.217"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:9.19578171px;line-height:0%;font-family:STIXIntegralsD;-inkscape-font-specification:'STIXIntegralsD Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.99999994"
        xml:space="preserve"><tspan
-         y="365.07855"
-         x="240.64223"
+         y="346.517"
+         x="232.217"
          id="tspan3848"
          sodipodi:role="line"
-         style="font-size:217.9133606px;line-height:1.25">S</tspan></text>
+         style="font-size:166.99029541px;line-height:1.25;stroke-width:0.99999994">M</tspan></text>
   </g>
 </svg>

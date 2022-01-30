@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.shortcuts import render, redirect, reverse
 from django.views import View
 from django.utils import timezone
 from django.db import transaction
@@ -6,6 +6,8 @@ from django.conf import settings
 from .. import models
 from ..helpers import toasts as t
 from datetime import datetime as dt
+from ..release import __version__
+
 
 def tidy_options(text):
     '''split given multiline string on newline, remove leading/trailing spaces, remove empty lines'''
@@ -32,7 +34,6 @@ def fill_poll_from_post(post):
     if 'deadline_time' in post and post['deadline_time'] != '' and 'deadline_date' in post and post['deadline_date'] != '':
         full_date_str = '{} {}'.format(post['deadline_date'], post['deadline_time'])
         try:
-            print('parsing date: {}'.format(full_date_str))
             parsed_deadline = timezone.make_aware(dt.strptime(full_date_str, "%Y-%m-%d %H:%M"))
 
             # only allow deadline if in future
@@ -41,6 +42,16 @@ def fill_poll_from_post(post):
 
         except ValueError:
             pass
+
+    expose_veto_names = post.get("expose_veto_names")
+    new_poll.expose_veto_names = (expose_veto_names == "True")
+
+    # expose_veto_names should imply require_names
+    if new_poll.expose_veto_names:
+        new_poll.require_name = True
+    else:
+        require_name = post.get("require_name")
+        new_poll.require_name = (require_name == "True")
 
     try:
         if 'mood_value_min' in post and int(post['mood_value_min']) <= 0:
@@ -82,9 +93,7 @@ def process_special_options(poll, option_list):
     # if the first option starts with `#` and poll has no title yet, then the first option
     # is interpreted as the title
 
-    from ipydex import IPS
-    if option_list[0].startswith("#") and \
-       len(option_list) > 1 and not poll.title:
+    if option_list[0].startswith("#") and not poll.title:
 
         title_candidate = option_list[0][1:].strip()
         if len(title_candidate) > 0:
@@ -98,6 +107,7 @@ class NewPollView(View):
             'settings_mood_value_min': settings.MOOD_VALUE_MIN,
             'settings_mood_value_max': settings.MOOD_VALUE_MAX,
             'now': timezone.now(),
+            'app_version': __version__,
         }
 
         return render(request, "moodpoll/poll/new_poll.html", context)
@@ -109,18 +119,20 @@ class NewPollView(View):
         if 'options' in request.POST:
             options_tidy = tidy_options(request.POST['options'])
         if 0 == len(options_tidy):
-            raise NotImplementedError
+            msg = "Empty option list received. This is unexpected due to `required` attribute of respective form field"
+            raise ValueError(msg)
 
         process_special_options(new_poll, options_tidy)
 
         if 0 == len(options_tidy):
-            raise NotImplementedError
+            # this might be the case if the first line started with # (interpreted as title)
+            t.error(request, 'no valid poll option found <!--utc_toast_error: empty_poll_option_list-->')
+            return redirect(reverse("new_poll"))
 
         # all params checked, create
         with transaction.atomic():
             save_poll_and_create_options(new_poll, options_tidy)
 
-        t.success(request, 'poll has been created')
+        t.success(request, 'poll has been created <!--utc_toast_success-->')
 
         return redirect(reverse("show_poll", kwargs={"pk": new_poll.pk, "key": new_poll.key}))
-

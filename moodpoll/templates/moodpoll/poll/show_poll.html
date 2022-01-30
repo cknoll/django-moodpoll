@@ -25,7 +25,8 @@
                         </div>
                         <div class="card-body">
                             <div class="has-icon-left" style="col-12">
-                                <input type="text" name="user_name" id="user_name" class="form-input" placeholder="Name" style="width:100%" autocomplete="off">
+                                <input type="text" name="user_name" id="user_name" class="form-input" placeholder="Name" style="width:100%" autocomplete="off"
+                                       {%if poll.require_name %}required{% endif %}>
                                 <i class="form-icon icon material-icons">person</i>
                             </div>
                         </div>

@@ -17,8 +17,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 
+
+prefix = ""
+# prefix = "test/" this is useful for testing if the url is redirected to maintenance page
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    url(r'', include('moodpoll.urls')),
+    path(f'{prefix}admin/', admin.site.urls),
+    url(f'{prefix}', include('moodpoll.urls')),
 ]
+
+
 

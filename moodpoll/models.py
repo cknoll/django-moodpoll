@@ -7,11 +7,24 @@ from random import randrange
 
 # Todo: the models need servere refactoring!
 
+
 def get_rdm_key():
     # note: copied from django doc
     return randrange(1, 2147483647)
 
-class Poll(models.Model):
+
+class BaseModel(models.Model):
+    """
+    prevent PyCharm from complaining on .objects-attribute
+    source: https://stackoverflow.com/a/56845199/333403
+    """
+    objects = models.Manager()
+
+    class Meta:
+        abstract = True
+
+
+class Poll(BaseModel):
     id = models.AutoField(primary_key=True)
     creation_datetime = models.DateTimeField(null=False, default=timezone.now,)
     title = models.CharField(max_length=200, null=True, blank=False,)
@@ -23,6 +36,11 @@ class Poll(models.Model):
     mood_value_min = models.IntegerField(null=False, default=settings.MOOD_VALUE_MIN)
     mood_value_max = models.IntegerField(null=False, default=settings.MOOD_VALUE_MAX)
     deadline = models.DateTimeField(null=True, default=None)
+    require_name = models.BooleanField(null=False, default=False,)
+
+    # if True: The name of those users which have voted with the most negative value
+    # (regarded as veto) on at least one option will be published on the result view of the poll
+    expose_veto_names = models.BooleanField(null=False, default=False,)
 
     def is_vote_possible(self):
         if self.deadline and self.deadline < timezone.now():
@@ -35,7 +53,7 @@ class Poll(models.Model):
         return True
 
 
-class PollReply(models.Model):
+class PollReply(BaseModel):
     id = models.AutoField(primary_key=True)
     update_datetime = models.DateTimeField(null=False, default=timezone.now,)
     user_name = models.CharField(max_length=50, null=True, blank=False,)
@@ -59,7 +77,7 @@ class PollReply(models.Model):
         self.delete()
 
 
-class PollOption(models.Model):
+class PollOption(BaseModel):
     id = models.AutoField(primary_key=True)
     text = models.CharField(max_length=200, null=True, blank=True,)
     poll = models.ForeignKey('Poll', on_delete=models.CASCADE, null=False,)
@@ -109,7 +127,7 @@ class PollOption(models.Model):
         return 0
 
 
-class PollOptionReply(models.Model):
+class PollOptionReply(BaseModel):
     # the correct way to handle this would be to use both poll_option and poll_reply as primary keys.
     # however, django does not support this.
     id = models.AutoField(primary_key=True)
@@ -118,7 +136,7 @@ class PollOptionReply(models.Model):
         unique_together = [
             ['poll_reply', 'poll_option'],
         ]
-    
+
     mood_value = models.IntegerField(null=False, default=0,)
     poll_option = models.ForeignKey('PollOption', on_delete=models.CASCADE, null=False,)
     poll_reply = models.ForeignKey('PollReply', on_delete=models.CASCADE, null=False,)

@@ -6,22 +6,24 @@
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+        {#<!-- Avoid flash of unstyled content: (https://stackoverflow.com/a/53364612/333403)    -->#}
+        <style>html{visibility: hidden;opacity:0;}</style>
+
+
+        <!-- <link type="text/css" rel="stylesheet" href="{% static 'moodpoll/base.css' %}"> -->
+        <link rel="stylesheet" href="{% static 'moodpoll/spectre.min.css' %}">
+        <link rel="stylesheet" href="{% static 'moodpoll/spectre-exp.min.css' %}">
+
 
         <link type="text/css" rel="stylesheet" href="{% static 'moodpoll/moodpoll.css' %}">
 
-        {# TODO replace by self-hosted versions #}
-        <!-- <link type="text/css" rel="stylesheet" href="{% static 'moodpoll/base.css' %}"> -->
-        <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
-        <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
-
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
         <link rel="icon" type="image/png"       href="{% static 'moodpoll/img/favicon1.png' %}">
 
         <title>
             {% block title %}
-            moodpoll
             {% endblock %}
+            – moodpoll
         </title>
     </head>
     <body>
@@ -30,7 +32,7 @@
                 {% include "moodpoll/snippets/base/header.html" with base=base only%}
             </div>
         </header>
-            
+
         <main class="columns">
             <div class="column col-mx-auto col-9 col-md-11 col-xs-12">
                 {% block toasts %}
@@ -45,7 +47,7 @@
 
         <footer class="columns">
             <div class="column col-mx-auto col-9 col-md-11 col-xs-12">
-                {% include "moodpoll/snippets/base/footer.html" with base=base only%}
+                {% include "moodpoll/snippets/base/footer.html" with base=base app_version=app_version only%}
             </div>
         </footer>
     </body>

@@ -112,8 +112,12 @@ def get_number_and_unit(x, unit):
         final_s = ''
     return '{}  {}{}'.format(x, unit, final_s)
 
-def get_time_until(future, now=timezone.now()):
+def get_time_until(future, now=None):
     """return string describing how much time is left to the given time point"""
+
+    if now is None:
+        now = timezone.now()
+
     if future < now:
         return 'passed'
 

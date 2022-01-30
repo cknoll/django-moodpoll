@@ -1,4 +1,5 @@
 {% extends "moodpoll/base.html" %}
+{% load extra_tags %}
 
 {% block title %}
 New Poll
@@ -12,6 +13,8 @@ New Poll
 <p><code>moodpoll</code> is an app for easy and good decision making. <a href="/about"> Learn more.</a></p>
 <div class="divider"></div>
 
+{# html comment to simplify unit testing#}
+<!--utc_new_poll-->
 <div class="columns">
     <div class="column col-12">
 
@@ -59,17 +62,36 @@ markdown is enabled"></textarea>
             </div>
 
             <div class="form-group moodpoll-collapsible-flex">
-                <label class="form-label col-2 col-sm-12" for="deadline_day">
-                    Deadline
+                <label class="form-label col-2 col-sm-12" for="deadline_date">
+                    <span title="Server time zone: {% server_timezone %}">Deadline*</span>
                 </label>
                 <label for="deadline_time" style="display:none">Deadline (Time)</label>
                 <div class="has-icon-left col-5 col-sm-6">
-                    <input type="date" class="form-input col-12" id="deadline_date" name="deadline_date" min="{{now|date:"Y-m-d"}}" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}">
+                    <input type="date" class="form-input col-12" id="deadline_date" name="deadline_date" min="{{now|date:'Y-m-d'}}" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}">
                     <i class="form-icon icon material-icons">today</i>
                 </div>
                 <div class="has-icon-left col-5 col-sm-6">
                     <input type="time" class="form-input col-12" id="deadline_time" name="deadline_time" placeholder="HH:MM" value="23:59" pattern="[0-9]{2}:[0-9]{2}">
                     <i class="form-icon icon material-icons">schedule</i>
+                </div>
+            </div>
+
+            <div class="form-group moodpoll-collapsible-flex">
+                <label class="form-label col-2 col-sm-12" for="require_name">
+                    <span title="Empty or duplicated voter names will be disabled">Require Unique Name*</span>
+                </label>
+                <div class="has-icon-left col-10 col-sm-12">
+                    <input type="checkbox" class="" id="require_name" name="require_name" value="True">
+                </div>
+            </div>
+            <div class="form-group moodpoll-collapsible-flex">
+                <label class="form-label col-2 col-sm-12" for="expose_veto_names">
+                    <span title="The name of those users which have voted with the most negative value (regarded as veto) on at least one option will be published on the result view of the poll.
+
+This implies `require_names=True`.">Expose Veto Names*</span>
+                </label>
+                <div class="has-icon-left col-10 col-sm-12">
+                    <input type="checkbox" class="" id="expose_veto_names" name="expose_veto_names" value="True">
                 </div>
             </div>
 
@@ -111,8 +133,8 @@ markdown is enabled"></textarea>
                     Options
                 </label>
                 <div class="has-icon-left col-10 col-sm-12">
-                    <textarea class="form-input col-12" id="options" rows="6" name="options" placeholder="options
-one per line"></textarea>
+                    <textarea class="form-input col-12" id="options" rows="6" name="options" placeholder="poll options
+one per line" required></textarea>
                     <i class="form-icon icon material-icons">format_list_bulleted</i>
                 </div>
             </div>
