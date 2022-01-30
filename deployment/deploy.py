@@ -3,7 +3,11 @@ import os
 import secrets
 import re
 import os
+
+# these packages are not in requirements.txt but in deployment_requirements.txt
+# noinspection PyUnresolvedReferences
 from packaging import version
+# noinspection PyUnresolvedReferences
 from ipydex import IPS, activate_ips_on_exception
 
 min_du_version = version.parse("0.3.0")
@@ -79,6 +83,7 @@ du.argparser.add_argument("-s", "--omit-static", help="omit static file handling
 du.argparser.add_argument("-x", "--omit-backup",
                           help="omit db-backup (avoid problems with changed models)", action="store_true")
 du.argparser.add_argument("-p", "--purge", help="purge target directory before deploying", action="store_true")
+du.argparser.add_argument("--debug", help="start debug interactive mode (IPS), then exit", action="store_true")
 
 args = du.parse_args()
 
@@ -134,6 +139,10 @@ c = du.StateConnection(remote, user=user, target=args.target)
 
 # TODO setup a virtual environment (also adapt template_moodpoll.ini)
 # TODO activate virtual environment
+
+if args.debug:
+    IPS()
+    exit()
 
 if args.initial:
     print("\n", "install uwsgi", "\n")
